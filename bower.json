@@ -1,6 +1,7 @@
 {
     "name": "ffffng",
     "version": "0.1.0",
+    "license": "MIT",
     "dependencies": {
         "angular": "1.2.15",
         "angular-leaflet-directive": "~0.7.6",

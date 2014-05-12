@@ -1,6 +1,7 @@
 {
     "name": "ffffng",
     "version": "0.1.0",
+    "license": "MIT",
     "dependencies": {},
     "devDependencies": {
         "express": "~3.6.0",
