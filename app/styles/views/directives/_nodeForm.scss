@@ -1,0 +1,77 @@
+f-node-form {
+    h3 {
+        margin-top: 10px;
+    }
+
+    .main-error {
+        @extend .alert, .alert-danger;
+    }
+
+    .node-data, .contact-data, .node-position {
+        @extend .well;
+    }
+
+    .hostname, .key, .mac, .nickname, .email, .coords {
+        @extend .form-group;
+
+        .feedback {
+            @extend .help-block;
+            color: $state-danger-text;
+        }
+    }
+
+    .hostname, .mac, .nickname, .email {
+        label::after {
+            content: '*';
+            font-size: $font-size-small;
+            vertical-align: 0.2em;
+        }
+    }
+
+    .coords input.has-coords {
+        padding-right: 25px;
+    }
+
+    .reset-coords {
+        @extend .fa, .fa-times;
+
+        position: relative;
+        float: right;
+
+        top: -25px;
+        right: 8px;
+
+        cursor: pointer;
+        color: $gray;
+    }
+
+    .map {
+        width: 100%;
+        height: 0;
+        padding-bottom: 66%;
+        margin-top: 5px;
+        margin-bottom: 20px;
+    }
+
+    .buttons {
+        @extend .form-group, .clearfix;
+
+        button {
+            @extend .pull-right;
+        }
+    }
+
+    .save {
+        @extend .btn;
+
+        margin-left: 5px;
+    }
+
+    &.new-node .save {
+        @extend .btn-info;
+    }
+
+    &.update-node .save {
+        @extend .btn-primary;
+    }
+}

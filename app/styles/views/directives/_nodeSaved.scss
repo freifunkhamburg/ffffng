@@ -1,0 +1,24 @@
+f-node-saved {
+    .summary, .actions {
+        text-align: center;
+    }
+
+    .summary {
+        .token {
+            @extend .well;
+
+            border: 3px dashed $gray;
+            font-family: monospace;
+            font-size: 32px;
+        }
+
+        margin: {
+            top: 30px;
+            bottom: 30px;
+        }
+    }
+
+    .back-button {
+        @extend .btn, .btn-lg, .btn-info;
+    }
+}

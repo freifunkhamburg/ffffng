@@ -1,0 +1,7 @@
+.update-node-form {
+    @extend .container;
+}
+
+.node-updated {
+    @extend .jumbotron, .container;
+}

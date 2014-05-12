@@ -1,0 +1,42 @@
+@charset "UTF-8";
+
+@import "_variables";
+
+@import "../bower_components/sass-bootstrap/lib/bootstrap";
+@import "../bower_components/font-awesome/scss/font-awesome";
+
+@import "views/_main";
+@import "views/_newNodeForm";
+@import "views/_updateNodeForm";
+@import "views/directives/_help";
+@import "views/directives/_nodeForm";
+@import "views/directives/_nodeSaved";
+@import "views/directives/_tokenForm";
+
+body {
+    padding-bottom: 40px;
+    text-align: justify;
+}
+
+input {
+    @extend .form-control;
+}
+
+label {
+    @extend .control-label;
+
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+button.cancel {
+    @extend .btn, .btn-default;
+}
+
+a[target="_blank"]:after {
+    @extend .fa;
+    content: "\f08e";
+    vertical-align: 0.3em;
+    font-size: 0.8em;
+    margin-left: 0.1em;
+}

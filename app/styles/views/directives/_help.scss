@@ -1,0 +1,14 @@
+f-help {
+    .help-icon {
+        @extend .fa, .fa-question-circle;
+
+        cursor: pointer;
+        font-size: $font-size-base + 2;
+        margin-left: 5px;
+        color: $brand-info;
+
+        &:hover {
+            color: darken($brand-info, 20%);
+        }
+    }
+}

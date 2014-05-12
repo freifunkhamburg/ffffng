@@ -1,0 +1,38 @@
+<div class="update-node-form" ng-if="!saved">
+    <h2>Knotendaten ändern</h2>
+
+    <div ng-if="!hasData()">
+        <p>
+            Um die Daten Deines Knoten ändern zu können, benötigen wir den passenden Token (eine 16-stellige Folge aus
+            Ziffern und Buchstaben). Diesen hast Du beim ersten Anmelden Deines Knotens erhalten. Sinn des Tokens ist,
+            Dich davor zu schützen, dass Dritte unbefugt Deine Daten einsehen oder ändern können.
+        </p>
+        <p>
+            <strong>
+                Solltest Du den Token nicht mehr haben, wende Dich einfach per E-Mail an
+                <a href="mailto:kontakt@hamburg.freifunk.net">kontakt@hamburg.freifunk.net</a>.
+            </strong>
+        </p>
+        <f-token-form f-submit="onSubmitToken" f-cancel="cancel"></f-token-form>
+    </div>
+
+    <div ng-if="hasData()">
+        <p>
+            Du kannst die Daten Deines Knotens jetzt anpassen. Sobald Du fertig bist, klicke einfach auf "Daten ändern",
+            um Deine Änderungen zu speichern.
+        </p>
+
+        <f-node-form class="update-node" f-save="save" f-cancel="cancel" f-node="node" f-action="update"></f-node-form>
+    </div>
+</div>
+
+<div class="node-updated" ng-if="saved">
+    <h1>Geschafft!</h1>
+    <p>
+        Die Daten Deines Freifunk-Knotens sind erfolgreich geändert worden. Es kann jetzt noch bis zu 20 Minuten dauern,
+        bis die Änderungen überall wirksam werden und sich im <a href="http://graph.hamburg.freifunk.net/graph.html" target="_blank">Knotengraph</a>
+        und in der <a href="http://graph.hamburg.freifunk.net/geomap.html" target="_blank">Knotenkarte</a> auswirken.
+    </p>
+
+    <f-node-saved f-node="node" f-token="token"></f-node-saved>
+</div>

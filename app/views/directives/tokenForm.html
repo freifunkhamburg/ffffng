@@ -1,0 +1,20 @@
+<form method="post" role="form" ng-submit="doSubmit(token)" ng-disabled="hasError()" novalidate>
+    <div class="main-error" ng-if="error">{{error}}</div>
+    <fieldset>
+        <div class="token">
+            <label for="token">Token</label>
+            <input type="text" id="token" placeholder="Dein 16-stelliger Token" ng-model="token" />
+            <span class="feedback" ng-if="hasError()">
+                Das Token ist ein 16-stelliger Wert bestehend aus 0-9 und a-f.
+            </span>
+        </div>
+        <div class="buttons">
+            <button class="submit" type="submit" ng-disabled="!token || hasError()">
+                <i class="fa fa-pencil"></i> Knotendaten ändern
+            </button>
+            <button class="cancel" type="reset" ng-click="onCancel()">
+                <i class="fa fa-times"></i> Abbrechen
+            </button>
+        </div>
+    </fieldset>
+</form>

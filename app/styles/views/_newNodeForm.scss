@@ -1,0 +1,7 @@
+.new-node-form {
+    @extend .container;
+}
+
+.node-created {
+    @extend .jumbotron, .container;
+}

@@ -1,0 +1,35 @@
+.welcome {
+    @extend .jumbotron, .container;
+
+    .select-action {
+        @extend .row;
+
+        margin-top: 25px;
+
+        .new-node, .update-node {
+            @extend .col-md-5;
+
+            button {
+                @extend .btn, .btn-lg, .btn-block;
+            }
+        }
+
+        .new-node {
+            button {
+                @extend .btn-info;
+            }
+        }
+
+        .update-node {
+            button {
+                @extend .btn-primary;
+            }
+        }
+
+        .or {
+            @extend .col-md-2;
+
+            text-align: center;
+        }
+    }
+}

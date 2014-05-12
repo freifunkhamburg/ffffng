@@ -1,0 +1,22 @@
+{
+    "name": "ffffng",
+    "version": "0.1.0",
+    "dependencies": {
+        "angular": "1.2.15",
+        "angular-leaflet-directive": "~0.7.6",
+        "angular-route": "1.2.15",
+        "angular-sanitize": "1.2.15",
+        "bootstrap-sass-official": "~3.1.0",
+        "es5-shim": "~3.1.1",
+        "font-awesome": "~4.0.3",
+        "jquery": "~2.1.1",
+        "json3": "~3.2.6",
+        "leaflet-dist": "~0.7.2",
+        "sass-bootstrap": "~3.0.2",
+        "underscore": "~1.6.0"
+    },
+    "devDependencies": {
+        "angular-mocks": "1.2.15",
+        "angular-scenario": "1.2.15"
+    }
+}

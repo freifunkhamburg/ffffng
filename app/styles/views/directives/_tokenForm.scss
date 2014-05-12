@@ -1,0 +1,28 @@
+f-token-form {
+    .main-error {
+        @extend .alert, .alert-danger;
+    }
+
+    .token {
+        @extend .form-group;
+    }
+
+    .feedback {
+        @extend .help-block;
+        color: $state-danger-text;
+    }
+
+    .submit {
+        @extend .btn, .btn-primary;
+
+        margin-left: 5px;
+    }
+
+    .buttons {
+        @extend .clearfix;
+
+        button {
+            @extend .pull-right;
+        }
+    }
+}
