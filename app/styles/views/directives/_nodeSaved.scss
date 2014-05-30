@@ -3,6 +3,16 @@ f-node-saved {
         text-align: center;
     }
 
+    .token-hint {
+        font: {
+            weight: bold;
+            size: 32px;
+        }
+
+        text-align: center;
+        margin-top: 32px;
+    }
+
     .summary {
         .token {
             @extend .well;
