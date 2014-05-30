@@ -304,6 +304,9 @@ module.exports = function (grunt) {
         // Copies remaining files to places other tasks can use
         copy: {
             dist: {
+                options: {
+                    mode: true
+                },
                 files: [
                     {
                         expand: true,
@@ -342,6 +345,12 @@ module.exports = function (grunt) {
                         cwd: '.',
                         dest: '<%= yeoman.dist %>/',
                         src: ['package.json']
+                    },
+                    {
+                        expand: true,
+                        cwd: 'bin',
+                        dest: '<%= yeoman.dist %>/bin',
+                        src: ['*']
                     }
                 ]
             },
