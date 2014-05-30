@@ -44,8 +44,7 @@ angular.module('ffffng')
             $scope.node.coords = lat + ' ' + lng;
         });
 
-        $scope.updateMap = function () {
-            var coords = $scope.coords || '';
+        function withValidCoords(coords, callback) {
             coords = coords.trim();
             if (_.isEmpty(coords)) {
                 return;
@@ -60,7 +59,14 @@ angular.module('ffffng')
             var lat = Number(parts[0]);
             var lng = Number(parts[1]);
 
-            updateNodePosition(lat, lng);
+            callback(lat, lng);
+        }
+
+        $scope.updateMap = function (optCoords) {
+            var coords = optCoords || $scope.coords || '';
+            withValidCoords(coords, function (lat, lng) {
+                updateNodePosition(lat, lng);
+            });
         };
 
         $scope.resetCoords = function () {
@@ -101,6 +107,13 @@ angular.module('ffffng')
                 }
             });
         };
+
+        $scope.updateMap($scope.node.coords);
+        withValidCoords($scope.node.coords, function (lat, lng) {
+            $scope.center.lat = lat;
+            $scope.center.lng = lng;
+            $scope.center.zoom = 12;
+        });
     };
 
     return {
