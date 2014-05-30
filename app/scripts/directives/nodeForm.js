@@ -45,6 +45,7 @@ angular.module('ffffng')
         });
 
         function withValidCoords(coords, callback) {
+            coords = coords ||  '';
             coords = coords.trim();
             if (_.isEmpty(coords)) {
                 return;
@@ -63,7 +64,7 @@ angular.module('ffffng')
         }
 
         $scope.updateMap = function (optCoords) {
-            var coords = optCoords || $scope.coords || '';
+            var coords = optCoords || $scope.coords;
             withValidCoords(coords, function (lat, lng) {
                 updateNodePosition(lat, lng);
             });
