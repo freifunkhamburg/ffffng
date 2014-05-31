@@ -35,18 +35,17 @@
             <h3>Wo soll Dein Router stehen?</h3>
             <div class="row">
                 <div class="coords col-md-4">
-                    <!--<label for="coords">Koordinaten des Knotens (freiwillig)</label>-->
                     <p class="help-block">
                         Wenn Du möchtest, dass Dein Knoten an der richtigen Stelle auf der
-                        <a href="http://graph.hamburg.freifunk.net/geomap.html" target="_blank">Knotenkarte</a> angezeigt wird,
+                        <a href="{{ config.map.mapUrl }}" target="_blank">Knotenkarte</a> angezeigt wird,
                         kannst Du seine Koordinaten hier eintragen. Klicke einfach in der auf dieser Seite angezeigten Karte
                         an die Stelle, wo Dein Knoten erscheinen soll. Durch erneutes Klicken kannst Du die Position jederzeit
                         anpassen.
                     </p>
-                    <input type="text" id="coords" class="{{node.coords ? 'has-coords' : ''}}" placeholder="z. B. 53.59784 10.01821" ng-model="node.coords" ng-blur="updateMap" />
+                    <input type="text" id="coords" class="{{node.coords ? 'has-coords' : ''}}" placeholder="z. B. {{config.coordsSelector.lat}} {{config.coordsSelector.lng}}" ng-model="node.coords" ng-blur="updateMap" />
                     <i class="reset-coords" ng-if="node.coords" ng-click="resetCoords()"></i>
                     <span class="feedback" ng-if="hasError('coords')">
-                        Bitte gib die Koordinaten wie folgt an, Beispiel: 53.59784 10.01821
+                        Bitte gib die Koordinaten wie folgt an, Beispiel: {{config.coordsSelector.lat}} {{config.coordsSelector.lng}}
                     </span>
                 </div>
                 <div class="col-md-8">
@@ -75,7 +74,7 @@
                 <div class="col-md-6">
                     <div class="email">
                         <label for="email">E-Mail-Adresse</label>
-                        <input type="email" id="email" placeholder="z. B. lisa@hamburg.freifunk.net" ng-model="node.email" />
+                        <input type="email" id="email" placeholder="z. B. lisa@{{config.community.domain}}" ng-model="node.email" />
                         <span class="feedback" ng-if="hasError('email')">
                             Die angegebene E-Mail-Adresse ist ungültig.
                         </span>

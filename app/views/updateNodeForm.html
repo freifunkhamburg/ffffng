@@ -10,7 +10,7 @@
         <p>
             <strong>
                 Solltest Du den Token nicht mehr haben, wende Dich einfach per E-Mail an
-                <a href="mailto:kontakt@hamburg.freifunk.net">kontakt@hamburg.freifunk.net</a>.
+                <a href="mailto:{{ config.community.contactEmail }}">{{ config.community.contactEmail }}</a>.
             </strong>
         </p>
         <f-token-form f-submit="onSubmitToken" f-cancel="cancel"></f-token-form>
@@ -30,8 +30,8 @@
     <h1>Geschafft!</h1>
     <p>
         Die Daten Deines Freifunk-Knotens sind erfolgreich geändert worden. Es kann jetzt noch bis zu 20 Minuten dauern,
-        bis die Änderungen überall wirksam werden und sich im <a href="http://graph.hamburg.freifunk.net/graph.html" target="_blank">Knotengraph</a>
-        und in der <a href="http://graph.hamburg.freifunk.net/geomap.html" target="_blank">Knotenkarte</a> auswirken.
+        bis die Änderungen überall wirksam werden und sich im <a href="{{ config.map.graphUrl }}" target="_blank">Knotengraph</a>
+        und in der <a href="{{ config.map.mapUrl }}" target="_blank">Knotenkarte</a> auswirken.
     </p>
 
     <f-node-saved f-node="node" f-token="token"></f-node-saved>

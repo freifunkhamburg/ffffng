@@ -1,7 +1,8 @@
 'use strict';
 
 angular.module('ffffng')
-.controller('UpdateNodeCtrl', function ($scope, Navigator, NodeService) {
+.controller('UpdateNodeCtrl', function ($scope, Navigator, NodeService, config) {
+    $scope.config = config;
     $scope.node = undefined;
     $scope.token = undefined;
     $scope.saved = false;

@@ -1,7 +1,9 @@
 'use strict';
 
 angular.module('ffffng')
-.controller('NewNodeCtrl', function ($scope, Navigator, NodeService, $routeParams, _) {
+.controller('NewNodeCtrl', function ($scope, Navigator, NodeService, $routeParams, _, config) {
+    $scope.config = config;
+
     $scope.node = {};
     $scope.saved = false;
 

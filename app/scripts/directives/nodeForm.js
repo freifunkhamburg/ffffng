@@ -2,12 +2,13 @@
 
 angular.module('ffffng')
 .directive('fNodeForm', function () {
-    var ctrl = function ($scope, $timeout, Constraints, Validator, _) {
+    var ctrl = function ($scope, $timeout, Constraints, Validator, _, config) {
+        $scope.config = config;
         angular.extend($scope, {
             center: {
-                lat: 53.565278,
-                lng: 10.001389,
-                zoom: 10
+                lat: config.coordsSelector.lat,
+                lng: config.coordsSelector.lng,
+                zoom: config.coordsSelector.defaultZoom
             },
             markers: {},
             layers: {

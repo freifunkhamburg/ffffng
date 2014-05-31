@@ -40,8 +40,9 @@ angular.module('ffffng', [
         }
     };
 })
-.run(['$location', '$rootScope', function ($location, $rootScope) {
+.run(function ($location, $rootScope, config) {
     $rootScope.$on('$routeChangeSuccess', function (event, current) {
         $rootScope.title = current.$$route.title;
+        $rootScope.config = config;
     });
-}]);
+});
