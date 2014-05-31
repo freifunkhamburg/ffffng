@@ -2,7 +2,7 @@
 
 angular.module('ffffng')
 .directive('fNodeForm', function () {
-    var ctrl = function ($scope, $timeout, Constraints, Validator, _, config) {
+    var ctrl = function ($scope, $timeout, Constraints, Validator, _, config, $window) {
         $scope.config = config;
         angular.extend($scope, {
             center: {
@@ -107,6 +107,7 @@ angular.module('ffffng')
                     default:
                         $scope.error = 'Es ist ein Fehler aufgetreten. Versuche es später noch einmal.';
                 }
+                $window.scrollTo(0, 0);
             });
         };
 
