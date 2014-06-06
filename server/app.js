@@ -2,13 +2,16 @@
 
 angular.module('ffffng').factory('app', function (fs) {
     var express = require('express');
+    var bodyParser = require('body-parser');
+    var compress = require('compression');
+
     var app = express();
 
-    app.use(express.bodyParser());
+    app.use(bodyParser());
 
     var clientDir = __dirname + '/../client';
 
-    app.use(express.compress());
+    app.use(compress());
     app.use('/', express.static(clientDir + '/'));
     app.get('/', function (req, res, next) {
         fs.readFile(clientDir + '/index.html', 'utf8', function (err, body) {
