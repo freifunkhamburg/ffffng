@@ -1,31 +1,31 @@
-<form method="post" role="form" ng-submit="onSubmit(node)" ng-disabled="hasAnyError()" novalidate>
+<form name="nodeForm" method="post" role="form" ng-submit="onSubmit(node)" novalidate>
     <div class="main-error" ng-if="error">{{error}}</div>
     <fieldset>
         <div class="node-data">
             <h3>Knotendaten</h3>
-            <div class="hostname">
+            <div class="hostname" ng-class="{'has-error' : hasError('hostname')}">
                 <label for="hostname">Knotenname</label>
                 <f-help text="Das ist der Name, der auch auf der Karte auftaucht."></f-help>
-                <input type="text" id="hostname" placeholder="z. B. Lisas-Freifunk" ng-model="node.hostname" />
+                <input type="text" id="hostname" name="hostname" placeholder="z. B. Lisas-Freifunk" ng-model="node.hostname" ng-pattern="constraints.hostname.regex" ng-required="!constraints.hostname.optional" />
                 <span class="feedback" ng-if="hasError('hostname')">
                     Knotennamen dürfen maximal 32 Zeichen lang sein und nur Klein- und Großbuchstaben, sowie Ziffern, - und _ enthalten.
                 </span>
             </div>
-            <div class="key">
+            <div class="key" ng-class="{'has-error' : hasError('key')}">
                 <label for="key">VPN-Schlüssel (bitte nur weglassen, wenn Du weisst, was Du tust)</label>
                 <f-help text="Dieser Schlüssel wird verwendet, um die Verbindung Deines Routers zu den Gateway-Servern abzusichern."></f-help>
-                <input type="text" id="key" placeholder="Dein 64-stelliger VPN-Schlüssel" ng-model="node.key" />
+                <input type="text" id="key" name="key" placeholder="Dein 64-stelliger VPN-Schlüssel" ng-model="node.key" ng-pattern="constraints.key.regex" ng-required="!constraints.key.optional" />
                 <span class="feedback" ng-if="hasError('key')">
                     Der angegebene VPN-Schlüssel ist ungültig.
                 </span>
             </div>
-            <div class="mac">
+            <div class="mac" ng-class="{'has-error' : hasError('mac')}">
                 <label for="mac">MAC-Adresse</label>
                 <f-help text="
                     Die MAC-Adresse (kurz &quot;MAC&quot;) steht üblicherweise auf dem Aufkleber auf der Unterseite deines Routers.
                     Sie wird verwendet, um die Daten Deines Routers auf der Karte korrekt zuzuordnen.
                 "></f-help>
-                <input type="text" id="mac" placeholder="z. B. 12:34:56:78:9a:bc oder 123456789abc" ng-model="node.mac" />
+                <input type="text" id="mac" name="mac" placeholder="z. B. 12:34:56:78:9a:bc oder 123456789abc" ng-model="node.mac" ng-pattern="constraints.mac.regex" ng-required="!constraints.mac.optional" />
                 <span class="feedback" ng-if="hasError('mac')">
                     Die angegebene MAC-Adresse ist ungültig.
                 </span>
@@ -34,7 +34,7 @@
         <div class="node-position">
             <h3>Wo soll Dein Router stehen?</h3>
             <div class="row">
-                <div class="coords col-md-4">
+                <div class="coords col-md-4" ng-class="{'has-error' : hasError('coords')}">
                     <p class="help-block">
                         Wenn Du möchtest, dass Dein Knoten an der richtigen Stelle auf der
                         <a href="{{ config.map.mapUrl }}" target="_blank">Knotenkarte</a> angezeigt wird,
@@ -42,7 +42,7 @@
                         an die Stelle, wo Dein Knoten erscheinen soll. Durch erneutes Klicken kannst Du die Position jederzeit
                         anpassen.
                     </p>
-                    <input type="text" id="coords" class="{{node.coords ? 'has-coords' : ''}}" placeholder="z. B. {{config.coordsSelector.lat}} {{config.coordsSelector.lng}}" ng-model="node.coords" ng-blur="updateMap" />
+                    <input type="text" id="coords" name="coords" class="{{node.coords ? 'has-coords' : ''}}" placeholder="z. B. {{config.coordsSelector.lat}} {{config.coordsSelector.lng}}" ng-model="node.coords" ng-pattern="constraints.coords.regex" ng-required="!constraints.coords.optional" ng-blur="updateMap" />
                     <i class="reset-coords" ng-if="node.coords" ng-click="resetCoords()"></i>
                     <span class="feedback" ng-if="hasError('coords')">
                         Bitte gib die Koordinaten wie folgt an, Beispiel: {{config.coordsSelector.lat}} {{config.coordsSelector.lng}}
@@ -63,18 +63,18 @@
             </p>
             <div class="row">
                 <div class="col-md-6">
-                    <div class="nickname">
+                    <div class="nickname" ng-class="{'has-error' : hasError('nickname')}">
                         <label for="nickname">Nickname / Name</label>
-                        <input type="text" id="nickname" placeholder="z. B. Lisa" ng-model="node.nickname" />
+                        <input type="text" id="nickname" name="nickname" placeholder="z. B. Lisa" ng-model="node.nickname" ng-pattern="constraints.nickname.regex" ng-required="!constraints.nickname.optional" />
                         <span class="feedback" ng-if="hasError('nickname')">
                             Nicknames dürfen maximal 64 Zeichen lang sein und nur Klein- und Großbuchstaben, sowie Ziffern, - und _ enthalten. Umlaute sind erlaubt.
                         </span>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="email">
+                    <div class="email" ng-class="{'has-error' : hasError('email')}">
                         <label for="email">E-Mail-Adresse</label>
-                        <input type="email" id="email" placeholder="z. B. lisa@{{config.community.domain}}" ng-model="node.email" />
+                        <input type="email" id="email" name="email" placeholder="z. B. lisa@{{config.community.domain}}" ng-model="node.email" ng-pattern="constraints.email.regex" ng-required="!constraints.email.optional" />
                         <span class="feedback" ng-if="hasError('email')">
                             Die angegebene E-Mail-Adresse ist ungültig.
                         </span>
@@ -83,7 +83,7 @@
             </div>
         </div>
         <div class="buttons">
-            <button class="save {{action}}" type="submit" ng-disabled="hasAnyError()" popover="I appeared on mouse enter!" popover-trigger="mouseenter"  ng-switch="action">
+            <button class="save {{action}}" type="submit" ng-switch="action">
                 <span ng-switch-when="create"><i class="fa fa-dot-circle-o"></i> Knoten anmelden</span>
                 <span ng-switch-when="update"><i class="fa fa-pencil"></i> Daten ändern</span>
             </button>

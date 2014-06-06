@@ -20,7 +20,7 @@ require('./resources/nodeResource');
 require('./services/nodeService');
 
 require('../shared/validation/constraints');
-require('../shared/validation/validator');
+require('./validation/validator');
 
 angular.injector(['ffffng']).invoke(function (config, app, Router) {
     Router.init();

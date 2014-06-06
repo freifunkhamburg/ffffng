@@ -2,17 +2,17 @@
 
 angular.module('ffffng')
 .directive('fTokenForm', function () {
-    var ctrl = function ($scope, Constraints, Validator) {
-        var isValid = Validator.forConstraint(Constraints.token);
-        $scope.hasError = function () {
-            var value = $scope.token;
-            if (value === undefined) {
-                return false;
-            }
-            return !isValid(value);
-        };
+    var ctrl = function ($scope, Constraints) {
+        $scope.constraints = Constraints;
+        $scope.submitted = false;
 
         $scope.doSubmit = function (token) {
+            $scope.submitted = true;
+
+            if ($scope.tokenForm.$invalid) {
+                return;
+            }
+
             $scope.error = null;
             $scope.onSubmit(token)
                 .error(function (response, code) {

@@ -2,7 +2,7 @@
 
 angular.module('ffffng')
 .directive('fNodeForm', function () {
-    var ctrl = function ($scope, $timeout, Constraints, Validator, _, config, $window) {
+    var ctrl = function ($scope, $timeout, Constraints, $element, _, config, $window) {
         $scope.config = config;
         angular.extend($scope, {
             center: {
@@ -76,19 +76,13 @@ angular.module('ffffng')
             $scope.markers = {};
         };
 
-        var isValid = _.reduce(Constraints.node, function (isValids, constraint, field) {
-            isValids[field] = Validator.forConstraint(constraint, true);
-            return isValids;
-        }, {});
-        var areValid = Validator.forConstraints(Constraints.node);
+        $scope.constraints = Constraints.node;
+
+        var submitted = false;
 
         $scope.hasError = function (field) {
-            var value = $scope.node[field];
-            return !isValid[field](value);
-        };
-
-        $scope.hasAnyError = function () {
-            return !areValid($scope.node);
+            var input = $scope.nodeForm[field];
+            return input.$invalid && submitted;
         };
 
         var duplicateError = {
@@ -98,6 +92,18 @@ angular.module('ffffng')
         };
 
         $scope.onSubmit = function (node) {
+            submitted = true;
+
+            if ($scope.nodeForm.$invalid) {
+                var firstInvalid = _.filter($element.find('form').find('input'), function (input) {
+                    return $scope.nodeForm[input.name].$invalid;
+                })[0];
+                if (firstInvalid) {
+                    $window.scrollTo(0, $window.pageYOffset + firstInvalid.getBoundingClientRect().top - 100);
+                }
+                return;
+            }
+
             $scope.error = null;
             $scope.save(node).error(function (response, code) {
                 switch (code) {
@@ -109,7 +115,7 @@ angular.module('ffffng')
                 }
                 $window.scrollTo(0, 0);
             });
-        };
+        }.bind(this);
 
         $scope.updateMap($scope.node.coords);
         withValidCoords($scope.node.coords, function (lat, lng) {
