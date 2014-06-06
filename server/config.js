@@ -1,20 +1,20 @@
 'use strict';
 
-angular.module('ffffng').factory('config', function () {
-    return {
+angular.module('ffffng').factory('config', function (fs, deepExtend) {
+    var defaultConfig = {
         server: {
             port: 8080,
             peersPath: '/tmp/peers'
         },
         client: {
             community: {
-                name: 'Freifunk Hamburg',
-                domain: 'hamburg.freifunk.net',
-                contactEmail: 'kontakt@hamburg.freifunk.net'
+                name: 'Freifunk Musterstadt',
+                domain: 'musterstadt.freifunk.net',
+                contactEmail: 'kontakt@musterstadt.freifunk.net'
             },
             map: {
-                graphUrl: 'http://graph.hamburg.freifunk.net/graph.html',
-                mapUrl: 'http://graph.hamburg.freifunk.net/geomap.html'
+                graphUrl: 'http://graph.musterstadt.freifunk.net/graph.html',
+                mapUrl: 'http://graph.musterstadt.freifunk.net/geomap.html'
             },
             coordsSelector: {
                 lat: 53.565278,
@@ -23,4 +23,13 @@ angular.module('ffffng').factory('config', function () {
             }
         }
     };
+
+    var configJSONFile = __dirname + "/../config.json";
+    var configJSON = undefined;
+
+    if (fs.existsSync(configJSONFile)) {
+        configJSON = JSON.parse(fs.readFileSync(configJSONFile, 'utf8'));
+    }
+
+    return deepExtend({}, defaultConfig, configJSON);
 });

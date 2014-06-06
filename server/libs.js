@@ -17,4 +17,5 @@
     lib('crypto');
     lib('fs');
     lib('glob');
+    lib('deepExtend', 'deep-extend');
 })();
