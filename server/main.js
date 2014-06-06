@@ -25,6 +25,6 @@ require('./validation/validator');
 angular.injector(['ffffng']).invoke(function (config, app, Router) {
     Router.init();
 
-    app.listen(config.port, '::');
+    app.listen(config.server.port, '::');
     module.exports = app;
 });

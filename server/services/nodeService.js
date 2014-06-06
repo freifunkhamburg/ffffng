@@ -16,7 +16,7 @@ angular.module('ffffng')
     }
 
     function findNodeFiles(pattern) {
-        return glob.sync(config.peersPath + '/' + pattern.toLowerCase());
+        return glob.sync(config.server.peersPath + '/' + pattern.toLowerCase());
     }
 
     function isDuplicate(pattern, token) {
@@ -52,7 +52,7 @@ angular.module('ffffng')
 
     function writeNodeFile(isUpdate, token, node, callback) {
         var filename =
-            config.peersPath + '/' + (node.hostname + '@' + node.mac + '@' + node.key + '@' + token).toLowerCase();
+            config.server.peersPath + '/' + (node.hostname + '@' + node.mac + '@' + node.key + '@' + token).toLowerCase();
 
         var data = '';
         _.each(linePrefixes, function (prefix, key) {
