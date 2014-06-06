@@ -49,6 +49,6 @@
     "commit": "f2b426b3daf3a3753bb76a3526956f14818f358c"
   },
   "_source": "git://github.com/tombatossals/angular-leaflet-directive.git",
-  "_target": "~0.7.6",
+  "_target": "~0.7.7",
   "_originalSource": "angular-leaflet-directive"
 }
