@@ -4,7 +4,8 @@ angular.module('ffffng', [
     'ngSanitize',
     'ngRoute',
     'ng',
-    'leaflet-directive'
+    'leaflet-directive',
+    'templates-main'
 ])
 .config(function ($routeProvider) {
     $routeProvider

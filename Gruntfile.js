@@ -182,6 +182,26 @@ module.exports = function (grunt) {
             }
         },
 
+        html2js: {
+            options: {
+                base: 'app',
+                htmlmin: {
+                    collapseBooleanAttributes: true,
+                    collapseWhitespace: true,
+                    removeAttributeQuotes: true,
+                    removeComments: true,
+                    removeEmptyAttributes: true,
+                    removeRedundantAttributes: true,
+                    removeScriptTypeAttributes: true,
+                    removeStyleLinkTypeAttributes: true
+                }
+            },
+            main: {
+                src: ['<%= yeoman.app %>/views/{*,**/*}.html'],
+                dest: '.tmp/scripts/templates.js'
+            }
+        },
+
         // Renames files for browser caching purposes
         rev: {
             dist: {
@@ -396,6 +416,7 @@ module.exports = function (grunt) {
     grunt.registerTask('build', [
         'clean:dist',
         'bowerInstall',
+        'html2js',
         'useminPrepare',
         'concurrent:dist',
         'autoprefixer',
