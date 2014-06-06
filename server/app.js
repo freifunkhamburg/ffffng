@@ -8,6 +8,7 @@ angular.module('ffffng').factory('app', function (fs) {
 
     var clientDir = __dirname + '/../client';
 
+    app.use(express.compress());
     app.use('/', express.static(clientDir + '/'));
     app.get('/', function (req, res, next) {
         fs.readFile(clientDir + '/index.html', 'utf8', function (err, body) {
