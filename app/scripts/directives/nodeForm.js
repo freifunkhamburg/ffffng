@@ -81,8 +81,7 @@ angular.module('ffffng')
         var submitted = false;
 
         $scope.hasError = function (field) {
-            var input = $scope.nodeForm[field];
-            return input.$invalid && submitted;
+            return $scope.nodeForm && $scope.nodeForm[field].$invalid && submitted;
         };
 
         var duplicateError = {
