@@ -24,8 +24,8 @@ angular.module('ffffng').factory('config', function (fs, deepExtend) {
         }
     };
 
-    var configJSONFile = __dirname + "/../config.json";
-    var configJSON = undefined;
+    var configJSONFile = __dirname + '/../config.json';
+    var configJSON = {};
 
     if (fs.existsSync(configJSONFile)) {
         configJSON = JSON.parse(fs.readFileSync(configJSONFile, 'utf8'));
