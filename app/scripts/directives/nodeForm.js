@@ -2,7 +2,17 @@
 
 angular.module('ffffng')
 .directive('fNodeForm', function () {
-    var ctrl = function ($scope, $timeout, Constraints, $element, _, config, $window) {
+    var ctrl = function (
+        $scope,
+        $timeout,
+        Constraints,
+        $element,
+        _,
+        config,
+        $window,
+        geolib,
+        OutsideOfCommunityDialog
+    ) {
         $scope.config = config;
         angular.extend($scope, {
             center: {
@@ -29,6 +39,29 @@ angular.module('ffffng')
             }
         });
 
+        if (config.otherCommunityInfo.showBorderForDebugging) {
+            $scope.paths = {
+                border: {
+                    color: '#ff0000',
+                        weight: 3,
+                        latlngs: config.otherCommunityInfo.localCommunityPolygon.concat(
+                                [config.otherCommunityInfo.localCommunityPolygon[0]]
+                        )
+                }
+            };
+        }
+
+        var geolibPolygon = _.map(config.otherCommunityInfo.localCommunityPolygon, function (point) {
+            return {
+                latitude: point.lat,
+                longitude: point.lng
+            };
+        });
+
+        var inCommunityArea = function (lat, lng) {
+            return geolib.isPointInside({latitude: lat, longitude: lng}, geolibPolygon);
+        };
+
         var updateNodePosition = function (lat, lng) {
             $scope.markers.node = {
                 lat: lat,
@@ -45,15 +78,17 @@ angular.module('ffffng')
             $scope.node.coords = lat + ' ' + lng;
         });
 
-        function withValidCoords(coords, callback) {
+        function withValidCoords(coords, callback, invalidCallback) {
+            invalidCallback = invalidCallback || function () {};
+
             coords = coords ||  '';
             coords = coords.trim();
             if (_.isEmpty(coords)) {
-                return;
+                return invalidCallback();
             }
 
             if ($scope.hasError('coords')) {
-                return;
+                return invalidCallback();
             }
 
             var parts = coords.split(/\s+/);
@@ -61,7 +96,7 @@ angular.module('ffffng')
             var lat = Number(parts[0]);
             var lng = Number(parts[1]);
 
-            callback(lat, lng);
+            return callback(lat, lng);
         }
 
         $scope.updateMap = function (optCoords) {
@@ -90,9 +125,7 @@ angular.module('ffffng')
             mac: 'Für die MAC-Adresse gibt es bereits einen Eintrag.'
         };
 
-        $scope.onSubmit = function (node) {
-            submitted = true;
-
+        var doSubmit = function (node) {
             if ($scope.nodeForm.$invalid) {
                 var firstInvalid = _.filter($element.find('form').find('input'), function (input) {
                     return $scope.nodeForm[input.name].$invalid;
@@ -114,7 +147,27 @@ angular.module('ffffng')
                 }
                 $window.scrollTo(0, 0);
             });
-        }.bind(this);
+        };
+
+        $scope.onSubmit = function (node) {
+            submitted = true;
+
+            withValidCoords(
+                node.coords,
+                function (lat, lng) {
+                    if (!config.otherCommunityInfo.showInfo || inCommunityArea(lat, lng)) {
+                        doSubmit(node);
+                    } else {
+                        OutsideOfCommunityDialog.open($scope.action).result.then(function () {
+                            doSubmit(node);
+                        });
+                    }
+                },
+                function () {
+                    doSubmit(node);
+                }
+            );
+        };
 
         $scope.updateMap($scope.node.coords);
         withValidCoords($scope.node.coords, function (lat, lng) {

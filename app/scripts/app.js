@@ -5,7 +5,8 @@ angular.module('ffffng', [
     'ngRoute',
     'ng',
     'leaflet-directive',
-    'templates-main'
+    'templates-main',
+    'ui.bootstrap'
 ])
 .config(function ($routeProvider) {
     $routeProvider

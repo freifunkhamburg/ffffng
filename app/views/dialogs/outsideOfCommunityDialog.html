@@ -1,0 +1,35 @@
+<div class="outside-of-community-dialog">
+    <div class="modal-header">
+        <i class="cancel-icon" ng-click="cancel()"></i>
+        <h3>Dein Router steht außerhalb des {{config.community.name}} Gebiets</h3>
+    </div>
+    <div class="modal-body">
+        <p>
+            <strong>Erst mal großartig, dass du Freifunk machen möchtest!</strong>
+        </p>
+        <p>
+            Freifunk steht u.a. für Denzentralität. Deshalb wäre es klasse wenn Du Dich einer Community in Deiner Nähe anschließt oder vielleicht sogar
+            <a href="http://freifunk.net/wie-mache-ich-mit/lokale-gruppe-gruenden/" target="_blank">Deine eigene gründest</a>.
+            Da aller Anfang schwer ist, macht es für eben diesen vielleicht Sinn sich erst mal einer
+            <a href="http://freifunk.net/wie-mache-ich-mit/community-finden/" target="_blank">nahegelegen Gruppe</a>
+            anzuschließen. Auch wir von {{config.community.name}} stehen Dir natürlich gerne mit Rat und Tat zur Seite und mit den
+            existierenden Hilfsmitteln ist die technische Hürde auch nicht mehr ganz so gigantisch.
+        </p>
+        <p>
+            Es gibt auch technische Gründe, die gegen eine Erweiterung über die Grenzen von {{config.community.name}} hinaus sprechen.
+            Das Problem mit Mesh-Netzen heute ist, dass sie nicht besonders gut skalieren und mit jedem weiteren Router die Leistung nach
+            unten geht.
+        </p>
+        <p>
+            Im Moment kommen ständig neue Freifunk-Communities dazu. Welche Communities es schon gibt, siehts Du
+            <a href="http://freifunk.net/wie-mache-ich-mit/community-finden/" target="_blank">in dieser Übersicht</a>.
+        </p>
+    </div>
+    <div class="modal-footer">
+        <button class="cancel" ng-click="cancel()">Abbrechen</button>
+        <button class="proceed {{action}}" ng-click="proceed()" ng-switch="action">
+            <span ng-switch-when="create"><i class="fa fa-dot-circle-o"></i> Knoten dennoch anmelden</span>
+            <span ng-switch-when="update"><i class="fa fa-pencil"></i> Daten dennoch ändern</span>
+        </button>
+    </div>
+</div>
