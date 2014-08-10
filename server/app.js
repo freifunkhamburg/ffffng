@@ -7,7 +7,7 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
 
     var app = express();
 
-    app.use(bodyParser());
+    app.use(bodyParser.json());
 
     var clientDir = __dirname + '/../client';
     var templateDir = __dirname + '/templates';
