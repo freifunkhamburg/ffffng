@@ -3,12 +3,12 @@
     "version": "0.1.0",
     "license": "MIT",
     "dependencies": {
-        "angular": "1.2.16",
+        "angular": "~1.2.21",
         "angular-leaflet-directive": "~0.7.7",
-        "angular-route": "1.2.16",
-        "angular-sanitize": "1.2.16",
-        "bootstrap-sass-official": "~3.1.1",
-        "es5-shim": "~3.4.0",
+        "angular-route": "~1.2.21",
+        "angular-sanitize": "~1.2.21",
+        "bootstrap-sass-official": "~3.2.0",
+        "es5-shim": "~4.0.1",
         "font-awesome": "~4.1.0",
         "geolib": "~2.0.9",
         "jquery": "~2.1.1",
@@ -19,7 +19,7 @@
         "angular-bootstrap": "~0.11.0"
     },
     "devDependencies": {
-        "angular-mocks": "1.2.16",
-        "angular-scenario": "1.2.16"
+        "angular-mocks": "1.2.21",
+        "angular-scenario": "1.2.21"
     }
 }
