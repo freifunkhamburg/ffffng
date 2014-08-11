@@ -19,6 +19,24 @@
             color: $gray;
         }
     }
+    .modal-body {
+        .icon {
+            @extend .fa;
+
+            display: block;
+
+            font-size: 100px;
+            width: 120px;
+            text-align: center;
+            margin: 14px auto;
+
+            color: lighten($gray, 25%);
+
+            &.community {
+                @extend .fa-users;
+            }
+        }
+    }
     .modal-footer {
         .proceed {
             @extend .btn;
