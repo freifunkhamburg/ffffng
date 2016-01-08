@@ -4,7 +4,10 @@
     .select-action {
         @extend .row;
 
-        margin-top: 25px;
+        margin: {
+            top: 25px;
+            bottom: 25px;
+        }
 
         .new-node, .update-node {
             @extend .col-md-5;
