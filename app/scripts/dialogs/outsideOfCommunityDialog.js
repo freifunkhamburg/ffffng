@@ -1,23 +1,23 @@
 'use strict';
 
 angular.module('ffffng')
-.factory('OutsideOfCommunityDialog', function ($modal, config) {
-    var ctrl = function ($scope, $modalInstance, action) {
+.factory('OutsideOfCommunityDialog', function ($uibModal, config) {
+    var ctrl = function ($scope, $uibModalInstance, action) {
         $scope.action = action;
         $scope.config = config;
 
         $scope.proceed = function () {
-            $modalInstance.close();
+            $uibModalInstance.close();
         };
 
         $scope.cancel = function () {
-            $modalInstance.dismiss('cancel');
+            $uibModalInstance.dismiss('cancel');
         };
     };
 
     return {
         open: function (action) {
-            return $modal.open({
+            return $uibModal.open({
                 controller: ctrl,
                 templateUrl: 'views/dialogs/outsideOfCommunityDialog.html',
                 resolve: {

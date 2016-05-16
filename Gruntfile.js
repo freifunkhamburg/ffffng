@@ -1,4 +1,3 @@
-// Generated on 2014-05-12 using generator-angular 0.8.0
 'use strict';
 
 module.exports = function (grunt) {
@@ -8,6 +7,8 @@ module.exports = function (grunt) {
 
     // Time how long tasks take. Can help when optimizing build times
     require('time-grunt')(grunt);
+
+    var serveStatic = require('serve-static');
 
     // Define the configuration for all the tasks
     grunt.initConfig({
@@ -23,7 +24,7 @@ module.exports = function (grunt) {
         watch: {
             bower: {
                 files: ['bower.json'],
-                tasks: ['bowerInstall']
+                tasks: ['wiredep']
             },
             js: {
                 files: ['<%= yeoman.app %>/scripts/{,**/}*.js', 'shared/{,**/}*.js'],
@@ -68,12 +69,12 @@ module.exports = function (grunt) {
 
                     // Serve static files.
                     options.base.forEach(function(base) {
-                        middlewares.push(connect.static(base));
+                        middlewares.push(serveStatic(base));
                     });
 
                     // Make directory browse-able.
                     var directory = options.directory || options.base[options.base.length - 1];
-                    middlewares.push(connect.directory(directory));
+                    middlewares.push(serveStatic(directory));
 
                     return middlewares;
                 }
@@ -152,9 +153,8 @@ module.exports = function (grunt) {
             }
         },
 
-        // Automatically inject Bower components into the app
-        bowerInstall: {
-            sass: {
+        wiredep: {
+            task: {
                 src: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
                 ignorePath: '<%= yeoman.app %>/bower_components/'
             }
@@ -302,10 +302,7 @@ module.exports = function (grunt) {
             }
         },
 
-        // ngmin tries to make the code safe for minification automatically by
-        // using the Angular long form for dependency injection. It doesn't work on
-        // things like resolve or inject so those have to be done manually.
-        ngmin: {
+        ngAnnotate: {
             dist: {
                 files: [
                     {
@@ -406,7 +403,7 @@ module.exports = function (grunt) {
 
         return grunt.task.run([
             'clean:server',
-            'bowerInstall',
+            'wiredep',
             'concurrent:server',
             'autoprefixer',
             'configureProxies',
@@ -422,13 +419,13 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', [
         'clean:dist',
-        'bowerInstall',
+        'wiredep',
         'html2js',
         'useminPrepare',
         'concurrent:dist',
         'autoprefixer',
         'concat',
-        'ngmin',
+        'ngAnnotate',
         'copy:dist',
         'cssmin',
         'uglify',

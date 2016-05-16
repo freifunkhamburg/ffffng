@@ -2,7 +2,7 @@
 'use strict';
 
 // Dirty hack to allow usage of angular modules.
-GLOBAL.angular = require('ng-di');
+global.angular = require('ng-di');
 
 angular.module('ffffng', []);
 

@@ -1,4 +1,4 @@
-# Geolib v2.0.9
+# Geolib v2.0.21
 [![Build Status](https://secure.travis-ci.org/manuelbieh/Geolib.png?branch=master)](http://travis-ci.org/manuelbieh/Geolib)
 
 Library to provide basic geospatial operations like distance calculation, conversion of decimal coordinates to sexagesimal and vice versa, etc.
@@ -7,39 +7,39 @@ Library to provide basic geospatial operations like distance calculation, conver
 
 <h2>Methods</h2>
 
-<h3>geolib.getDistance(object start, object end[, int accuracy])</h3>
+<h3>geolib.getDistance(object start, object end[, int accuracy, int precision])</h3>
 
 Calculates the distance between two geo coordinates
 
-Takes 2 or 3 arguments. First 2 arguments must be an object with latitude and a longitude properties (e.g. `{latitude: 52.518611, longitude: 13.408056}`). Coordinates can be in sexagesimal or decimal format. 3rd argument is accuracy (in meters). So a calculated distance of 1248 meters with an accuracy of 100 is returned as `1200` (accuracy 10 = `1250` etc.).
+Takes 2 or 4 arguments. First 2 arguments must be objects that each have latitude and longitude properties (e.g. `{latitude: 52.518611, longitude: 13.408056}`)Works with:. Coordinates can be in sexagesimal or decimal format. 3rd argument is accuracy (in meters). So a calculated distaWorks with:nce of 1248 meters with an accuracy of 100 is returned as `1200` (accuracy 10 = `1250` etc.). 4th argument is precision in sub-meters (1 is meter presicion, 2 is decimeters, 3 is centimeters, etc).
 
-Return value is always an integer and represents the distance in meters.
+Return value is always an float and represents the distance in meters.
 
 <h4>Examples</h4>
 
 <pre>geolib.getDistance(
-	{latitude: 51.5103, longitude: 7.49347}, 
-	{latitude: "51° 31' N", longitude: "7° 28' E"}
+    {latitude: 51.5103, longitude: 7.49347},
+    {latitude: "51° 31' N", longitude: "7° 28' E"}
 );
 geolib.getDistance(
-	{latitude: 51.5103, longitude: 7.49347}, 
-	{latitude: "51° 31' N", longitude: "7° 28' E"}
+    {latitude: 51.5103, longitude: 7.49347},
+    {latitude: "51° 31' N", longitude: "7° 28' E"}
 );
 
 // Working with W3C Geolocation API
 navigator.geolocation.getCurrentPosition(
-	function(position) {
-		alert('You are ' + geolib.getDistance(position.coords, {
-			latitude: 51.525, 
-			longitude: 7.4575
-		}) + ' meters away from 51.525, 7.4575');
-	}, 
-	function() { 
-		alert('Position could not be determined.')
-	}, 
-	{
-		enableHighAccuracy: true
-	}
+    function(position) {
+        alert('You are ' + geolib.getDistance(position.coords, {
+            latitude: 51.525,
+            longitude: 7.4575
+        }) + ' meters away from 51.525, 7.4575');
+    },
+    function() {
+        alert('Position could not be determined.')
+    },
+    {
+        enableHighAccuracy: true
+    }
 );
 </pre>
 
@@ -49,32 +49,48 @@ Calculates the geographical center of all points in a collection of geo coordina
 
 Takes an object or array of coordinates and calculates the center of it.
 
-Returns an object: `{"latitude": centerLat, "longitude": centerLng, "distance": diagonalDistance}`
+Returns an object: `{"latitude": centerLat, "longitude": centerLng}`
 
 <h4>Examples</h4>
 
 <pre>var spots = {
-	"Brandenburg Gate, Berlin": {latitude: 52.516272, longitude: 13.377722},
-	"Dortmund U-Tower": {latitude: 51.515, longitude: 7.453619},
-	"London Eye": {latitude: 51.503333, longitude: -0.119722},
-	"Kremlin, Moscow": {latitude: 55.751667, longitude: 37.617778},
-	"Eiffel Tower, Paris": {latitude: 48.8583, longitude: 2.2945},
-	"Riksdag building, Stockholm": {latitude: 59.3275, longitude: 18.0675},
-	"Royal Palace, Oslo": {latitude: 59.916911, longitude: 10.727567}
+    "Brandenburg Gate, Berlin": {latitude: 52.516272, longitude: 13.377722},
+    "Dortmund U-Tower": {latitude: 51.515, longitude: 7.453619},
+    "London Eye": {latitude: 51.503333, longitude: -0.119722},
+    "Kremlin, Moscow": {latitude: 55.751667, longitude: 37.617778},
+    "Eiffel Tower, Paris": {latitude: 48.8583, longitude: 2.2945},
+    "Riksdag building, Stockholm": {latitude: 59.3275, longitude: 18.0675},
+    "Royal Palace, Oslo": {latitude: 59.916911, longitude: 10.727567}
 }
 
 geolib.getCenter(spots);
 
 geolib.getCenter([
-	{latitude: 52.516272, longitude: 13.377722}, 
-	{latitude: 51.515, longitude: 7.453619}, 
-	{latitude: 51.503333, longitude: -0.119722}
+    {latitude: 52.516272, longitude: 13.377722},
+    {latitude: 51.515, longitude: 7.453619},
+    {latitude: 51.503333, longitude: -0.119722}
 ]);
 </pre>
 
-<h3>geolib.isPointInside(object latlng, array coords)</h3>
+<h3>geolib.getCenterOfBounds(array coords)</h3>
 
-Checks whether a point is inside of a polygon or not. 
+Calculates the center of the bounds of geo coordinates.
+
+Takes an array of coordinates, calculate the border of those, and gives back
+the center of that rectangle.
+
+On polygons like political borders (eg. states), this may gives a closer
+result to human expectation, than `getCenter`, because that function can be
+disturbed by uneven distribution of point in different sides.
+
+Imagine the US state Oklahoma: `getCenter` on that gives a southern
+point, because the southern border contains a lot more nodes, than the others.
+
+Returns an object: `{"latitude": centerLat, "longitude": centerLng}`
+
+<h3>geolib.isPointInside(object latlng, array polygon)</h3>
+
+Checks whether a point is inside of a polygon or not.
 Note: the polygon coords must be in correct order!
 
 Returns true or false
@@ -83,18 +99,18 @@ Returns true or false
 
 <pre>
 geolib.isPointInside(
-	{latitude: 51.5125, longitude: 7.485}, 
-	[
-		{latitude: 51.50, longitude: 7.40},
-		{latitude: 51.555, longitude: 7.40},
-		{latitude: 51.555, longitude: 7.625},
-		{latitude: 51.5125, longitude: 7.625}
-	]
+    {latitude: 51.5125, longitude: 7.485},
+    [
+        {latitude: 51.50, longitude: 7.40},
+        {latitude: 51.555, longitude: 7.40},
+        {latitude: 51.555, longitude: 7.625},
+        {latitude: 51.5125, longitude: 7.625}
+    ]
 ); // -> true</pre>
 
 <h3>geolib.isPointInCircle(object latlng, object center, integer radius)</h3>
 
-Similar to is point inside: checks whether a point is inside of a circle or not. 
+Similar to is point inside: checks whether a point is inside of a circle or not.
 
 Returns true or false
 
@@ -102,9 +118,9 @@ Returns true or false
 
 <pre>// checks if 51.525, 7.4575 is within a radius of 5km from 51.5175, 7.4678
 geolib.isPointInCircle(
-	{latitude: 51.525, longitude: 7.4575},
-	{latitude: 51.5175, longitude: 7.4678}, 
-	5000
+    {latitude: 51.525, longitude: 7.4575},
+    {latitude: 51.5175, longitude: 7.4678},
+    5000
 );</pre>
 
 <h3>geolib.orderByDistance(object latlng, mixed coords)</h3>
@@ -118,16 +134,16 @@ Returns a sorted array [{latitude: x, longitude: y, distance: z, key: property}]
 <pre>
 // coords array
 geolib.orderByDistance({latitude: 51.515, longitude: 7.453619}, [
-	{latitude: 52.516272, longitude: 13.377722}, 
-	{latitude: 51.518, longitude: 7.45425}, 
-	{latitude: 51.503333, longitude: -0.119722}
+    {latitude: 52.516272, longitude: 13.377722},
+    {latitude: 51.518, longitude: 7.45425},
+    {latitude: 51.503333, longitude: -0.119722}
 ]);
 
 // coords object
 geolib.orderByDistance({latitude: 51.515, longitude: 7.453619}, {
-	a: {latitude: 52.516272, longitude: 13.377722}, 
-	b: {latitude: 51.518, longitude: 7.45425}, 
-	c: {latitude: 51.503333, longitude: -0.119722}
+    a: {latitude: 52.516272, longitude: 13.377722},
+    b: {latitude: 51.518, longitude: 7.45425},
+    c: {latitude: 51.503333, longitude: -0.119722}
 });
 </pre>
 
@@ -138,17 +154,17 @@ Finds the nearest coordinate to a reference coordinate.
 <h4>Examples</h4>
 
 <pre>var spots = {
-	"Brandenburg Gate, Berlin": {latitude: 52.516272, longitude: 13.377722},
-	"Dortmund U-Tower": {latitude: 51.515, longitude: 7.453619},
-	"London Eye": {latitude: 51.503333, longitude: -0.119722},
-	"Kremlin, Moscow": {latitude: 55.751667, longitude: 37.617778},
-	"Eiffel Tower, Paris": {latitude: 48.8583, longitude: 2.2945},
-	"Riksdag building, Stockholm": {latitude: 59.3275, longitude: 18.0675},
-	"Royal Palace, Oslo": {latitude: 59.916911, longitude: 10.727567}
+    "Brandenburg Gate, Berlin": {latitude: 52.516272, longitude: 13.377722},
+    "Dortmund U-Tower": {latitude: 51.515, longitude: 7.453619},
+    "London Eye": {latitude: 51.503333, longitude: -0.119722},
+    "Kremlin, Moscow": {latitude: 55.751667, longitude: 37.617778},
+    "Eiffel Tower, Paris": {latitude: 48.8583, longitude: 2.2945},
+    "Riksdag building, Stockholm": {latitude: 59.3275, longitude: 18.0675},
+    "Royal Palace, Oslo": {latitude: 59.916911, longitude: 10.727567}
 }
 
 // in this case set offset to 1 otherwise the nearest point will always be your reference point
-geolib.findNearest(spots['Dortmund U-Tower'], spots, 1) 
+geolib.findNearest(spots['Dortmund U-Tower'], spots, 1)
 </pre>
 
 <h3>geolib.getPathLength(mixed coords)</h3>
@@ -162,9 +178,9 @@ Returns the length of the path in meters
 <pre>
 // Calculate distance from Berlin via Dortmund to London
 geolib.getPathLength([
-	{latitude: 52.516272, longitude: 13.377722}, // Berlin
-	{latitude: 51.515, longitude: 7.453619}, // Dortmund
-	{latitude: 51.503333, longitude: -0.119722} // London
+    {latitude: 52.516272, longitude: 13.377722}, // Berlin
+    {latitude: 51.515, longitude: 7.453619}, // Dortmund
+    {latitude: 51.503333, longitude: -0.119722} // London
 ]); // -> 945235</pre>
 
 <h3>geolib.getSpeed(coords, coords[, options])</h3>
@@ -177,10 +193,29 @@ Returns the speed in <em>options.unit</em> (default is km/h).
 
 <pre>
 geolib.getSpeed(
-	{lat: 51.567294, lng: 7.38896, time: 1360231200880}, 
-	{lat: 52.54944, lng: 13.468509, time: 1360245600880},
-	{unit: 'mph'}
+    {lat: 51.567294, lng: 7.38896, time: 1360231200880},
+    {lat: 52.54944, lng: 13.468509, time: 1360245600880},
+    {unit: 'mph'}
 ); // -> 66.9408 (mph)</pre>
+
+<h3>geolib.isPointInLine(object point, object start, object end</h3>
+
+Calculates if given point lies in a line formed by start and end.
+
+Returns true or false
+
+<h4>Examples</h4>
+
+<pre>var point1 = {latitude: 0.5, longitude: 0};
+var point2 = {latitude: 0, longitude: 10};
+var point3 = {latitude: 0, longitude: 15.5};
+var start  = {latitude: 0, longitude: 0};
+var end    = {latitude: 0, longitude: 15};
+
+var isInLine1 = geolib.isPointInLine(point1, start, end) //-> false;
+var isInLine2 = geolib.isPointInLine(point2, start, end) //-> true;
+var isInLine3 = geolib.isPointInLine(point3, start, end) //-> false;
+</pre>
 
 <h3>geolib.convertUnit(string unit, float distance[, int round])</h3>
 
@@ -231,8 +266,8 @@ Converts a decimal coordinate to sexagesimal format
 Returns the latitude/longitude/elevation for a given point and converts it to decimal.
 
 Works with:
-- latitude: `latitude`, `lat`, 0 (GeoJSON array)
-- longitude: `longitude`, `lng`, `lon`, 1 (GeoJSON array)
+- longitude: `longitude`, `lng`, `lon`, 0 (GeoJSON array)
+- latitude: `latitude`, `lat`, 1 (GeoJSON array)
 - elevation: `elevation`, `elev`, `alt`, `altitude`, 2 (GeoJSON array)
 
 <h4>Examples</h4>
@@ -248,6 +283,26 @@ Checks if a coordinate is already in decimal format and, if not, converts it to
 
 <pre>geolib.useDecimal("51° 29' 46\" N"); // -> 51.59611111
 geolib.useDecimal(51.59611111) // -> 51.59611111</pre>
+
+<h3>geolib.computeDestinationPoint(start, distance, bearing, radius(optional))</h3>
+
+Computes the destination point given an initial point, a distance and a bearing
+
+If no radius is given it defaults to the mean earth radius of 6371000 meter.
+
+Returns an object: `{"latitude": destLat, "longitude": destLng}`
+
+(Attention: this formula is not *100%* accurate (but very close though))
+
+<h4>Example</h4>
+
+<pre>var initialPoint = {lat: 51.516272, lon: 0.45425}
+var dist = 1234;
+var bearing = 45;
+
+geolib.computeDestinationPoint(initialPoint.lat, initialPoint.lon, dist, bearing);
+// -> {"latitude":51.52411853234181,"longitude":0.4668623365950795}
+</pre>
 
 <h2>Changelog</h2>
 <h3>v2.0.0+beta1</h3>

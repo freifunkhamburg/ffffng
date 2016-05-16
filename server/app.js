@@ -25,7 +25,7 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
             }
 
             res.writeHead(200, {'Content-Type': mimeType});
-            res.end(_.template(body, { config: config.client }));
+            res.end(_.template(body)( { config: config.client }));
 
             return null; // to suppress warning
         });

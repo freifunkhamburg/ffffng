@@ -13,7 +13,7 @@
         });
     }
 
-    lib('_', 'underscore');
+    lib('_', 'lodash');
     lib('crypto');
     lib('fs');
     lib('glob');
