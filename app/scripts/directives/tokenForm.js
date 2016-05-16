@@ -33,7 +33,9 @@ angular.module('ffffng')
         'templateUrl': 'views/directives/tokenForm.html',
         'scope': {
             'onSubmit': '=fSubmit',
-            'onCancel': '=fCancel'
+            'onCancel': '=fCancel',
+            'submitIcon': '@fSubmitIcon',
+            'submitLabel': '@fSubmitLabel'
         }
     };
 });

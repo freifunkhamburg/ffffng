@@ -8,10 +8,12 @@
 @import "views/_main";
 @import "views/_newNodeForm";
 @import "views/_updateNodeForm";
+@import "views/_deleteNodeForm";
 @import "views/directives/_help";
 @import "views/directives/_nodeForm";
 @import "views/directives/_nodeSaved";
 @import "views/directives/_tokenForm";
+@import "views/dialogs/_confirmDeletionDialog";
 @import "views/dialogs/_outsideOfCommunityDialog";
 
 body {

@@ -1,0 +1,56 @@
+<div class="delete-node-form" ng-if="!deleted">
+    <h2>Knoten löschen</h2>
+
+    <div>
+        <p>
+            Um die Daten Deines Knotens zu löschen, benötigen wir den passenden Token (eine 16-stellige Folge aus
+            Ziffern und Buchstaben). Diesen hast Du beim ersten Anmelden Deines Knotens erhalten. Sinn des Tokens ist,
+            Dich davor zu schützen, dass Dritte unbefugt Deine Daten einsehen oder ändern können.
+        </p>
+        <p>
+            <strong>
+                Solltest Du den Token nicht mehr haben, wende Dich einfach per E-Mail an
+                <a href="mailto:{{ config.community.contactEmail }}">{{ config.community.contactEmail }}</a>.
+            </strong>
+        </p>
+        <f-token-form f-submit="onSubmitToken" f-cancel="cancel" f-submit-icon="fa-trash" f-submit-label="Knoten löschen"></f-token-form>
+
+        <p>
+            <em>
+                Hinweis: Nach dem Löschen kann der Knoten ggf. weiterhin in der Knotenkarte angezeigt werden. Dies
+                ist dann der Fall, wenn der Knoten eingeschaltet ist und in Reichweite eines anderen aktiven Knotens
+                steht. Die angezeigten Daten sind dann die während der Einrichtung des Knotens im Config-Mode
+                (Konfigurationsoberfläche des Routers) hinterlegten.
+            </em>
+        </p>
+    </div>
+</div>
+
+<div class="node-deleted" ng-if="deleted">
+    <h1>Erledigt!</h1>
+    <p>
+        Die Daten Deines Freifunk-Knotens sind gelöscht worden. Es kann jetzt noch bis zu 20 Minuten dauern,
+        bis die Änderungen überall wirksam werden und sich im <a href="{{ config.map.graphUrl }}" target="_blank">Knotengraph</a>
+        und in der <a href="{{ config.map.mapUrl }}" target="_blank">Knotenkarte</a> auswirken.
+    </p>
+
+    <div class="summary">
+        <span class="node">
+            <i class="fa fa-trash"></i>
+            {{hostname}}
+        </span>
+    </div>
+
+    <div class="actions">
+        <button class="back-button" ng-click="goHome()"><i class="fa fa-reply"></i> Zurück zum Anfang</button>
+    </div>
+
+    <p>
+        <em>
+            Hinweis: Nach dem Löschen kann der Knoten ggf. weiterhin in der Knotenkarte angezeigt werden. Dies
+            ist dann der Fall, wenn der Knoten eingeschaltet ist und in Reichweite eines anderen aktiven Knotens
+            steht. Die angezeigten Daten sind dann die während der Einrichtung des Knotens im Config-Mode
+            (Konfigurationsoberfläche des Routers) hinterlegten.
+        </em>
+    </p>
+</div>

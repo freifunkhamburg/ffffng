@@ -1,0 +1,18 @@
+<div class="confirm-deletion-dialog">
+    <div class="modal-header">
+        <i class="cancel-icon" ng-click="cancel()"></i>
+        <h3>Soll der Knoten wirklich gelöscht werden?</h3>
+    </div>
+    <div class="modal-body">
+        <p>
+            Soll der Knoten „{{node.hostname}}“ wirklich endgültig gelöscht werden?
+            Du kannst ihn selbstverständlich später jederzeit erneut anmelden!
+        </p>
+    </div>
+    <div class="modal-footer">
+        <button class="cancel" ng-click="cancel()">Abbrechen</button>
+        <button class="proceed" ng-click="proceed()">
+            <i class="fa fa-trash"></i> Knoten löschen
+        </button>
+    </div>
+</div>

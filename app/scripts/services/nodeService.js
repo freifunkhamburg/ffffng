@@ -11,6 +11,10 @@ angular.module('ffffng')
             return $http.put('/api/node/' + token, node);
         },
 
+        'deleteNode': function (token) {
+            return $http.delete('/api/node/' + token);
+        },
+
         'getNode': function (token) {
             return $http.get('/api/node/' + token);
         }

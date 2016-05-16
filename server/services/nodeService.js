@@ -101,6 +101,23 @@ angular.module('ffffng')
         return callback(null, token, node);
     }
 
+    function deleteNodeFile(token, callback) {
+        var files = findNodeFiles('*@*@*@' + token);
+        if (files.length !== 1) {
+            return callback({data: 'Node not found.', type: ErrorTypes.notFound});
+        }
+
+        try {
+            fs.unlinkSync(files[0]);
+        }
+        catch (error) {
+            console.log(error);
+            return callback({data: 'Could not delete node.', type: ErrorTypes.internalError});
+        }
+
+        return callback(null);
+    }
+
     function parseNodeFile(file, callback) {
         var lines = fs.readFileSync(file).toString();
 
@@ -138,6 +155,10 @@ angular.module('ffffng')
 
         updateNode: function (token, node, callback) {
             writeNodeFile(true, token, node, callback);
+        },
+
+        deleteNode: function (token, callback) {
+            deleteNodeFile(token, callback);
         },
 
         getNodeData: function (token, callback) {

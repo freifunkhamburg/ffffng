@@ -80,6 +80,22 @@ angular.module('ffffng').factory('NodeResource', function (
             });
         },
 
+        delete: function (req, res) {
+            var data = getData(req);
+
+            var token = Strings.normalizeString(data.token);
+            if (!isValidToken(token)) {
+                return error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
+            }
+
+            return NodeService.deleteNode(token, function (err) {
+                if (err) {
+                    return error(res, err);
+                }
+                return success(res, {});
+            });
+        },
+
         get: function (req, res) {
             var token = Strings.normalizeString(getData(req).token);
             if (!isValidToken(token)) {

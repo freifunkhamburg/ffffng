@@ -1,4 +1,8 @@
 f-token-form {
+    form {
+        margin-bottom: 10px;
+    }
+
     .main-error {
         @extend .alert, .alert-danger;
     }

@@ -2,22 +2,24 @@
     <h1>Willkommen!</h1>
     <p>
         Du hast einen neuen {{ config.community.name }} Router (Knoten), den Du in Betrieb nehmen möchtest? Du hast
-        schon einen Knoten in Betrieb und möchtest seine Daten ändern? Dann bist Du hier richtig!
+        schon einen Knoten in Betrieb und möchtest seine Daten ändern? Oder Du möchtest einen Knoten, der nicht mehr
+        in Betrieb ist löschen? Dann bist Du hier richtig!
     </p>
     <div class="select-action">
         <div class="new-node">
-            <button ng-click="newNode()"><i class="fa fa-dot-circle-o"></i> Melde einen neuen Knoten an</button>
+            <button ng-click="newNode()">
+                <i class="fa fa-dot-circle-o"></i> Neuen Knoten anmelden
+            </button>
         </div>
-        <div class="or">oder</div>
         <div class="update-node">
-            <button ng-click="updateNode()"><i class="fa fa-pencil"></i> Ändere die Daten Deines Knotens</button>
+            <button ng-click="updateNode()">
+                <i class="fa fa-pencil"></i> Knotendaten ändern
+            </button>
+        </div>
+        <div class="delete-node">
+            <button ng-click="deleteNode()">
+                <i class="fa fa-trash"></i> Knoten löschen
+            </button>
         </div>
     </div>
-    <p>
-        <strong>
-            Hinweis:
-            Zum Entfernen von Knoten wende Dich bitte per E-Mail an
-            <a href="mailto:{{ config.community.contactEmail }}">{{ config.community.contactEmail }}</a>.
-        </strong>
-    </p>
 </div>

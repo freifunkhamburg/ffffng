@@ -11,4 +11,8 @@ angular.module('ffffng')
     $scope.updateNode = function () {
         Navigator.updateNode();
     };
+
+    $scope.deleteNode = function () {
+        Navigator.deleteNode();
+    };
 });

@@ -9,11 +9,19 @@
             bottom: 25px;
         }
 
-        .new-node, .update-node {
-            @extend .col-md-5;
+        .new-node, .update-node, .delete-node {
+            @extend .col-md-4;
 
             button {
                 @extend .btn, .btn-lg, .btn-block;
+
+                text-overflow: ellipsis;
+                overflow: hidden;
+
+                padding: {
+                    left: 10px;
+                    right: 10px;
+                };
             }
         }
 
@@ -29,10 +37,10 @@
             }
         }
 
-        .or {
-            @extend .col-md-2;
-
-            text-align: center;
+        .delete-node {
+            button {
+                //@extend .btn-link;
+            }
         }
     }
 }

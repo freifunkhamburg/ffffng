@@ -25,6 +25,11 @@ angular.module('ffffng', [
             controller: 'UpdateNodeCtrl',
             title: 'Knotendaten ändern'
         })
+        .when('/delete', {
+            templateUrl: 'views/deleteNodeForm.html',
+            controller: 'DeleteNodeCtrl',
+            title: 'Knoten löschen'
+        })
         .otherwise({
             redirectTo: '/'
         });
@@ -39,6 +44,9 @@ angular.module('ffffng', [
         },
         updateNode: function () {
             $location.url('/update');
+        },
+        deleteNode: function () {
+            $location.url('/delete');
         }
     };
 })
