@@ -128,7 +128,7 @@ angular.module('ffffng')
         var doSubmit = function (node) {
             if ($scope.nodeForm.$invalid) {
                 var firstInvalid = _.filter($element.find('form').find('input'), function (input) {
-                    return $scope.nodeForm[input.name].$invalid;
+                    return input.name !== 'leaflet-base-layers' && $scope.nodeForm[input.name].$invalid;
                 })[0];
                 if (firstInvalid) {
                     $window.scrollTo(0, $window.pageYOffset + firstInvalid.getBoundingClientRect().top - 100);
