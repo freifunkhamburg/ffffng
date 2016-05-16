@@ -39,7 +39,7 @@
 
         .delete-node {
             button {
-                //@extend .btn-link;
+                @extend .btn-warning;
             }
         }
     }

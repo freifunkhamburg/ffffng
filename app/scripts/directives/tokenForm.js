@@ -35,7 +35,8 @@ angular.module('ffffng')
             'onSubmit': '=fSubmit',
             'onCancel': '=fCancel',
             'submitIcon': '@fSubmitIcon',
-            'submitLabel': '@fSubmitLabel'
+            'submitLabel': '@fSubmitLabel',
+            'submitBtn': '@fSubmitBtn'
         }
     };
 });

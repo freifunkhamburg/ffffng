@@ -15,7 +15,6 @@ $brand-warning: #FDBC41;
 $brand-danger: #C9302C;
 $brand-info: #009EE0;
 
-
 // Scaffolding
 $body-bg: $gray-lighter;
 $text-color: $gray-dark;
@@ -62,7 +61,7 @@ $btn-primary-border: darken($btn-primary-bg, 10%);
 $btn-success-color: #FFFFFF;
 $btn-success-bg: $brand-success;
 $btn-success-border: darken($btn-success-bg, 10%);
-$btn-warning-color: #FFFFFF;
+$btn-warning-color: $gray-dark;
 $btn-warning-bg: $brand-warning;
 $btn-warning-border: darken($btn-warning-bg, 10%);
 $btn-danger-color: #FFFFFF;

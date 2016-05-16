@@ -17,7 +17,7 @@ f-token-form {
     }
 
     .submit {
-        @extend .btn, .btn-primary;
+        @extend .btn;
 
         margin-left: 5px;
     }
