@@ -8,7 +8,8 @@ angular.module('ffffng', [
     'templates-main',
     'ui.bootstrap'
 ])
-.config(function ($routeProvider) {
+.config(function ($logProvider, $routeProvider) {
+    $logProvider.debugEnabled(false);
     $routeProvider
         .when('/', {
             templateUrl: 'views/main.html',
