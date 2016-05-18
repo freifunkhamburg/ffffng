@@ -83,6 +83,65 @@
                 </div>
             </div>
         </div>
+        <div class="monitoring-data">
+            <h3>Möchtest Du Status-E-Mails bekommen?</h3>
+            <i class="monitoring-icon"></i>
+            <p class="help-block">
+                Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+            </p>
+            <div class="row clearfix">
+                <div class="col-md-12">
+                    <div class="monitoring">
+                        <input type="checkbox" id="monitoring" name="monitoring" ng-model="node.monitoring" />
+                        <label for="monitoring">
+                            Informiert mich, wenn mein Knoten offline ist
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-12" ng-if="monitoringInitialConfirmationRequired()">
+                    <div class="monitoring-confirmation-info" role="alert">
+                        <i class="icon"></i>
+                        <div class="message">
+                            <p>
+                                Zur Bestätigung Deiner E-Mail-Adresse schicken wir Dir nach dem Speichern Deiner Knotendaten
+                                eine E-Mail mit einem Bestätiguns-Link. Erst nach der Bestätigung deiner E-Mail-Adresse
+                                wirst Du informiert, falls Dein Knoten längere Zeit offline ist.
+                            </p>
+                            <p>
+                                Die Inbetriebnahme Deines Knotens kannst Du selbstverständlich unabhängig von der Bestätigung
+                                immer sofort duchführen.
+                            </p>
+                            <p ng-if="node.email">
+                                <i class="fa fa-envelope-o"></i> <strong>{{node.email}}</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12" ng-if="monitoringConfirmationPending() && !monitoringInitialConfirmationRequired()">
+                    <div class="monitoring-confirmation-pending-info" role="alert">
+                        <i class="icon"></i>
+                        <div class="message">
+                            <p>
+                                Deine E-Mail-Adresse ist noch nicht bestätigt. Erst nach der Bestätigung deiner E-Mail-Adresse
+                                wirst Du informiert, falls Dein Knoten längere Zeit offline ist.
+                            </p>
+                            <p>
+                                Zur Bestätigung Deiner E-Mail-Adresse schicken wir Dir nach einem Klick auf „Daten ändern“ unten
+                                nochmal eine E-Mail mit einem Bestätiguns-Link. Möchtest Du keine Status-E-Mails erhalten,
+                                entferne einfach das Häkchen oberhalb dieser Box.
+                            </p>
+                            <p>
+                                Die Inbetriebnahme Deines Knotens kannst Du selbstverständlich unabhängig von der Bestätigung
+                                immer sofort duchführen.
+                            </p>
+                            <p ng-if="node.email">
+                                <i class="fa fa-envelope-o"></i> <strong>{{node.email}}</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="buttons">
             <button class="save {{action}}" type="submit" ng-switch="action">
                 <span ng-switch-when="create"><i class="fa fa-dot-circle-o"></i> Knoten anmelden</span>

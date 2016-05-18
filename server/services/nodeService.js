@@ -8,7 +8,9 @@ angular.module('ffffng')
         email: '# Kontakt: ',
         coords: '# Koordinaten: ',
         mac: '# MAC: ',
-        token: '# Token: '
+        token: '# Token: ',
+        monitoring: '# Monitoring: ',
+        monitoringToken: '# Monitoring-Token: '
     };
 
     function generateToken() {
@@ -50,15 +52,34 @@ angular.module('ffffng')
         return null;
     }
 
-    function writeNodeFile(isUpdate, token, node, callback) {
+    function writeNodeFile(isUpdate, token, node, nodeSecrets, callback) {
         var filename =
             config.server.peersPath + '/' + (node.hostname + '@' + node.mac + '@' + node.key + '@' + token).toLowerCase();
 
         var data = '';
         _.each(linePrefixes, function (prefix, key) {
-            var value = key === 'token' ? token : node[key];
-            if (_.isUndefined(value)) {
-                value = '';
+            var value;
+            switch (key) {
+                case 'monitoring':
+                    if (node.monitoring && node.monitoringConfirmed) {
+                        value = 'aktiv';
+                    } else if (node.monitoring && !node.monitoringConfirmed) {
+                        value = 'pending';
+                    } else {
+                        value = '';
+                    }
+                break;
+
+                case 'monitoringToken':
+                    value = nodeSecrets.monitoringToken || '';
+                break;
+
+                default:
+                    value = key === 'token' ? token : node[key];
+                    if (_.isUndefined(value)) {
+                        value = _.isUndefined(nodeSecrets[key]) ? '' : nodeSecrets[key];
+                    }
+                break;
             }
             data += prefix + value + '\n';
         });
@@ -81,8 +102,14 @@ angular.module('ffffng')
                 return callback(error);
             }
 
-            var file = files[0];
-            fs.unlinkSync(file);
+            try {
+                var file = files[0];
+                fs.unlinkSync(file);
+            }
+            catch (error) {
+                console.log(error);
+                return callback({data: 'Could not remove old node data.', type: ErrorTypes.internalError});
+            }
         } else {
             error = checkNoDuplicates(null, node);
             if (error) {
@@ -122,6 +149,7 @@ angular.module('ffffng')
         var lines = fs.readFileSync(file).toString();
 
         var node = {};
+        var nodeSecrets = {};
 
         _.each(lines.split('\n'), function (line) {
             var entries = {};
@@ -141,20 +169,92 @@ angular.module('ffffng')
             }
 
             _.each(entries, function (value, key) {
-                node[key] = value;
+                if (key === 'monitoring') {
+                    var active = value === 'aktiv';
+                    var pending = value === 'pending';
+                    node.monitoring = active || pending;
+                    node.monitoringConfirmed = active;
+                } else if (key === 'monitoringToken') {
+                    nodeSecrets.monitoringToken = value;
+                } else {
+                    node[key] = value;
+                }
             });
         });
-        callback(null, node);
+
+        callback(null, node, nodeSecrets);
     }
 
     return {
         createNode: function (node, callback) {
             var token = generateToken();
-            writeNodeFile(false, token, node, callback);
+            var nodeSecrets = {};
+
+            node.monitoringConfirmed = false;
+
+            if (node.monitoring) {
+                nodeSecrets.monitoringToken = generateToken();
+            }
+
+            writeNodeFile(false, token, node, nodeSecrets, function (err, token, node) {
+                if (err) {
+                    return callback(err);
+                }
+
+                if (node.monitoring && !node.monitoringConfirmed) {
+                    // TODO: Send mail...
+                }
+
+                return callback(null, token, node);
+            });
         },
 
         updateNode: function (token, node, callback) {
-            writeNodeFile(true, token, node, callback);
+            this.getNodeData(token, function (err, currentNode, nodeSecrets) {
+                if (err) {
+                    return callback(err);
+                }
+
+                var monitoringConfirmed = false;
+                var monitoringToken = '';
+
+                if (node.monitoring) {
+                    if (!currentNode.monitoring) {
+                        // monitoring just has been enabled
+                        monitoringConfirmed = false;
+                        monitoringToken = generateToken();
+
+                    } else {
+                        // monitoring is still enabled
+
+                        if (currentNode.email != node.email) {
+                            // new email so we need a new token and a reconfirmation
+                            monitoringConfirmed = false;
+                            monitoringToken = generateToken();
+
+                        } else {
+                            // email unchanged, keep token and confirmation state
+                            monitoringConfirmed = currentNode.monitoringConfirmed;
+                            monitoringToken = nodeSecrets.monitoringToken;
+                        }
+                    }
+                }
+
+                node.monitoringConfirmed = monitoringConfirmed;
+                nodeSecrets.monitoringToken = monitoringToken;
+
+                writeNodeFile(true, token, node, nodeSecrets, function (err, token, node) {
+                    if (err) {
+                        return callback(err);
+                    }
+
+                    if (node.monitoring && !node.monitoringConfirmed) {
+                        // TODO: Send mail...
+                    }
+
+                    return callback(null, token, node);
+                });
+            });
         },
 
         deleteNode: function (token, callback) {

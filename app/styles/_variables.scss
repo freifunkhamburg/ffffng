@@ -173,9 +173,9 @@ $pager-disabled-color: $gray;
 
 
 // Form States
-$state-warning-text: darken($brand-warning, 10%);
-$state-warning-bg: lighten($brand-warning, 30%);
-$state-warning-border: darken(adjust-hue($state-warning-bg, -10), 3%);
+$state-warning-text: darken($brand-warning, 30%);
+$state-warning-bg: lighten($brand-warning, 20%);
+$state-warning-border: darken(adjust-hue($state-warning-bg, -10), 5%);
 $state-danger-text: darken($brand-danger, 10%);
 $state-danger-bg: lighten($brand-danger, 30%);
 $state-danger-border: darken(adjust-hue($state-danger-bg, -10), 3%);
@@ -184,7 +184,7 @@ $state-success-bg: lighten($brand-success, 30%);
 $state-success-border: darken(adjust-hue($state-success-bg, -10), 5%);
 $state-info-text: darken($brand-info, 20%);
 $state-info-bg: lighten($brand-info, 30%);
-$state-info-border: darken(adjust-hue($state-info-bg, -10), 7%);
+$state-info-border: darken(adjust-hue($state-info-bg, -10), 10%);
 
 
 // ToolTip

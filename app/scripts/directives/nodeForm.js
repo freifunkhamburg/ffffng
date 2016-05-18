@@ -13,6 +13,10 @@ angular.module('ffffng')
         geolib,
         OutsideOfCommunityDialog
     ) {
+        var initialEmail = $scope.node.email;
+        var initialMonitoring = $scope.node.monitoring;
+        var monitoringConfirmed = $scope.node.monitoringConfirmed;
+
         $scope.config = config;
         angular.extend($scope, {
             center: {
@@ -117,6 +121,15 @@ angular.module('ffffng')
 
         $scope.hasError = function (field) {
             return $scope.nodeForm && $scope.nodeForm[field].$invalid && submitted;
+        };
+
+        $scope.monitoringInitialConfirmationRequired = function () {
+            return $scope.node.monitoring
+                && ($scope.action === 'create' || $scope.node.email !== initialEmail || !initialMonitoring);
+        };
+
+        $scope.monitoringConfirmationPending = function () {
+            return $scope.node.monitoring && initialMonitoring && !monitoringConfirmed;
         };
 
         var duplicateError = {

@@ -7,11 +7,11 @@ f-node-form {
         @extend .alert, .alert-danger;
     }
 
-    .node-data, .contact-data, .node-position {
+    .node-data, .contact-data, .node-position, .monitoring-data {
         @extend .well;
     }
 
-    .hostname, .key, .mac, .nickname, .email, .coords {
+    .hostname, .key, .mac, .nickname, .email, .coords, .monitoring {
         @extend .form-group;
 
         .feedback {
@@ -25,6 +25,56 @@ f-node-form {
             content: '*';
             font-size: $font-size-small;
             vertical-align: 0.2em;
+        }
+    }
+
+    .monitoring {
+        display: table;
+
+        label {
+            display: table-cell;
+        }
+
+        input {
+            display: table-cell;
+
+            width: 18px;
+            height: 18px;
+
+            margin: {
+                top: 0;
+                right: 10px;
+            }
+        }
+    }
+
+    .monitoring-icon {
+        @extend .fa, .fa-heartbeat, .pull-left;
+
+        font-size: 36px;
+        color: $brand-primary;
+    }
+
+    .monitoring-confirmation-info {
+        @extend .alert, .alert-info;
+    }
+
+    .monitoring-confirmation-pending-info {
+        @extend .alert, .alert-warning;
+    }
+
+    .monitoring-confirmation-info, .monitoring-confirmation-pending-info {
+        display: table;
+
+        .icon {
+            @extend .fa, .fa-exclamation-triangle;
+
+            font-size: 24px;
+            padding-right: 15px;
+        }
+
+        .icon, .message {
+            display: table-cell;
         }
     }
 

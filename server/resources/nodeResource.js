@@ -12,7 +12,7 @@ angular.module('ffffng').factory('NodeResource', function (
         return _.extend({}, req.body, req.params);
     }
 
-    var nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords'];
+    var nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords', 'monitoring'];
 
     function getValidNodeData(reqData) {
         var node = {};
