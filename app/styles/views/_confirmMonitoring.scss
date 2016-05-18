@@ -1,0 +1,55 @@
+.confirm-monitoring {
+    @extend .jumbotron, .container;
+
+    .actions {
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    .back-button {
+        @extend .btn, .btn-lg, .btn-info;
+    }
+
+    .summary {
+        @extend .well;
+
+        display: table;
+        margin: {
+            left: auto;
+            right: auto;
+            top: 30px;
+            bottom: 30px;
+        };
+
+        border: 3px dashed $gray;
+
+        .icon {
+            @extend .fa, .fa-heartbeat;
+
+            display: table-cell;
+
+            color: $brand-primary;
+            font-size: 64px;
+        }
+
+        .node {
+            @extend .dl-horizontal;
+
+            display: table-cell;
+
+            overflow: hidden;
+
+            font-family: monospace;
+            font-size: 24px;
+
+            dt {
+                width: 100px;
+            }
+
+            dd {
+                text-overflow: ellipsis;
+                margin-left: 120px;
+            }
+        }
+    }
+}

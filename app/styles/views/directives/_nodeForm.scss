@@ -55,26 +55,47 @@ f-node-form {
         color: $brand-primary;
     }
 
+    .monitoring-active-info {
+        @extend .alert-success;
+    }
+
     .monitoring-confirmation-info {
-        @extend .alert, .alert-info;
+        @extend .alert-info;
     }
 
     .monitoring-confirmation-pending-info {
-        @extend .alert, .alert-warning;
+        @extend .alert-warning;
     }
 
-    .monitoring-confirmation-info, .monitoring-confirmation-pending-info {
+    .monitoring-active-info,
+    .monitoring-confirmation-info,
+    .monitoring-confirmation-pending-info {
+        @extend .alert;
+
         display: table;
 
+        .icon, .message {
+            display: table-cell;
+        }
+
         .icon {
-            @extend .fa, .fa-exclamation-triangle;
+            @extend .fa;
 
             font-size: 24px;
             padding-right: 15px;
         }
+    }
 
-        .icon, .message {
-            display: table-cell;
+    .monitoring-active-info {
+        .icon {
+            @extend .fa-heartbeat;
+        }
+    }
+
+    .monitoring-confirmation-info,
+    .monitoring-confirmation-pending-info {
+        .icon {
+            @extend .fa-exclamation-triangle;
         }
     }
 

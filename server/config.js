@@ -3,6 +3,7 @@
 angular.module('ffffng').factory('config', function (fs, deepExtend) {
     var defaultConfig = {
         server: {
+            baseUrl: 'http://localhost:8080',
             port: 8080,
             peersPath: '/tmp/peers'
         },
@@ -16,7 +17,13 @@ angular.module('ffffng').factory('config', function (fs, deepExtend) {
                 graphUrl: 'http://graph.musterstadt.freifunk.net/graph.html',
                 mapUrl: 'http://graph.musterstadt.freifunk.net/geomap.html'
             },
+            monitoring: {
+                enabled: true
+            },
             coordsSelector: {
+                showInfo: false,
+                showBorderForDebugging: false,
+                localCommunityPolygon: [],
                 lat: 53.565278,
                 lng: 10.001389,
                 defaultZoom: 10

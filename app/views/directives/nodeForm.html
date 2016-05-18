@@ -83,7 +83,7 @@
                 </div>
             </div>
         </div>
-        <div class="monitoring-data">
+        <div class="monitoring-data" ng-if="config.monitoring.enabled">
             <h3>Möchtest Du Status-E-Mails bekommen?</h3>
             <i class="monitoring-icon"></i>
             <p class="help-block">
@@ -96,6 +96,20 @@
                         <label for="monitoring">
                             Informiert mich, wenn mein Knoten offline ist
                         </label>
+                    </div>
+                </div>
+                <div class="col-md-12" ng-if="monitoringActive()">
+                    <div class="monitoring-active-info" role="alert">
+                        <i class="icon"></i>
+                        <div class="message">
+                            <p>
+                                Der Versand von Status-E-Mails ist für Deinen Knoten aktiv. Möchtest Du keine Status-E-Mails
+                                mehr erhalten, entferne einfach das Häkchen oberhalb dieser Box und klicke unten auf „Daten ändern“.
+                            </p>
+                            <p ng-if="node.email">
+                                <i class="fa fa-envelope-o"></i> <strong>{{node.email}}</strong>
+                            </p>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-12" ng-if="monitoringInitialConfirmationRequired()">
@@ -128,7 +142,7 @@
                             <p>
                                 Zur Bestätigung Deiner E-Mail-Adresse schicken wir Dir nach einem Klick auf „Daten ändern“ unten
                                 nochmal eine E-Mail mit einem Bestätiguns-Link. Möchtest Du keine Status-E-Mails erhalten,
-                                entferne einfach das Häkchen oberhalb dieser Box.
+                                entferne einfach das Häkchen oberhalb dieser Box und klicke dann unten auf „Daten ändern“.
                             </p>
                             <p>
                                 Die Inbetriebnahme Deines Knotens kannst Du selbstverständlich unabhängig von der Bestätigung

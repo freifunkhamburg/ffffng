@@ -185,6 +185,17 @@ angular.module('ffffng')
         callback(null, node, nodeSecrets);
     }
 
+    function getNodeDataByFilePattern(pattern, callback) {
+        var files = findNodeFiles(pattern);
+
+        if (files.length !== 1) {
+            return callback({data: 'Node not found.', type: ErrorTypes.notFound});
+        }
+
+        var file = files[0];
+        return parseNodeFile(file, callback);
+    }
+
     return {
         createNode: function (node, callback) {
             var token = generateToken();
@@ -210,7 +221,7 @@ angular.module('ffffng')
         },
 
         updateNode: function (token, node, callback) {
-            this.getNodeData(token, function (err, currentNode, nodeSecrets) {
+            this.getNodeDataByToken(token, function (err, currentNode, nodeSecrets) {
                 if (err) {
                     return callback(err);
                 }
@@ -233,9 +244,9 @@ angular.module('ffffng')
                             monitoringToken = generateToken();
 
                         } else {
-                            // email unchanged, keep token and confirmation state
+                            // email unchanged, keep token (fix if not set) and confirmation state
                             monitoringConfirmed = currentNode.monitoringConfirmed;
-                            monitoringToken = nodeSecrets.monitoringToken;
+                            monitoringToken = nodeSecrets.monitoringToken || generateToken();
                         }
                     }
                 }
@@ -257,19 +268,20 @@ angular.module('ffffng')
             });
         },
 
+        internalUpdateNode: function (token, node, nodeSecrets, callback) {
+            writeNodeFile(true, token, node, nodeSecrets, callback);
+        },
+
         deleteNode: function (token, callback) {
             deleteNodeFile(token, callback);
         },
 
-        getNodeData: function (token, callback) {
-            var files = findNodeFiles('*@*@*@' + token);
+        getNodeDataByToken: function (token, callback) {
+            return getNodeDataByFilePattern('*@*@*@' + token, callback);
+        },
 
-            if (files.length !== 1) {
-                return callback({data: 'Node not found.', type: ErrorTypes.notFound});
-            }
-
-            var file = files[0];
-            return parseNodeFile(file, callback);
+        getNodeDataByMac: function (mac, callback) {
+            return getNodeDataByFilePattern('*@' + mac + '@*@*', callback);
         }
     };
 });

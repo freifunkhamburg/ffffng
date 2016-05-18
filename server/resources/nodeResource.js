@@ -6,12 +6,9 @@ angular.module('ffffng').factory('NodeResource', function (
     NodeService,
     _,
     Strings,
+    Resources,
     ErrorTypes
 ) {
-    function getData(req) {
-        return _.extend({}, req.body, req.params);
-    }
-
     var nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords', 'monitoring'];
 
     function getValidNodeData(reqData) {
@@ -26,87 +23,74 @@ angular.module('ffffng').factory('NodeResource', function (
         return node;
     }
 
-    function respond(res, httpCode, data) {
-        res.writeHead(httpCode, {'Content-Type': 'application/json'});
-        res.end(JSON.stringify(data));
-    }
-
-    function success(res, data) {
-        respond(res, 200, data);
-    }
-
-    function error(res, err) {
-        respond(res, err.type.code, err.data);
-    }
-
     var isValidNode = Validator.forConstraints(Constraints.node);
     var isValidToken = Validator.forConstraint(Constraints.token);
 
     return {
         create: function (req, res) {
-            var data = getData(req);
+            var data = Resources.getData(req);
 
             var node = getValidNodeData(data);
             if (!isValidNode(node)) {
-                return error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
+                return Resources.error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
             }
 
             return NodeService.createNode(node, function (err, token, node) {
                 if (err) {
-                    return error(res, err);
+                    return Resources.error(res, err);
                 }
-                return success(res, {token: token, node: node});
+                return Resources.success(res, {token: token, node: node});
             });
         },
 
         update: function (req, res) {
-            var data = getData(req);
+            var data = Resources.getData(req);
 
             var token = Strings.normalizeString(data.token);
             if (!isValidToken(token)) {
-                return error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
+                return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
             }
 
             var node = getValidNodeData(data);
             if (!isValidNode(node)) {
-                return error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
+                return Resources.error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
             }
 
             return NodeService.updateNode(token, node, function (err, token, node) {
                 if (err) {
-                    return error(res, err);
+                    return Resources.error(res, err);
                 }
-                return success(res, {token: token, node: node});
+                return Resources.success(res, {token: token, node: node});
             });
         },
 
         delete: function (req, res) {
-            var data = getData(req);
+            var data = Resources.getData(req);
 
             var token = Strings.normalizeString(data.token);
             if (!isValidToken(token)) {
-                return error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
+                return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
             }
 
             return NodeService.deleteNode(token, function (err) {
                 if (err) {
-                    return error(res, err);
+                    return Resources.error(res, err);
                 }
-                return success(res, {});
+                return Resources.success(res, {});
             });
         },
 
         get: function (req, res) {
-            var token = Strings.normalizeString(getData(req).token);
+            var token = Strings.normalizeString(Resources.getData(req).token);
             if (!isValidToken(token)) {
-                return error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
+                return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
             }
 
-            return NodeService.getNodeData(token, function (err, node) {
+            return NodeService.getNodeDataByToken(token, function (err, node) {
                 if (err) {
-                    return error(res, err);
+                    return Resources.error(res, err);
                 }
-                return success(res, node);
+                return Resources.success(res, node);
             });
         }
     };

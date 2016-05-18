@@ -123,6 +123,10 @@ angular.module('ffffng')
             return $scope.nodeForm && $scope.nodeForm[field].$invalid && submitted;
         };
 
+        $scope.monitoringActive = function () {
+            return $scope.node.monitoring && monitoringConfirmed && $scope.node.email === initialEmail;
+        };
+
         $scope.monitoringInitialConfirmationRequired = function () {
             return $scope.node.monitoring
                 && ($scope.action === 'create' || $scope.node.email !== initialEmail || !initialMonitoring);
@@ -151,7 +155,8 @@ angular.module('ffffng')
             }
 
             $scope.error = null;
-            $scope.save(node).error(function (response, code) {
+            $scope.save(node).catch(function (response, code) {
+                // error
                 switch (code) {
                     case 409: // conflict
                         $scope.error = duplicateError[response.field];

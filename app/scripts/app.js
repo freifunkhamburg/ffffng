@@ -31,6 +31,11 @@ angular.module('ffffng', [
             controller: 'DeleteNodeCtrl',
             title: 'Knoten löschen'
         })
+        .when('/monitoring/confirm', {
+            templateUrl: 'views/confirmMonitoring.html',
+            controller: 'ConfirmMonitoringCtrl',
+            title: 'Versand von Status-E-Mails bestätigen'
+        })
         .otherwise({
             redirectTo: '/'
         });

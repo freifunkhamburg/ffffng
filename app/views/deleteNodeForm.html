@@ -35,14 +35,10 @@
     </p>
 
     <div class="summary">
+        <i class="icon"></i>
         <span class="node">
-            <i class="fa fa-trash"></i>
             {{hostname}}
         </span>
-    </div>
-
-    <div class="actions">
-        <button class="back-button" ng-click="goHome()"><i class="fa fa-reply"></i> Zurück zum Anfang</button>
     </div>
 
     <p>
@@ -53,4 +49,13 @@
             (Konfigurationsoberfläche des Routers) hinterlegten.
         </em>
     </p>
+
+    <p>
+        Bei Fragen wende Dich gerne an
+        <a href="mailto:{{ config.community.contactEmail }}">{{ config.community.contactEmail }}</a>.
+    </p>
+
+    <div class="actions">
+        <button class="back-button" ng-click="goHome()"><i class="fa fa-reply"></i> Zurück zum Anfang</button>
+    </div>
 </div>

@@ -13,11 +13,14 @@ require('./router');
 require('./libs');
 
 require('./utils/errorTypes');
+require('./utils/resources');
 require('./utils/strings');
 
 require('./resources/nodeResource');
+require('./resources/monitoringResource');
 
 require('./services/nodeService');
+require('./services/monitoringService');
 
 require('../shared/validation/constraints');
 require('./validation/validator');
