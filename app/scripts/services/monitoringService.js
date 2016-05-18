@@ -8,6 +8,13 @@ angular.module('ffffng')
                 return $q.reject({});
             }
             return $http.put('/api/monitoring/confirm/' + mac + '?token=' + token);
+        },
+
+        'disable': function (mac, token) {
+            if (!mac || !token) {
+                return $q.reject({});
+            }
+            return $http.put('/api/monitoring/disable/' + mac + '?token=' + token);
         }
     };
 });

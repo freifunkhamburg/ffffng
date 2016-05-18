@@ -9,6 +9,7 @@ angular.module('ffffng').factory('Router', function (app, NodeResource, Monitori
             app.get('/api/node/:token', NodeResource.get);
 
             app.put('/api/monitoring/confirm/:mac', MonitoringResource.confirm);
+            app.put('/api/monitoring/disable/:mac', MonitoringResource.disable);
         }
     };
 });

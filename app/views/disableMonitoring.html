@@ -1,0 +1,75 @@
+<div class="disable-monitoring" ng-switch="monitoringStatus">
+    <h2 ng-switch-when="loading">Einen Moment bitte...</h2>
+
+    <div ng-switch-when="disabled">
+        <h2>Der Versand von Status-E-Mails ist nun deaktiviert!</h2>
+
+        <p>
+            Für diesen Knoten wirst Du in Zukunft keine weiteren Status-E-Mails mehr erhalten. Bitte habe Verständnis
+            dafür, dass das An- und Abschalten des Versands für jeden Deiner Knoten einzeln erfolgt.
+        </p>
+
+        <div class="summary">
+            <i class="icon"></i>
+            <dl class="node">
+                <dt>Name</dt>
+                <dd>{{monitoringInfo.hostname}}</dd>
+
+                <dt>MAC</dt>
+                <dd>{{monitoringInfo.mac}}</dd>
+
+                <dt><i class="fa fa-envelope"></i></dt>
+                <dd>{{monitoringInfo.email}}</dd>
+            </dl>
+        </div>
+
+        <p>
+            <em>
+                Möchtest Du wieder Status-E-Mails zu Deinem Knoten erhalten, so kannst Du den Versand
+                jederzeit unter <a href="javascript:" ng-click="goToUpdate()">„Knotendaten ändern“</a> reaktivieren.
+                Gib dazu dort Dein Token ein und scrolle dann ganz nach unten.
+            </em>
+        </p>
+
+        <p>
+            Bei Fragen wende Dich gerne an
+            <a href="mailto:{{ config.community.contactEmail }}">{{ config.community.contactEmail }}</a>.
+        </p>
+
+        <div class="actions">
+            <button class="back-button" ng-click="goHome()"><i class="fa fa-reply"></i> Zurück zum Anfang</button>
+        </div>
+    </div>
+
+    <div ng-switch-when="error">
+        <h2>Die Deaktivierung des Versands von Status-E-Mails ist fehlgeschlagen</h2>
+
+        <div class="alert alert-danger" role="alert">
+            <p><strong>Dies kann mehrere Gründe haben:</strong></p>
+
+            <ul>
+                <li>Du hast zwischenzeitlich die E-Mail-Adresse für den Knoten geändert.</li>
+                <li>Du hast den Link nicht vollständig aus der E-Mail kopiert.</li>
+                <li>Es ist ein interner Fehler aufgetreten.</li>
+                <li>Der Versand von Status-E-Mail ist bereits deaktiviert.</li>
+            </ul>
+        </div>
+
+        <p>
+            Um zu prüfen, ob der Versand bereits deaktiviert ist, gehe bitte auf
+            <a href="javascript:" ng-click="goToUpdate()">„Knotendaten ändern“</a>, gib dort Dein Token ein
+            und scrolle dann ganz nach unten. Dort kannst Du auch den Versand manuell an- und abschalten.
+        </p>
+
+        <p>
+            <strong>
+                Sollte das Problem so nicht zu beheben sein, wende Dich gerne an
+                <a href="mailto:{{ config.community.contactEmail }}">{{ config.community.contactEmail }}</a>.
+            </strong>
+        </p>
+
+        <div class="actions">
+            <button class="back-button" ng-click="goHome()"><i class="fa fa-reply"></i> Zurück zum Anfang</button>
+        </div>
+    </div>
+</div>

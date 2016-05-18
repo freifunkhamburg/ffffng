@@ -25,6 +25,29 @@ angular.module('ffffng')
                     callback(null, node);
                 });
             });
+        },
+
+        disable: function (mac, token, callback) {
+            NodeService.getNodeDataByMac(mac, function (err, node, nodeSecrets) {
+                if (err) {
+                    return callback(err);
+                }
+
+                if (!node.monitoring || !nodeSecrets.monitoringToken || nodeSecrets.monitoringToken !== token) {
+                    return callback({data: 'Invalid token.', type: ErrorTypes.badRequest});
+                }
+
+                node.monitoring = false;
+                node.monitoringConfirmed = false;
+                nodeSecrets.monitoringToken = '';
+
+                NodeService.internalUpdateNode(node.token, node, nodeSecrets, function (err, token, node) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    callback(null, node);
+                });
+            });
         }
     };
 });

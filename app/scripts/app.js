@@ -36,6 +36,11 @@ angular.module('ffffng', [
             controller: 'ConfirmMonitoringCtrl',
             title: 'Versand von Status-E-Mails bestätigen'
         })
+        .when('/monitoring/disable', {
+            templateUrl: 'views/disableMonitoring.html',
+            controller: 'DisableMonitoringCtrl',
+            title: 'Versand von Status-E-Mails deaktivieren'
+        })
         .otherwise({
             redirectTo: '/'
         });
