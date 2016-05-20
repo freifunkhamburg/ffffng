@@ -1,46 +1,55 @@
 'use strict';
 
-angular.module('ffffng').factory('config', function (fs, deepExtend) {
-    var defaultConfig = {
-        server: {
-            baseUrl: 'http://localhost:8080',
-            port: 8080,
-            peersPath: '/tmp/peers',
+var fs = require('fs');
+var deepExtend = require('deep-extend');
 
-            email: {
-                from: 'no-reply@musterstadt.freifunk.net'
-            }
-        },
-        client: {
-            community: {
-                name: 'Freifunk Musterstadt',
-                domain: 'musterstadt.freifunk.net',
-                contactEmail: 'kontakt@musterstadt.freifunk.net'
-            },
-            map: {
-                graphUrl: 'http://graph.musterstadt.freifunk.net/graph.html',
-                mapUrl: 'http://graph.musterstadt.freifunk.net/geomap.html'
-            },
-            monitoring: {
-                enabled: true
-            },
-            coordsSelector: {
-                showInfo: false,
-                showBorderForDebugging: false,
-                localCommunityPolygon: [],
-                lat: 53.565278,
-                lng: 10.001389,
-                defaultZoom: 10
-            }
+var defaultConfig = {
+    server: {
+        baseUrl: 'http://localhost:8080',
+        port: 8080,
+
+        databaseFile: '/tmp/ffffng.sqlite',
+        peersPath: '/tmp/peers',
+
+        email: {
+            from: 'no-reply@musterstadt.freifunk.net'
         }
-    };
-
-    var configJSONFile = __dirname + '/../config.json';
-    var configJSON = {};
-
-    if (fs.existsSync(configJSONFile)) {
-        configJSON = JSON.parse(fs.readFileSync(configJSONFile, 'utf8'));
+    },
+    client: {
+        community: {
+            name: 'Freifunk Musterstadt',
+            domain: 'musterstadt.freifunk.net',
+            contactEmail: 'kontakt@musterstadt.freifunk.net'
+        },
+        map: {
+            graphUrl: 'http://graph.musterstadt.freifunk.net/graph.html',
+            mapUrl: 'http://graph.musterstadt.freifunk.net/geomap.html'
+        },
+        monitoring: {
+            enabled: true
+        },
+        coordsSelector: {
+            showInfo: false,
+            showBorderForDebugging: false,
+            localCommunityPolygon: [],
+            lat: 53.565278,
+            lng: 10.001389,
+            defaultZoom: 10
+        }
     }
+};
 
-    return deepExtend({}, defaultConfig, configJSON);
+var configJSONFile = __dirname + '/../config.json';
+var configJSON = {};
+
+if (fs.existsSync(configJSONFile)) {
+    configJSON = JSON.parse(fs.readFileSync(configJSONFile, 'utf8'));
+}
+
+var config = deepExtend({}, defaultConfig, configJSON);
+
+module.exports = config;
+
+angular.module('ffffng').factory('config', function () {
+    return config;
 });

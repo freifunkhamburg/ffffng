@@ -5,6 +5,8 @@ var fs = require('fs');
 var glob = require('glob');
 var path = require('path');
 
+var config = require('../config');
+
 function applyPatch(db, file, callback) {
     fs.readFile(file, function (err, contents) {
         if (err) {
@@ -62,7 +64,7 @@ function applyMigrations(db, callback) {
 module.exports = {
     init: function (callback) {
         var SQLite3 = require('sqlite3');
-        var db = new SQLite3.Database('/tmp/test.sqlite');
+        var db = new SQLite3.Database(config.server.databaseFile);
 
         applyMigrations(db, function (err) {
             if (err) {

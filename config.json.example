@@ -2,6 +2,8 @@
     "server": {
         "baseUrl": "http://localhost:8080",
         "port": 8080,
+
+        "databaseFile": "/tmp/ffffng.sqlite",
         "peersPath": "/tmp/peers",
 
         "email": {
