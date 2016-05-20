@@ -5,7 +5,11 @@ angular.module('ffffng').factory('config', function (fs, deepExtend) {
         server: {
             baseUrl: 'http://localhost:8080',
             port: 8080,
-            peersPath: '/tmp/peers'
+            peersPath: '/tmp/peers',
+
+            email: {
+                from: 'no-reply@musterstadt.freifunk.net'
+            }
         },
         client: {
             community: {

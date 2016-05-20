@@ -2,7 +2,11 @@
     "server": {
         "baseUrl": "http://localhost:8080",
         "port": 8080,
-        "peersPath": "/tmp/peers"
+        "peersPath": "/tmp/peers",
+
+        "email": {
+            "from": "no-reply@musterstadt.freifunk.net"
+        }
     },
     "client": {
         "community": {
@@ -13,9 +17,6 @@
         "map": {
             "graphUrl": "http://graph.hamburg.freifunk.net/graph.html",
             "mapUrl": "http://graph.hamburg.freifunk.net/geomap.html"
-        },
-        "monitoring": {
-            "enabled": true
         },
         "coordsSelector": {
             "lat": 53.565278,

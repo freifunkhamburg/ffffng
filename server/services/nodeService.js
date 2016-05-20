@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ffffng')
-.service('NodeService', function (config, _, crypto, fs, glob, Strings, ErrorTypes) {
+.service('NodeService', function (config, _, crypto, fs, glob, MailService, Strings, ErrorTypes) {
     var linePrefixes = {
         hostname: '# Knotenname: ',
         nickname: '# Ansprechpartner: ',
@@ -196,6 +196,31 @@ angular.module('ffffng')
         return parseNodeFile(file, callback);
     }
 
+    function sendMonitoringConfirmationMail(node, nodeSecrets, callback) {
+        var monitoringQueryString = '?mac=' + node.mac + '&token=' + nodeSecrets.monitoringToken;
+        var confirmUrl = config.server.baseUrl + '/#!/monitoring/confirm' + monitoringQueryString;
+        var disableUrl = config.server.baseUrl + '/#!/monitoring/disable' + monitoringQueryString;
+
+        MailService.enqueue(
+            config.server.email.from,
+            node.email,
+            'monitoring-confirmation',
+            {
+                node: node,
+                confirmUrl: confirmUrl,
+                disableUrl: disableUrl
+            },
+            function (err) {
+                if (err) {
+                    console.log(err);
+                    return callback({data: 'Internal error.', type: ErrorTypes.internalError});
+                }
+
+                callback(null);
+            }
+        );
+    }
+
     return {
         createNode: function (node, callback) {
             var token = generateToken();
@@ -213,7 +238,13 @@ angular.module('ffffng')
                 }
 
                 if (node.monitoring && !node.monitoringConfirmed) {
-                    // TODO: Send mail...
+                    return sendMonitoringConfirmationMail(node, nodeSecrets, function (err) {
+                        if (err) {
+                            return callback(err);
+                        }
+
+                        return callback(null, token, node);
+                    });
                 }
 
                 return callback(null, token, node);
@@ -260,7 +291,13 @@ angular.module('ffffng')
                     }
 
                     if (node.monitoring && !node.monitoringConfirmed) {
-                        // TODO: Send mail...
+                        return sendMonitoringConfirmationMail(node, nodeSecrets, function (err) {
+                            if (err) {
+                                return callback(err);
+                            }
+
+                            return callback(null, token, node);
+                        });
                     }
 
                     return callback(null, token, node);

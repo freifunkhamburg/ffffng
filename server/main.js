@@ -19,15 +19,18 @@ require('./utils/strings');
 require('./resources/nodeResource');
 require('./resources/monitoringResource');
 
+require('./services/mailService');
 require('./services/nodeService');
 require('./services/monitoringService');
 
 require('../shared/validation/constraints');
 require('./validation/validator');
 
-angular.injector(['ffffng']).invoke(function (config, app, Router) {
-    Router.init();
+require('./db/database').init(function () {
+    angular.injector(['ffffng']).invoke(function (config, app, Router) {
+        Router.init();
 
-    app.listen(config.server.port, '::');
-    module.exports = app;
+        app.listen(config.server.port, '::');
+        module.exports = app;
+    });
 });
