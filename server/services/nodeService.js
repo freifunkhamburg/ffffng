@@ -54,7 +54,7 @@ angular.module('ffffng')
 
     function writeNodeFile(isUpdate, token, node, nodeSecrets, callback) {
         var filename =
-            config.server.peersPath + '/' + (node.hostname + '@' + node.mac + '@' + node.key + '@' + token).toLowerCase();
+            config.server.peersPath + '/' + (node.hostname + '@' + node.mac + '@' + (node.key || '') + '@' + token).toLowerCase();
 
         var data = '';
         _.each(linePrefixes, function (prefix, key) {
