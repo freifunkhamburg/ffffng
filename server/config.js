@@ -12,7 +12,18 @@ var defaultConfig = {
         peersPath: '/tmp/peers',
 
         email: {
-            from: 'no-reply@musterstadt.freifunk.net'
+            from: 'Freifunk Knotenformular <no-reply@musterstadt.freifunk.net>',
+
+            // For details see: https://nodemailer.com/2-0-0-beta/setup-smtp/
+            smtp: {
+                host: 'mail.example.com',
+                port: '465',
+                secure: true,
+                auth: {
+                    user: 'user@example.com',
+                    pass: 'pass'
+                }
+            }
         }
     },
     client: {

@@ -7,7 +7,17 @@
         "peersPath": "/tmp/peers",
 
         "email": {
-            "from": "no-reply@musterstadt.freifunk.net"
+            "from": "Freifunk Knotenformular <no-reply@musterstadt.freifunk.net>",
+
+            "smtp": {
+                "host": "mail.example.com",
+                "port": 465,
+                "secure": true,
+                "auth": {
+                    "user": "user@example.com",
+                    "pass": "pass"
+                }
+            }
         }
     },
     "client": {

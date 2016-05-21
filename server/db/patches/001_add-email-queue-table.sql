@@ -7,5 +7,6 @@ CREATE TABLE email_queue (
     email VARCHAR(255) NOT NULL,
     data TEXT NOT NULL,
 
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+    created_at DATETIME DEFAULT (strftime('%s','now')) NOT NULL,
+    modified_at DATETIME DEFAULT (strftime('%s','now')) NOT NULL
 );

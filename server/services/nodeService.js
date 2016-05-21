@@ -1,7 +1,17 @@
 'use strict';
 
 angular.module('ffffng')
-.service('NodeService', function (config, _, crypto, fs, glob, MailService, Strings, ErrorTypes) {
+.service('NodeService', function (
+    config,
+    _,
+    crypto,
+    fs,
+    glob,
+    MailService,
+    Strings,
+    ErrorTypes,
+    UrlBuilder
+) {
     var linePrefixes = {
         hostname: '# Knotenname: ',
         nickname: '# Ansprechpartner: ',
@@ -107,7 +117,7 @@ angular.module('ffffng')
                 fs.unlinkSync(file);
             }
             catch (error) {
-                console.log(error);
+                console.error(error);
                 return callback({data: 'Could not remove old node data.', type: ErrorTypes.internalError});
             }
         } else {
@@ -121,7 +131,7 @@ angular.module('ffffng')
             fs.writeFileSync(filename, data, 'utf8');
         }
         catch (error) {
-            console.log(error);
+            console.error(error);
             return callback({data: 'Could not write node data.', type: ErrorTypes.internalError});
         }
 
@@ -138,7 +148,7 @@ angular.module('ffffng')
             fs.unlinkSync(files[0]);
         }
         catch (error) {
-            console.log(error);
+            console.error(error);
             return callback({data: 'Could not delete node.', type: ErrorTypes.internalError});
         }
 
@@ -197,13 +207,12 @@ angular.module('ffffng')
     }
 
     function sendMonitoringConfirmationMail(node, nodeSecrets, callback) {
-        var monitoringQueryString = '?mac=' + node.mac + '&token=' + nodeSecrets.monitoringToken;
-        var confirmUrl = config.server.baseUrl + '/#!/monitoring/confirm' + monitoringQueryString;
-        var disableUrl = config.server.baseUrl + '/#!/monitoring/disable' + monitoringQueryString;
+        var confirmUrl = UrlBuilder.monitoringConfirmUrl(node, nodeSecrets);
+        var disableUrl = UrlBuilder.monitoringDisableUrl(node, nodeSecrets);
 
         MailService.enqueue(
             config.server.email.from,
-            node.email,
+            node.nickname + ' <' + node.email + '>',
             'monitoring-confirmation',
             {
                 node: node,
@@ -212,7 +221,7 @@ angular.module('ffffng')
             },
             function (err) {
                 if (err) {
-                    console.log(err);
+                    console.error(err);
                     return callback({data: 'Internal error.', type: ErrorTypes.internalError});
                 }
 
