@@ -12,7 +12,7 @@ angular.module('ffffng')
     $scope.monitoringInfo = {};
     $scope.monitoringStatus = 'loading';
 
-    MonitoringService.confirm($routeParams['mac'], $routeParams['token'])
+    MonitoringService.confirm($routeParams['token'])
         .then(
             function (response) {
                 // success

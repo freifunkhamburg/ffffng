@@ -8,8 +8,8 @@ angular.module('ffffng').factory('Router', function (app, NodeResource, Monitori
             app.delete('/api/node/:token', NodeResource.delete);
             app.get('/api/node/:token', NodeResource.get);
 
-            app.put('/api/monitoring/confirm/:mac', MonitoringResource.confirm);
-            app.put('/api/monitoring/disable/:mac', MonitoringResource.disable);
+            app.put('/api/monitoring/confirm/:token', MonitoringResource.confirm);
+            app.put('/api/monitoring/disable/:token', MonitoringResource.disable);
         }
     };
 });

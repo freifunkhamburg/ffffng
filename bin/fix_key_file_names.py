@@ -26,7 +26,7 @@ def normalizeMac(mac):
 
 def toFilename(peer):
     filename = ''
-    for field in ['name', 'mac', 'vpn', 'token']:
+    for field in ['name', 'mac', 'vpn', 'token', 'monitoring-token']:
         if peer.has_key(field):
             filename = filename + peer[field]
         filename = filename + '@'
@@ -48,12 +48,17 @@ for filename in os.listdir(peersDir):
                 parts = line.split()
 
                 if len(parts) > 0:
+                    for i in range(0, 3 - len(parts)):
+                        parts.append('')
+
                     if parts[1] == 'Knotenname:':
                         peer['name'] = parts[2].lower()
                     elif parts[1] == 'MAC:':
                         peer['mac'] = normalizeMac(parts[2])
                     elif parts[1] == 'Token:':
                         peer['token'] = parts[2].lower()
+                    elif parts[1] == 'Monitoring-Token:':
+                        peer['monitoring-token'] = parts[2].lower()
                     elif parts[0] == 'key':
                         peer['vpn'] = parts[1].split('"')[1].lower()
 

@@ -29,11 +29,11 @@ angular.module('ffffng').factory('UrlBuilder', function (_, config) {
             return formUrl('update');
         },
 
-        monitoringConfirmUrl: function (node, nodeSecrets) {
-            return formUrl('monitoring/confirm', { mac: node.mac, token: nodeSecrets.monitoringToken });
+        monitoringConfirmUrl: function (nodeSecrets) {
+            return formUrl('monitoring/confirm', { token: nodeSecrets.monitoringToken });
         },
-        monitoringDisableUrl: function (node, nodeSecrets) {
-            return formUrl('monitoring/disable', { mac: node.mac, token: nodeSecrets.monitoringToken });
+        monitoringDisableUrl: function (nodeSecrets) {
+            return formUrl('monitoring/disable', { token: nodeSecrets.monitoringToken });
         }
     };
 });

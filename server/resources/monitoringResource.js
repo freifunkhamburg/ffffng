@@ -9,24 +9,18 @@ angular.module('ffffng').factory('MonitoringResource', function (
     Resources,
     ErrorTypes
 ) {
-    var isValidMac = Validator.forConstraint(Constraints.node.mac);
     var isValidToken = Validator.forConstraint(Constraints.token);
 
     return {
         confirm: function (req, res) {
             var data = Resources.getData(req);
 
-            var mac = Strings.normalizeMac(data.mac);
-            if (!isValidMac(mac)) {
-                return Resources.error(res, {data: 'Invalid MAC.', type: ErrorTypes.badRequest});
-            }
-
             var token = Strings.normalizeString(data.token);
             if (!isValidToken(token)) {
                 return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
             }
 
-            return MonitoringService.confirm(mac, token, function (err, node) {
+            return MonitoringService.confirm(token, function (err, node) {
                 if (err) {
                     return Resources.error(res, err);
                 }
@@ -43,17 +37,12 @@ angular.module('ffffng').factory('MonitoringResource', function (
         disable: function (req, res) {
             var data = Resources.getData(req);
 
-            var mac = Strings.normalizeMac(data.mac);
-            if (!isValidMac(mac)) {
-                return Resources.error(res, {data: 'Invalid MAC.', type: ErrorTypes.badRequest});
-            }
-
             var token = Strings.normalizeString(data.token);
             if (!isValidToken(token)) {
                 return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
             }
 
-            return MonitoringService.disable(mac, token, function (err, node) {
+            return MonitoringService.disable(token, function (err, node) {
                 if (err) {
                     return Resources.error(res, err);
                 }

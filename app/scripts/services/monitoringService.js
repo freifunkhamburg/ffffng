@@ -3,18 +3,18 @@
 angular.module('ffffng')
 .service('MonitoringService', function ($http, $q) {
     return {
-        'confirm': function (mac, token) {
-            if (!mac || !token) {
+        'confirm': function (token) {
+            if (!token) {
                 return $q.reject({});
             }
-            return $http.put('/api/monitoring/confirm/' + mac + '?token=' + token);
+            return $http.put('/api/monitoring/confirm/' + token);
         },
 
-        'disable': function (mac, token) {
-            if (!mac || !token) {
+        'disable': function (token) {
+            if (!token) {
                 return $q.reject({});
             }
-            return $http.put('/api/monitoring/disable/' + mac + '?token=' + token);
+            return $http.put('/api/monitoring/disable/' + token);
         }
     };
 });

@@ -3,8 +3,8 @@
 angular.module('ffffng')
 .service('MonitoringService', function (NodeService, ErrorTypes) {
     return {
-        confirm: function (mac, token, callback) {
-            NodeService.getNodeDataByMac(mac, function (err, node, nodeSecrets) {
+        confirm: function (token, callback) {
+            NodeService.getNodeDataByMonitoringToken(token, function (err, node, nodeSecrets) {
                 if (err) {
                     return callback(err);
                 }
@@ -27,8 +27,8 @@ angular.module('ffffng')
             });
         },
 
-        disable: function (mac, token, callback) {
-            NodeService.getNodeDataByMac(mac, function (err, node, nodeSecrets) {
+        disable: function (token, callback) {
+            NodeService.getNodeDataByMonitoringToken(token, function (err, node, nodeSecrets) {
                 if (err) {
                     return callback(err);
                 }

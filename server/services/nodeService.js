@@ -23,48 +23,77 @@ angular.module('ffffng')
         monitoringToken: '# Monitoring-Token: '
     };
 
+    var filenameParts = ['hostname', 'mac', 'key', 'token', 'monitoringToken'];
+
     function generateToken() {
         return crypto.randomBytes(8).toString('hex');
     }
 
-    function findNodeFiles(pattern) {
+    function findNodeFiles(filter) {
+        var pattern = _.join(
+            _.map(filenameParts, function (field) {
+                return filter.hasOwnProperty(field) ? filter[field] : '*';
+            }),
+            '@'
+        );
+
         return glob.sync(config.server.peersPath + '/' + pattern.toLowerCase());
     }
 
-    function isDuplicate(pattern, token) {
-        var files = findNodeFiles(pattern);
+    function parseNodeFilename(filename) {
+        var parts = _.split(filename, '@', filenameParts.length);
+        var parsed = {};
+        _.each(_.zip(filenameParts, parts), function (part) {
+            parsed[part[0]] = part[1];
+        });
+        return parsed;
+    }
+
+    function isDuplicate(filter, token) {
+        var files = findNodeFiles(filter);
         if (files.length === 0) {
             return false;
         }
 
-        if (files.length > 1 || !token) {
+        if (files.length > 1 || !token /* node is being created*/) {
             return true;
         }
 
-        var file = files[0];
-        return file.substring(file.length - token.length, file.length) !== token;
+        return parseNodeFilename(files[0]).token !== token;
     }
 
-    function checkNoDuplicates(token, node) {
-        if (isDuplicate(node.hostname + '@*@*@*', token)) {
+    function checkNoDuplicates(token, node, nodeSecrets) {
+        if (isDuplicate({ hostname: node.hostname }, token)) {
             return {data: {msg: 'Already exists.', field: 'hostname'}, type: ErrorTypes.conflict};
         }
 
         if (node.key) {
-            if (isDuplicate('*@*@' + node.key + '@*', token)) {
+            if (isDuplicate({ key: node.key }, token)) {
                 return {data: {msg: 'Already exists.', field: 'key'}, type: ErrorTypes.conflict};
             }
         }
 
-        if (isDuplicate('*@' + node.mac + '@*@*', token)) {
+        if (isDuplicate({ mac: node.mac }, token)) {
             return {data: {msg: 'Already exists.', field: 'mac'}, type: ErrorTypes.conflict};
         }
+
+        if (nodeSecrets.monitoringToken && isDuplicate({ monitoringToken: nodeSecrets.monitoringToken }, token)) {
+            return {data: {msg: 'Already exists.', field: 'monitoringToken'}, type: ErrorTypes.conflict};
+        }
+
         return null;
     }
 
     function writeNodeFile(isUpdate, token, node, nodeSecrets, callback) {
         var filename =
-            config.server.peersPath + '/' + (node.hostname + '@' + node.mac + '@' + (node.key || '') + '@' + token).toLowerCase();
+            config.server.peersPath + '/' +
+            (
+                node.hostname + '@' +
+                node.mac + '@' +
+                (node.key || '') + '@' +
+                token + '@' +
+                nodeSecrets.monitoringToken
+            ).toLowerCase();
 
         var data = '';
         _.each(linePrefixes, function (prefix, key) {
@@ -102,12 +131,12 @@ angular.module('ffffng')
         var error;
 
         if (isUpdate) {
-            var files = findNodeFiles('*@*@*@' + token);
+            var files = findNodeFiles({ token: token });
             if (files.length !== 1) {
                 return callback({data: 'Node not found.', type: ErrorTypes.notFound});
             }
 
-            error = checkNoDuplicates(token, node);
+            error = checkNoDuplicates(token, node, nodeSecrets);
             if (error) {
                 return callback(error);
             }
@@ -121,7 +150,7 @@ angular.module('ffffng')
                 return callback({data: 'Could not remove old node data.', type: ErrorTypes.internalError});
             }
         } else {
-            error = checkNoDuplicates(null, node);
+            error = checkNoDuplicates(null, node, nodeSecrets);
             if (error) {
                 return callback(error);
             }
@@ -139,7 +168,7 @@ angular.module('ffffng')
     }
 
     function deleteNodeFile(token, callback) {
-        var files = findNodeFiles('*@*@*@' + token);
+        var files = findNodeFiles({ token: token });
         if (files.length !== 1) {
             return callback({data: 'Node not found.', type: ErrorTypes.notFound});
         }
@@ -195,8 +224,8 @@ angular.module('ffffng')
         callback(null, node, nodeSecrets);
     }
 
-    function getNodeDataByFilePattern(pattern, callback) {
-        var files = findNodeFiles(pattern);
+    function getNodeDataByFilePattern(filter, callback) {
+        var files = findNodeFiles(filter);
 
         if (files.length !== 1) {
             return callback({data: 'Node not found.', type: ErrorTypes.notFound});
@@ -207,8 +236,8 @@ angular.module('ffffng')
     }
 
     function sendMonitoringConfirmationMail(node, nodeSecrets, callback) {
-        var confirmUrl = UrlBuilder.monitoringConfirmUrl(node, nodeSecrets);
-        var disableUrl = UrlBuilder.monitoringDisableUrl(node, nodeSecrets);
+        var confirmUrl = UrlBuilder.monitoringConfirmUrl(nodeSecrets);
+        var disableUrl = UrlBuilder.monitoringDisableUrl(nodeSecrets);
 
         MailService.enqueue(
             config.server.email.from,
@@ -220,7 +249,7 @@ angular.module('ffffng')
                 disableUrl: disableUrl
             },
             function (err) {
-                if (err) {
+                if (err) {checkNoDuplicates
                     console.error(err);
                     return callback({data: 'Internal error.', type: ErrorTypes.internalError});
                 }
@@ -323,11 +352,11 @@ angular.module('ffffng')
         },
 
         getNodeDataByToken: function (token, callback) {
-            return getNodeDataByFilePattern('*@*@*@' + token, callback);
+            return getNodeDataByFilePattern({ token: token }, callback);
         },
 
-        getNodeDataByMac: function (mac, callback) {
-            return getNodeDataByFilePattern('*@' + mac + '@*@*', callback);
+        getNodeDataByMonitoringToken: function (monitoringToken, callback) {
+            return getNodeDataByFilePattern({ monitoringToken: monitoringToken }, callback);
         }
     };
 });
