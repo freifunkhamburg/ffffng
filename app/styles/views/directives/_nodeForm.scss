@@ -122,6 +122,10 @@ f-node-form {
         padding-bottom: 66%;
         margin-top: 5px;
         margin-bottom: 20px;
+
+        .leaflet-control-layers.leaflet-control {
+            display: none;
+        }
     }
 
     .buttons {

@@ -18,7 +18,7 @@ angular.module('ffffng')
         var monitoringConfirmed = $scope.node.monitoringConfirmed;
 
         $scope.config = config;
-        angular.extend($scope, {
+        $scope.map = {
             center: {
                 lat: config.coordsSelector.lat,
                 lng: config.coordsSelector.lng,
@@ -41,10 +41,10 @@ angular.module('ffffng')
                     }
                 }
             }
-        });
+        };
 
         if (config.otherCommunityInfo.showBorderForDebugging) {
-            $scope.paths = {
+            $scope.map.paths = {
                 border: {
                     color: '#ff0000',
                         weight: 3,
@@ -67,7 +67,7 @@ angular.module('ffffng')
         };
 
         var updateNodePosition = function (lat, lng) {
-            $scope.markers.node = {
+            $scope.map.markers.node = {
                 lat: lat,
                 lng: lng,
                 focus: true,
@@ -104,7 +104,7 @@ angular.module('ffffng')
         }
 
         $scope.updateMap = function (optCoords) {
-            var coords = optCoords || $scope.coords;
+            var coords = optCoords || $scope.node.coords;
             withValidCoords(coords, function (lat, lng) {
                 updateNodePosition(lat, lng);
             });
@@ -112,7 +112,7 @@ angular.module('ffffng')
 
         $scope.resetCoords = function () {
             $scope.node.coords = '';
-            $scope.markers = {};
+            $scope.map.markers = {};
         };
 
         $scope.constraints = Constraints.node;

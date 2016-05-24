@@ -42,14 +42,28 @@
                         an die Stelle, wo Dein Knoten erscheinen soll. Durch erneutes Klicken kannst Du die Position jederzeit
                         anpassen.
                     </p>
-                    <input type="text" id="coords" name="coords" class="{{node.coords ? 'has-coords' : ''}}" placeholder="z. B. {{config.coordsSelector.lat}} {{config.coordsSelector.lng}}" ng-model="node.coords" ng-pattern="constraints.coords.regex" ng-required="!constraints.coords.optional" ng-blur="updateMap" />
+                    <input
+                        type="text"
+                        id="coords"
+                        name="coords"
+                        class="{{node.coords ? 'has-coords' : ''}}"
+                        placeholder="z. B. {{config.coordsSelector.lat}} {{config.coordsSelector.lng}}"
+                        ng-model="node.coords"
+                        ng-pattern="constraints.coords.regex"
+                        ng-required="!constraints.coords.optional"
+                        ng-change="updateMap()" />
                     <i class="reset-coords" ng-if="node.coords" ng-click="resetCoords()"></i>
                     <span class="feedback" ng-if="hasError('coords')">
                         Bitte gib die Koordinaten wie folgt an, Beispiel: {{config.coordsSelector.lat}} {{config.coordsSelector.lng}}
                     </span>
                 </div>
                 <div class="col-md-8">
-                    <leaflet class="map" center="center" layers="layers" markers="markers" paths="paths"></leaflet>
+                    <leaflet
+                        class="map"
+                        center="map.center"
+                        layers="map.layers"
+                        markers="map.markers"
+                        paths="map.paths"></leaflet>
                 </div>
             </div>
         </div>
