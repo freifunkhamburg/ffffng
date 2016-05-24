@@ -307,6 +307,28 @@ angular.module('ffffng')
                     );
                 });
             });
+        },
+
+        cleanupNodeInformation: function (callback) {
+            var daysBeforeCleanup = 30;
+            Logger
+                .tag('monitoring', 'information-cleanup')
+                .info('Cleaning up node data not updated for %s days...', daysBeforeCleanup);
+            Database.run(
+                'DELETE FROM node_state WHERE modified_at < ?',
+                [moment().subtract(daysBeforeCleanup, 'days').unix()],
+                function (err) {
+                    if (err) {
+                        return callback(err);
+                    }
+
+                    Logger
+                        .tag('monitoring', 'information-retrieval')
+                        .info('Node data cleanup done.');
+
+                    callback();
+                }
+            );
         }
     };
 });
