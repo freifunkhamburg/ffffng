@@ -23,7 +23,9 @@ if (config.server.logging.debug) {
         logInConsole: false
     });
 } else {
-    process.console.debug = function () {};
+    process.console.debug = function () {
+        this._reset(); // forget tags, etc. for this logging event
+    };
 }
 
 angular.module('ffffng').factory('Logger', function (app) {
