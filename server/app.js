@@ -2,10 +2,26 @@
 
 angular.module('ffffng').factory('app', function (fs, config, _) {
     var express = require('express');
+    var auth = require('http-auth');
     var bodyParser = require('body-parser');
     var compress = require('compression');
 
     var app = express();
+
+    // urls beneath /internal are protected
+    var internalAuth = auth.basic(
+        {
+            realm: "Knotenformular - Intern"
+        },
+        function (username, password, callback) {
+            callback(
+                config.server.internal.active &&
+                username === config.server.internal.user &&
+                password === config.server.internal.password
+            );
+        }
+    );
+    app.use('/internal', auth.connect(internalAuth));
 
     app.use(bodyParser.json());
 

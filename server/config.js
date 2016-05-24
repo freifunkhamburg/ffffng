@@ -17,6 +17,12 @@ var defaultConfig = {
             logRequests: false
         },
 
+        internal: {
+            active: false,
+            user: 'admin',
+            password: 'secret'
+        },
+
         email: {
             from: 'Freifunk Knotenformular <no-reply@musterstadt.freifunk.net>',
 

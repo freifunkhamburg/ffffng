@@ -30,7 +30,9 @@ angular.module('ffffng').factory('Logger', function (app) {
     if (config.server.logging.logRequests) {
         app.use(scribe.express.logger());
     }
-    app.use('/internal/logs', scribe.webPanel());
+    if (config.server.internal.active) {
+        app.use('/internal/logs', scribe.webPanel());
+    }
 
     return process.console;
 });
