@@ -190,9 +190,9 @@ angular.module('ffffng')
 
         $scope.updateMap($scope.node.coords);
         withValidCoords($scope.node.coords, function (lat, lng) {
-            $scope.center.lat = lat;
-            $scope.center.lng = lng;
-            $scope.center.zoom = 12;
+            $scope.map.center.lat = lat;
+            $scope.map.center.lng = lng;
+            $scope.map.center.zoom = 12;
         });
     };
 
