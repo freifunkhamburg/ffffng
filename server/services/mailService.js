@@ -2,7 +2,7 @@
 
 angular.module('ffffng')
 .service('MailService', function (Database, UrlBuilder, config, _, async, deepExtend, fs, moment, Logger) {
-    var MAIL_QUEUE_DB_BATCH_SIZE = 2;
+    var MAIL_QUEUE_DB_BATCH_SIZE = 50;
     var MAIL_QUEUE_MAX_PARALLEL_SENDING = 3;
 
     var transporter = require('nodemailer').createTransport(deepExtend(
