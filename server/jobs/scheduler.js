@@ -8,7 +8,7 @@ _.each(jobFiles, function (jobFile) {
     require(jobFile);
 });
 
-angular.module('ffffng').factory('Scheduler', function ($injector, Logger) {
+angular.module('ffffng').factory('Scheduler', function ($injector, Logger, config) {
     var cron = require('node-cron');
 
     function schedule(expr, jobName) {
@@ -29,9 +29,12 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger) {
 
             try {
                 schedule('0 */1 * * * *', 'MailQueueJob');
-                // schedule('0 */5 * * * *', 'NodeInformationRetrievalJob');
-                schedule('*/10 * * * * *', 'NodeInformationRetrievalJob');
-                // schedule('0 */1 * * * *', 'NodeInformationCleanupJob');
+
+                if (config.client.monitoring.enabled) {
+                    // schedule('0 */5 * * * *', 'NodeInformationRetrievalJob');
+                    schedule('*/10 * * * * *', 'NodeInformationRetrievalJob');
+                    // schedule('0 */1 * * * *', 'NodeInformationCleanupJob');
+                }
             }
             catch (error) {
                 Logger.tag('jobs').error('Error during scheduling of background jobs:', error);

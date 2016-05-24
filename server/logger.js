@@ -2,26 +2,34 @@
 
 var config = require('./config');
 
+
+// Hack to allow proper logging of Error.
+Object.defineProperty(Error.prototype, 'message', {
+    configurable: true,
+    enumerable: true
+});
+Object.defineProperty(Error.prototype, 'stack', {
+    configurable: true,
+    enumerable: true
+});
+
+
 var scribe = require('scribe-js')({
-    app: 'ffffng',
-    id: process.pid,
-
     rootPath: config.server.logging.directory,
-
-    module: {
-        'router/Viewer': {
-            username: false,
-            password: false
-        }
-    }
 });
 
-process.console.addLogger('debug', 'grey', {
-    logInConsole: false
-});
+if (config.server.logging.debug) {
+    process.console.addLogger('debug', 'grey', {
+        logInConsole: false
+    });
+} else {
+    process.console.debug = function () {};
+}
 
 angular.module('ffffng').factory('Logger', function (app) {
-    app.use(scribe.express.logger());
+    if (config.server.logging.logRequests) {
+        app.use(scribe.express.logger());
+    }
     app.use('/internal/logs', scribe.webPanel());
 
     return process.console;

@@ -7,7 +7,9 @@
         "peersPath": "/tmp/peers",
 
         "logging": {
-            "directory": "/tmp/logs"
+            "directory": "/tmp/logs",
+            "debug": false,
+            "logRequests": false
         },
 
         "email": {
@@ -25,7 +27,7 @@
         },
 
         "map": {
-            "nodesJsonUrl": "https://map.hamburg.freifunk.net/nodes.json"
+            "nodesJsonUrl": "http://musterstadt.freifunk.net/nodes.json"
         }
     },
     "client": {
@@ -36,6 +38,9 @@
         },
         "map": {
             "mapUrl": "http://map.hamburg.freifunk.net"
+        },
+        "monitoring": {
+            "enabled": false
         },
         "coordsSelector": {
             "lat": 53.565278,

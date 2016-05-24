@@ -241,6 +241,13 @@ angular.module('ffffng')
                     return callback(err);
                 }
 
+                if (response.statusCode !== 200) {
+                    return callback(new Error(
+                        'Could not download nodes.json from ' + url + ': ' +
+                        response.statusCode + ' - ' + response.statusMessage
+                    ));
+                }
+
                 parseNodesJson(body, function (err, data) {
                     if (err) {
                         return callback(err);

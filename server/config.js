@@ -12,7 +12,9 @@ var defaultConfig = {
         peersPath: '/tmp/peers',
 
         logging: {
-            directory: '/tmp/logs'
+            directory: '/tmp/logs',
+            debug: false,
+            logRequests: false
         },
 
         email: {
@@ -44,7 +46,7 @@ var defaultConfig = {
             mapUrl: 'http://map.musterstadt.freifunk.net'
         },
         monitoring: {
-            enabled: true
+            enabled: false
         },
         coordsSelector: {
             showInfo: false,
