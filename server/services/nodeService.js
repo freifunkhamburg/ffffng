@@ -7,6 +7,7 @@ angular.module('ffffng')
     crypto,
     fs,
     glob,
+    Logger,
     MailService,
     Strings,
     ErrorTypes,
@@ -141,12 +142,12 @@ angular.module('ffffng')
                 return callback(error);
             }
 
+            var file = files[0];
             try {
-                var file = files[0];
                 fs.unlinkSync(file);
             }
             catch (error) {
-                console.error(error);
+                Logger.tag('node', 'save').error('Could not delete old node file: ' + file, error);
                 return callback({data: 'Could not remove old node data.', type: ErrorTypes.internalError});
             }
         } else {
@@ -160,7 +161,7 @@ angular.module('ffffng')
             fs.writeFileSync(filename, data, 'utf8');
         }
         catch (error) {
-            console.error(error);
+            Logger.tag('node', 'save').error('Could not write node file: ' + filename, error);
             return callback({data: 'Could not write node data.', type: ErrorTypes.internalError});
         }
 
@@ -177,7 +178,7 @@ angular.module('ffffng')
             fs.unlinkSync(files[0]);
         }
         catch (error) {
-            console.error(error);
+            Logger.tag('node', 'delete').error('Could not delete node file: ' + file, error);
             return callback({data: 'Could not delete node.', type: ErrorTypes.internalError});
         }
 
@@ -263,8 +264,8 @@ angular.module('ffffng')
                 disableUrl: disableUrl
             },
             function (err) {
-                if (err) {checkNoDuplicates
-                    console.error(err);
+                if (err) {
+                    Logger.tag('monitoring', 'confirmation').error('Could not enqueue confirmation mail.', error);
                     return callback({data: 'Internal error.', type: ErrorTypes.internalError});
                 }
 

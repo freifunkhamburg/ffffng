@@ -12,7 +12,7 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
     var cron = require('node-cron');
 
     function schedule(expr, jobName) {
-        Logger.tag('jobs').info('Scheduling job: ' + expr + ' ' + jobName);
+        Logger.tag('jobs').info('Scheduling job: %s  %s', expr, jobName);
 
         var job = $injector.get(jobName);
 

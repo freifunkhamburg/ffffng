@@ -23,8 +23,9 @@ angular.module('ffffng')
         Logger
             .tag('mail', 'queue')
             .info(
-                'Sending pending mail[' + options.id + '] of type ' + options.email + '. ' +
-                'Had ' + options.failures + ' failures before.'
+                'Sending pending mail[%d] of type %s. ' +
+                'Had %d failures before.',
+                options.id, options.email, options.failures
             );
 
         var templateBasePath = __dirname + '/../mailTemplates/' + options.email;
@@ -71,7 +72,7 @@ angular.module('ffffng')
                         return callback(err);
                     }
 
-                    Logger.tag('mail', 'queue').info('Mail[' + options.id +'] has been send.');
+                    Logger.tag('mail', 'queue').info('Mail[%d] has been send.', options.id);
 
                     callback(null);
                 });

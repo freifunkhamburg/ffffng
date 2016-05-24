@@ -9,7 +9,7 @@ var config = require('../config');
 var Logger = require('../logger');
 
 function applyPatch(db, file, callback) {
-    Logger.tag('database', 'migration').info('Checking if patch need to be applied: ' + file);
+    Logger.tag('database', 'migration').info('Checking if patch need to be applied: %s', file);
 
     fs.readFile(file, function (err, contents) {
         if (err) {
@@ -25,7 +25,7 @@ function applyPatch(db, file, callback) {
 
             if (row) {
                 // patch is already applied. skip!
-                Logger.tag('database', 'migration').info('Patch already applied, skipping: ' + file);
+                Logger.tag('database', 'migration').info('Patch already applied, skipping: %s', file);
                 return callback(null);
             }
 
@@ -39,7 +39,7 @@ function applyPatch(db, file, callback) {
                     return callback(err);
                 }
 
-                Logger.tag('database', 'migration').info('Patch successfully applied: ' + file);
+                Logger.tag('database', 'migration').info('Patch successfully applied: %s', file);
 
                 callback(null);
             });
@@ -80,7 +80,7 @@ module.exports = {
         var SQLite3 = require('sqlite3');
 
         var file = config.server.databaseFile;
-        Logger.tag('database').info('Setting up database: ' + file);
+        Logger.tag('database').info('Setting up database: %s', file);
 
         var db;
         try {
