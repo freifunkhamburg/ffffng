@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ffffng')
-.service('MailService', function (Database, UrlBuilder, config, _, async, deepExtend, fs, moment) {
+.service('MailService', function (Database, UrlBuilder, config, _, async, deepExtend, fs, moment, Logger) {
     var MAIL_QUEUE_DB_BATCH_SIZE = 2;
     var MAIL_QUEUE_MAX_PARALLEL_SENDING = 3;
 
@@ -20,6 +20,13 @@ angular.module('ffffng')
     }));
 
     function sendMail(options, callback) {
+        Logger
+            .tag('mail', 'queue')
+            .info(
+                'Sending pending mail[' + options.id + '] of type ' + options.email + '. ' +
+                'Had ' + options.failures + ' failures before.'
+            );
+
         var templateBasePath = __dirname + '/../mailTemplates/' + options.email;
         async.parallel({
                 subject: _.partial(fs.readFile, templateBasePath + '.subject.txt'),
@@ -39,13 +46,8 @@ angular.module('ffffng')
                     }
                 );
 
-                console.log(data);
-
                 function render(field) {
-                    console.log(field);
-                    var rendered = _.template(templates[field].toString())(data);
-                    console.log(rendered);
-                    return rendered;
+                    return _.template(templates[field].toString())(data);
                 }
 
                 var mailOptions;
@@ -58,6 +60,9 @@ angular.module('ffffng')
                     };
                 }
                 catch (error) {
+                    Logger
+                        .tag('mail', 'queue')
+                        .error('Error rendering template for pending mail[' + options.id + ']:', error);
                     return callback(error);
                 }
 
@@ -65,6 +70,8 @@ angular.module('ffffng')
                     if (err) {
                         return callback(err);
                     }
+
+                    Logger.tag('mail', 'queue').info('Mail[' + options.id +'] has been send.');
 
                     callback(null);
                 });
@@ -116,11 +123,10 @@ angular.module('ffffng')
     }
 
     function sendPendingMail(pendingMail, callback) {
-        console.log(pendingMail);
         sendMail(pendingMail, function (err) {
             if (err) {
                 // we only log the error and increment the failure counter as we want to continue with pending mails
-                console.error(err);
+                Logger.tag('mail', 'queue').error('Error sending pending mail[' + pendingMail.id + ']:', err);
 
                 return incrementFailureCounterForPendingEmail(pendingMail.id, function (err) {
                     if (err) {
@@ -151,7 +157,7 @@ angular.module('ffffng')
         },
 
         sendPendingMails: function (callback) {
-            console.info('Start sending pending mails.');
+            Logger.tag('mail', 'queue').info('Start sending pending mails...');
 
             var startTime = moment();
 
@@ -160,13 +166,15 @@ angular.module('ffffng')
                     return callback(err);
                 }
 
+                Logger.tag('mail', 'queue').info('Sending next batch...');
+
                 findPendingMailsBefore(startTime, MAIL_QUEUE_DB_BATCH_SIZE, function (err, pendingMails) {
                     if (err) {
                         return callback(err);
                     }
 
                     if (_.isEmpty(pendingMails)) {
-                        console.info('Done sending pending mails.');
+                        Logger.tag('mail', 'queue').info('Done sending pending mails.');
                         return callback(null);
                     }
 

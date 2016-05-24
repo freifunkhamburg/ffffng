@@ -8,6 +8,8 @@ angular.module('ffffng', []);
 
 require('./config');
 
+require('./logger').tag('main', 'startup').info('Server starting up...');
+
 require('./app');
 require('./router');
 require('./libs');
@@ -32,7 +34,9 @@ require('./jobs/scheduler');
 var db = require('./db/database');
 
 db.init(function () {
-    angular.injector(['ffffng']).invoke(function (config, app, Scheduler, Router) {
+    angular.injector(['ffffng']).invoke(function (config, app, Logger, Scheduler, Router) {
+        Logger.tag('main').info('Initializing...');
+
         Scheduler.init();
         Router.init();
 

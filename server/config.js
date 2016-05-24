@@ -11,6 +11,10 @@ var defaultConfig = {
         databaseFile: '/tmp/ffffng.sqlite',
         peersPath: '/tmp/peers',
 
+        logging: {
+            directory: '/tmp/logs'
+        },
+
         email: {
             from: 'Freifunk Knotenformular <no-reply@musterstadt.freifunk.net>',
 

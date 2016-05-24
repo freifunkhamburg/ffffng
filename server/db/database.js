@@ -6,8 +6,11 @@ var glob = require('glob');
 var path = require('path');
 
 var config = require('../config');
+var Logger = require('../logger');
 
 function applyPatch(db, file, callback) {
+    Logger.tag('database', 'migration').info('Checking if patch need to be applied: ' + file);
+
     fs.readFile(file, function (err, contents) {
         if (err) {
             return callback(err);
@@ -22,6 +25,7 @@ function applyPatch(db, file, callback) {
 
             if (row) {
                 // patch is already applied. skip!
+                Logger.tag('database', 'migration').info('Patch already applied, skipping: ' + file);
                 return callback(null);
             }
 
@@ -30,12 +34,22 @@ function applyPatch(db, file, callback) {
                     + 'INSERT INTO schema_version (version) VALUES (\'' + version + '\');\n'
                     + 'END TRANSACTION;';
 
-            db.exec(sql, callback);
+            db.exec(sql, function (err) {
+                if (err) {
+                    return callback(err);
+                }
+
+                Logger.tag('database', 'migration').info('Patch successfully applied: ' + file);
+
+                callback(null);
+            });
         });
     });
 }
 
 function applyMigrations(db, callback) {
+    Logger.tag('database', 'migration').info('Migrating database...');
+
     var sql = 'BEGIN TRANSACTION; CREATE TABLE IF NOT EXISTS schema_version (\n'
             + '    version VARCHAR(255) PRIMARY KEY ASC,\n'
             + '    applied_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\n'
@@ -50,7 +64,7 @@ function applyMigrations(db, callback) {
                 return callback(err);
             }
 
-            async.each(
+            async.eachSeries(
                 files,
                 function (file, fileCallback) {
                     applyPatch(db, file, fileCallback);
@@ -64,10 +78,22 @@ function applyMigrations(db, callback) {
 module.exports = {
     init: function (callback) {
         var SQLite3 = require('sqlite3');
-        var db = new SQLite3.Database(config.server.databaseFile);
+
+        var file = config.server.databaseFile;
+        Logger.tag('database').info('Setting up database: ' + file);
+
+        var db;
+        try {
+            db = new SQLite3.Database(file);
+        }
+        catch (error) {
+            Logger.tag('database').error('Error initialzing database:', error);
+            throw error;
+        }
 
         applyMigrations(db, function (err) {
             if (err) {
+                Logger.tag('database').error('Error migrating database:', err);
                 throw err;
             }
 

@@ -7,6 +7,7 @@ angular.module('ffffng')
         config,
         Database,
         ErrorTypes,
+        Logger,
         moment,
         NodeService,
         request,
@@ -17,6 +18,10 @@ angular.module('ffffng')
         var previousImportTimestamp = null;
 
         function insertNodeInformation(nodeData, node, callback) {
+            Logger
+                .tag('monitoring', 'information-retrieval')
+                .debug('Node is new in monitoring, creating data:', nodeData.mac);
+
             return Database.run(
                 'INSERT INTO node_state ' +
                 '(mac, state, last_seen, import_timestamp, last_status_mail_send) ' +
@@ -33,10 +38,20 @@ angular.module('ffffng')
         }
 
         function updateNodeInformation(nodeData, node, row, callback) {
-            debugger;
+            Logger
+                .tag('monitoring', 'information-retrieval')
+                .debug('Node is known in monitoring:', nodeData.mac);
+
             if (!moment(row.import_timestamp).isBefore(nodeData.importTimestamp)) {
+                Logger
+                    .tag('monitoring', 'information-retrieval')
+                    .debug('No new data for node, skipping:', nodeData.mac);
                 return callback();
             }
+
+            Logger
+                .tag('monitoring', 'information-retrieval')
+                .debug('New data for node, updating:', nodeData.mac);
 
             return Database.run(
                 'UPDATE node_state ' +
@@ -51,6 +66,9 @@ angular.module('ffffng')
         }
 
         function deleteNodeInformation(nodeData, node, callback) {
+            Logger
+                .tag('monitoring', 'information-retrieval')
+                .debug('Node is not being monitored, deleting monitoring data:', nodeData.mac);
             return Database.run(
                 'DELETE FROM node_state WHERE mac = ? AND import_timestamp < ?',
                 [node.mac, nodeData.importTimestamp.unix()],
@@ -60,6 +78,8 @@ angular.module('ffffng')
 
         function storeNodeInformation(nodeData, node, callback) {
             if (node.monitoring && node.monitoringConfirmed) {
+                Logger.tag('monitoring', 'information-retrieval').debug('Node is being monitored:', nodeData.mac);
+
                 return Database.get('SELECT * FROM node_state WHERE mac = ?', [node.mac], function (err, row) {
                     if (err) {
                         return callback(err);
@@ -79,6 +99,8 @@ angular.module('ffffng')
         var isValidMac = Validator.forConstraint(Constraints.node.mac);
 
         function parseNodesJson(body, callback) {
+            Logger.tag('monitoring', 'information-retrieval').info('Parsing nodes.json...');
+
             function parseTimestamp(timestamp) {
                 if (!_.isString(json.timestamp)) {
                     return moment.invalid();
@@ -212,8 +234,9 @@ angular.module('ffffng')
         },
 
         retrieveNodeInformation: function (callback) {
-            console.info();
-            request(config.server.map.nodesJsonUrl, function (err, response, body) {
+            var url = config.server.map.nodesJsonUrl;
+            Logger.tag('monitoring', 'information-retrieval').info('Retrieving nodes.json:', url);
+            request(url, function (err, response, body) {
                 if (err) {
                     return callback(err);
                 }
@@ -224,6 +247,15 @@ angular.module('ffffng')
                     }
 
                     if (previousImportTimestamp !== null && !data.importTimestamp.isAfter(previousImportTimestamp)) {
+                        Logger
+                            .tag('monitoring', 'information-retrieval')
+                            .info(
+                                'No new data, skipping.',
+                                'Current timestamp:',
+                                data.importTimestamp.format(),
+                                'Previous timestamp:',
+                                previousImportTimestamp.format()
+                            );
                         return callback();
                     }
                     previousImportTimestamp = data.importTimestamp;
@@ -231,16 +263,37 @@ angular.module('ffffng')
                     async.each(
                         data.nodes,
                         function (nodeData, nodeCallback) {
+                            Logger.tag('monitoring', 'information-retrieval').debug('Importing:', nodeData.mac);
+
                             NodeService.findNodeDataByMac(nodeData.mac, function (err, node) {
                                 if (err) {
+                                    Logger
+                                        .tag('monitoring', 'information-retrieval')
+                                        .error('Error importing:', nodeData.mac, err);
                                     return nodeCallback(err);
                                 }
 
                                 if (!node) {
+                                    Logger
+                                        .tag('monitoring', 'information-retrieval')
+                                        .debug('Unknown node, skipping:', nodeData.mac);
                                     return nodeCallback(null);
                                 }
 
-                                storeNodeInformation(nodeData, node, nodeCallback);
+                                storeNodeInformation(nodeData, node, function (err) {
+                                    if (err) {
+                                        Logger
+                                            .tag('monitoring', 'information-retrieval')
+                                            .debug('Could not update / deleting node data:', nodeData.mac, err);
+                                        return nodeCallback(err);
+                                    }
+
+                                    Logger
+                                        .tag('monitoring', 'information-retrieval')
+                                        .debug('Updating / deleting node data done:', nodeData.mac);
+
+                                    nodeCallback();
+                                });
                             });
                         },
                         callback

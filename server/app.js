@@ -31,7 +31,7 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
         });
     }
 
-    app.use( function (req, res, next) {
+    app.use(function (req, res, next) {
         if (jsTemplateFiles.indexOf(req.path) >= 0) {
             return serveTemplate('application/javascript', req, res, next);
         }
