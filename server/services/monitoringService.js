@@ -55,11 +55,11 @@ angular.module('ffffng')
 
             return Database.run(
                 'UPDATE node_state ' +
-                'WHERE id = ? AND mac = ?' +
-                'SET state = ?, last_seen = ?, import_timestamp = ?, modified_at = ?',
+                'SET state = ?, last_seen = ?, import_timestamp = ?, modified_at = ?' +
+                'WHERE id = ? AND mac = ?',
                 [
-                    row.id, node.mac,
-                    nodeData.state, nodeData.lastSeen.unix(), nodeData.importTimestamp.unix(), moment.unix()
+                    nodeData.state, nodeData.lastSeen.unix(), nodeData.importTimestamp.unix(), moment().unix(),
+                    row.id, node.mac
                 ],
                 callback
             );
@@ -92,7 +92,7 @@ angular.module('ffffng')
                     }
                 });
             } else {
-                return deleteNodeInformation(node, callback);
+                return deleteNodeInformation(nodeData, node, callback);
             }
         }
 
@@ -105,7 +105,7 @@ angular.module('ffffng')
                 if (!_.isString(json.timestamp)) {
                     return moment.invalid();
                 }
-                return moment(timestamp);
+                return moment.utc(timestamp);
             }
 
             var data = {};
@@ -291,7 +291,7 @@ angular.module('ffffng')
                                     if (err) {
                                         Logger
                                             .tag('monitoring', 'information-retrieval')
-                                            .debug('Could not update / deleting node data:', nodeData.mac, err);
+                                            .debug('Could not update / deleting node data: ', nodeData.mac, err);
                                         return nodeCallback(err);
                                     }
 

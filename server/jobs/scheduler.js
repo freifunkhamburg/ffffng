@@ -31,8 +31,7 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
                 schedule('0 */1 * * * *', 'MailQueueJob');
 
                 if (config.client.monitoring.enabled) {
-                    // schedule('0 */5 * * * *', 'NodeInformationRetrievalJob');
-                    schedule('*/10 * * * * *', 'NodeInformationRetrievalJob');
+                    schedule('30 */5 * * * *', 'NodeInformationRetrievalJob');
                     // schedule('0 */1 * * * *', 'NodeInformationCleanupJob');
                 }
             }
