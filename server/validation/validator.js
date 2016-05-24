@@ -6,6 +6,10 @@ angular.module('ffffng').factory('Validator', function (_) {
             return acceptUndefined || constraint.optional;
         }
 
+        if (!_.isString(value)) {
+            return false;
+        }
+
         var trimmed = value.trim();
         return (trimmed === '' && constraint.optional) || trimmed.match(constraint.regex);
     };

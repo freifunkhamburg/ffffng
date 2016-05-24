@@ -24,6 +24,10 @@ var defaultConfig = {
                     pass: 'pass'
                 }
             }
+        },
+
+        map: {
+            nodesJsonUrl: 'http://map.musterstadt.freifunk.net/nodes.json'
         }
     },
     client: {
@@ -33,8 +37,7 @@ var defaultConfig = {
             contactEmail: 'kontakt@musterstadt.freifunk.net'
         },
         map: {
-            graphUrl: 'http://graph.musterstadt.freifunk.net/graph.html',
-            mapUrl: 'http://graph.musterstadt.freifunk.net/geomap.html'
+            mapUrl: 'http://map.musterstadt.freifunk.net'
         },
         monitoring: {
             enabled: true

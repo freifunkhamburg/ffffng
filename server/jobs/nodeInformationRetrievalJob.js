@@ -1,9 +1,9 @@
 'use strict';
 
-angular.module('ffffng').factory('MailQueueJob', function (MailService) {
+angular.module('ffffng').factory('NodeInformationRetrievalJob', function (MonitoringService) {
     return {
         run: function () {
-            MailService.sendPendingMails(function (err) {
+            MonitoringService.retrieveNodeInformation(function (err) {
                 if (err) {
                     console.error(err);
                 }

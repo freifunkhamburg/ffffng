@@ -224,15 +224,29 @@ angular.module('ffffng')
         callback(null, node, nodeSecrets);
     }
 
-    function getNodeDataByFilePattern(filter, callback) {
+    function findNodeDataByFilePattern(filter, callback) {
         var files = findNodeFiles(filter);
 
         if (files.length !== 1) {
-            return callback({data: 'Node not found.', type: ErrorTypes.notFound});
+            return callback(null);
         }
 
         var file = files[0];
         return parseNodeFile(file, callback);
+    }
+
+    function getNodeDataByFilePattern(filter, callback) {
+        findNodeDataByFilePattern(filter, function (err, node, nodeSecrets) {
+            if (err) {
+                return callback(err);
+            }
+
+            if (!node) {
+                return callback({data: 'Node not found.', type: ErrorTypes.notFound});
+            }
+
+            callback(null, node, nodeSecrets);
+        });
     }
 
     function sendMonitoringConfirmationMail(node, nodeSecrets, callback) {
@@ -349,6 +363,10 @@ angular.module('ffffng')
 
         deleteNode: function (token, callback) {
             deleteNodeFile(token, callback);
+        },
+
+        findNodeDataByMac: function (mac, callback) {
+            return findNodeDataByFilePattern({ mac: mac }, callback);
         },
 
         getNodeDataByToken: function (token, callback) {

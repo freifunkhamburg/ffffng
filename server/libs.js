@@ -20,4 +20,5 @@
     lib('fs');
     lib('glob');
     lib('moment');
+    lib('request');
 })();

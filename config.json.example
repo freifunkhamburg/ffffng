@@ -18,6 +18,10 @@
                     "pass": "pass"
                 }
             }
+        },
+
+        "map": {
+            "nodesJsonUrl": "https://map.hamburg.freifunk.net/nodes.json"
         }
     },
     "client": {
@@ -27,8 +31,7 @@
             "contactEmail": "kontakt@hamburg.freifunk.net"
         },
         "map": {
-            "graphUrl": "http://graph.hamburg.freifunk.net/graph.html",
-            "mapUrl": "http://graph.hamburg.freifunk.net/geomap.html"
+            "mapUrl": "http://map.hamburg.freifunk.net"
         },
         "coordsSelector": {
             "lat": 53.565278,

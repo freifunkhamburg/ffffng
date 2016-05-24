@@ -24,6 +24,9 @@ angular.module('ffffng').factory('Scheduler', function ($injector) {
     return {
         init: function () {
             schedule('*/5 * * * * *', 'MailQueueJob');
+            // schedule('0 */1 * * * *', 'NodeInformationRetrievalJob');
+            schedule('*/10 * * * * *', 'NodeInformationRetrievalJob');
+            // schedule('0 */1 * * * *', 'NodeInformationCleanupJob');
         }
     };
 });
