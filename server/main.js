@@ -19,6 +19,7 @@ require('./utils/resources');
 require('./utils/strings');
 require('./utils/urlBuilder');
 
+require('./resources/taskResource');
 require('./resources/nodeResource');
 require('./resources/monitoringResource');
 

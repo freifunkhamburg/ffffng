@@ -1,6 +1,11 @@
 'use strict';
 
-angular.module('ffffng').factory('Router', function (app, NodeResource, MonitoringResource) {
+angular.module('ffffng').factory('Router', function (
+    app,
+    NodeResource,
+    MonitoringResource,
+    TaskResource
+) {
     return {
         init: function () {
             app.post('/api/node', NodeResource.create);
@@ -10,6 +15,8 @@ angular.module('ffffng').factory('Router', function (app, NodeResource, Monitori
 
             app.put('/api/monitoring/confirm/:token', MonitoringResource.confirm);
             app.put('/api/monitoring/disable/:token', MonitoringResource.disable);
+
+            app.get('/internal/api/task/all', TaskResource.getAll);
         }
     };
 });
