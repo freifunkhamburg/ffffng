@@ -25,6 +25,7 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
 
     app.use(bodyParser.json());
 
+    var adminDir = __dirname + '/../admin';
     var clientDir = __dirname + '/../client';
     var templateDir = __dirname + '/templates';
 
@@ -54,6 +55,7 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
         return next();
     });
 
+    app.use('/internal/admin', express.static(adminDir + '/'));
     app.use('/', express.static(clientDir + '/'));
 
     return app;

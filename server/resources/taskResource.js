@@ -11,8 +11,9 @@ angular.module('ffffng').factory('TaskResource', function (
 ) {
     var isValidId = Validator.forConstraint(Constraints.id);
 
-    function toExternalTask(task) {
+    function toExternalTask(task, id) {
         return {
+            id: id,
             name: task.name,
             schedule: task.schedule,
             runningSince: task.runningSince && task.runningSince.unix(),
@@ -23,7 +24,7 @@ angular.module('ffffng').factory('TaskResource', function (
     return {
         getAll: function (req, res) {
             var tasks = Scheduler.getTasks();
-            return Resources.success(res, _.mapValues(tasks, toExternalTask));
+            return Resources.success(res, _.map(tasks, toExternalTask));
         },
 
         run: function (req, res) {
@@ -46,7 +47,7 @@ angular.module('ffffng').factory('TaskResource', function (
 
             task.run();
 
-            return Resources.success(res, toExternalTask(task));
+            return Resources.success(res, toExternalTask(task, id));
         }
     };
 });

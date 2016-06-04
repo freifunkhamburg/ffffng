@@ -16,8 +16,8 @@ angular.module('ffffng').factory('Router', function (
             app.put('/api/monitoring/confirm/:token', MonitoringResource.confirm);
             app.put('/api/monitoring/disable/:token', MonitoringResource.disable);
 
-            app.get('/internal/api/task/all', TaskResource.getAll);
-            app.put('/internal/api/task/run/:id', TaskResource.run);
+            app.get('/internal/api/tasks', TaskResource.getAll);
+            app.put('/internal/api/tasks/run/:id', TaskResource.run);
         }
     };
 });

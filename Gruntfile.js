@@ -371,6 +371,12 @@ module.exports = function (grunt) {
                         cwd: 'bin',
                         dest: '<%= yeoman.dist %>/bin',
                         src: ['*']
+                    },
+                    {
+                        expand: true,
+                        cwd: 'admin',
+                        dest: '<%= yeoman.dist %>/admin',
+                        src: ['{,**}/*.*']
                     }
                 ]
             },
