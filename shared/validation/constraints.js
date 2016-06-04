@@ -2,6 +2,10 @@
 
 angular.module('ffffng').factory('Constraints', function () {
     return {
+        id:{
+            regex: /^[1-9][0-9]*/,
+            optional: false
+        },
         token:{
             regex: /^[0-9a-f]{16}$/i,
             optional: false

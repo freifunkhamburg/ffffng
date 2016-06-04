@@ -38,7 +38,7 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
             lastRunStarted: false
         };
 
-        cron.schedule(expr, function () {
+        task.run = function () {
             if (task.runningSince) {
                 // job is still running, skip execution
                 return;
@@ -50,7 +50,9 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
             job.run(function () {
                 task.runningSince = false;
             });
-        });
+        };
+
+        cron.schedule(expr, task.run);
 
         tasks['' + id] = task;
     }
