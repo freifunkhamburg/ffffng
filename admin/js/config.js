@@ -38,8 +38,8 @@ myApp.config(['NgAdminConfigurationProvider', function(NgAdminConfigurationProvi
         ])
         .listActions(
             '<fa-task-action-button action="run" task="entry" button="primary" label="run" size="sm"></fa-task-action-button> ' +
-            '<fa-task-action-button disabled="entry.values.enabled" button="success" action="enable" icon="off" task="entry" label="enable" size="sm"></fa-task-action-button> ' +
-            '<fa-task-action-button disabled="!entry.values.enabled" button="warning" action="disable" icon="off" task="entry" label="disable" size="sm"></fa-task-action-button>'
+            '<fa-task-action-button ng-if="!entry.values.enabled" button="success" action="enable" icon="off" task="entry" label="enable" size="sm"></fa-task-action-button> ' +
+            '<fa-task-action-button ng-if="entry.values.enabled" button="warning" action="disable" icon="off" task="entry" label="disable" size="sm"></fa-task-action-button>'
     )
     ;
 
