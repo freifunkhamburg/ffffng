@@ -35,20 +35,24 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
             schedule: expr,
             job: job,
             runningSince: false,
-            lastRunStarted: false
+            lastRunStarted: false,
+            state: 'idle',
+            enabled: true
         };
 
         task.run = function () {
-            if (task.runningSince) {
+            if (task.runningSince || !task.enabled) {
                 // job is still running, skip execution
                 return;
             }
 
             task.runningSince = moment();
             task.lastRunStarted = task.runningSince;
+            task.state = 'running';
 
             job.run(function () {
                 task.runningSince = false;
+                task.state = 'idle';
             });
         };
 
@@ -65,7 +69,6 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
                 schedule('0 */1 * * * *', 'MailQueueJob');
 
                 if (config.client.monitoring.enabled) {
-                    schedule('* * * * * *', 'TestJob');
                     schedule('30 */15 * * * *', 'NodeInformationRetrievalJob');
                     schedule('45 */5 * * * *', 'MonitoringMailsSendingJob');
                     schedule('0 0 3 * * *', 'NodeInformationCleanupJob'); // every night at 3:00

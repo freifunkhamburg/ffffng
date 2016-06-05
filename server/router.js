@@ -18,6 +18,8 @@ angular.module('ffffng').factory('Router', function (
 
             app.get('/internal/api/tasks', TaskResource.getAll);
             app.put('/internal/api/tasks/run/:id', TaskResource.run);
+            app.put('/internal/api/tasks/enable/:id', TaskResource.enable);
+            app.put('/internal/api/tasks/disable/:id', TaskResource.disable);
         }
     };
 });

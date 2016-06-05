@@ -5,6 +5,7 @@ angular.module('ffffngAdmin')
     var link = function (scope) {
         scope.label = scope.label || 'ACTION';
         scope.icon = scope.icon || 'play';
+        scope.button = scope.button || 'default';
 
         scope.perform = function () {
             var task = scope.task();
@@ -28,12 +29,14 @@ angular.module('ffffngAdmin')
             'icon': '@',
             'task': '&',
             'size': '@',
-            'label': '@'
+            'label': '@',
+            'button': '@',
+            'disabled': '='
         },
 
         'template':
-            '<a class="btn btn-default" ng-class="size ? \'btn-\' + size : \'\'" ng-click="perform()">' +
+            '<button class="btn btn-{{ button }}" ng-disabled="disabled" ng-class="size ? \'btn-\' + size : \'\'" ng-click="perform()">' +
             '<span class="glyphicon glyphicon-{{ icon }}" aria-hidden="true"></span>&nbsp;<span class="hidden-xs">{{ label }}</span>' +
-            '</a>'
+            '</button>'
     };
 });

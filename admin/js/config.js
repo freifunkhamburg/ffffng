@@ -14,6 +14,13 @@ myApp.config(['NgAdminConfigurationProvider', function(NgAdminConfigurationProvi
         .baseApiUrl('/internal/api/')
         .debug(true);
 
+    function taskClasses(task) {
+        if (!task) {
+            return;
+        }
+        return task.values.enabled ? 'task-enabled' : 'task-disabled';
+    }
+
     var tasks = nga.entity('tasks').label('Background-Jobs');
     tasks
         .listView()
@@ -22,14 +29,17 @@ myApp.config(['NgAdminConfigurationProvider', function(NgAdminConfigurationProvi
         .batchActions([])
         .exportFields([])
         .fields([
-            nga.field('id'),
-            nga.field('name'),
-            nga.field('schedule'),
-            nga.field('runningSince').map(formatMoment),
-            nga.field('lastRunStarted').map(formatMoment)
+            nga.field('id').cssClasses(taskClasses),
+            nga.field('name').cssClasses(taskClasses),
+            nga.field('schedule').cssClasses(taskClasses),
+            nga.field('state').cssClasses(taskClasses),
+            nga.field('runningSince').map(formatMoment).cssClasses(taskClasses),
+            nga.field('lastRunStarted').map(formatMoment).cssClasses(taskClasses)
         ])
         .listActions(
-            '<fa-task-action-button action="run" task="entry" label="Run" size="sm"></fa-task-action-button>'
+            '<fa-task-action-button action="run" task="entry" button="primary" label="run" size="sm"></fa-task-action-button> ' +
+            '<fa-task-action-button disabled="entry.values.enabled" button="success" action="enable" icon="off" task="entry" label="enable" size="sm"></fa-task-action-button> ' +
+            '<fa-task-action-button disabled="!entry.values.enabled" button="warning" action="disable" icon="off" task="entry" label="disable" size="sm"></fa-task-action-button>'
     )
     ;
 
