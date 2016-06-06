@@ -6,6 +6,10 @@ angular.module('ffffng').factory('Validator', function (_) {
             return acceptUndefined || constraint.optional;
         }
 
+        if (constraint.type === 'boolean') {
+            return _.isBoolean(value);
+        }
+
         if (!_.isString(value)) {
             return false;
         }

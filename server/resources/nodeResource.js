@@ -92,6 +92,18 @@ angular.module('ffffng').factory('NodeResource', function (
                 }
                 return Resources.success(res, node);
             });
+        },
+
+        getAll: function (req, res) {
+            // TODO: Paging + Sort + Filter
+
+            return NodeService.getAllNodes(function (err, nodes) {
+                if (err) {
+                    return Resources.error(res, err);
+                }
+
+                return Resources.success(res, nodes);
+            });
         }
     };
 });

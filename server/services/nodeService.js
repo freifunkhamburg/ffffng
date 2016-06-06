@@ -4,6 +4,7 @@ angular.module('ffffng')
 .service('NodeService', function (
     config,
     _,
+    async,
     crypto,
     fs,
     glob,
@@ -13,6 +14,8 @@ angular.module('ffffng')
     ErrorTypes,
     UrlBuilder
 ) {
+    var MAX_PARALLEL_NODES_PARSING = 10;
+
     var linePrefixes = {
         hostname: '# Knotenname: ',
         nickname: '# Ansprechpartner: ',
@@ -364,6 +367,24 @@ angular.module('ffffng')
 
         deleteNode: function (token, callback) {
             deleteNodeFile(token, callback);
+        },
+
+        getAllNodes: function (callback) {
+            var files = findNodeFiles({});
+
+            async.mapLimit(
+                files,
+                MAX_PARALLEL_NODES_PARSING,
+                parseNodeFile,
+                function (err, nodes) {
+                    if (err) {
+                        Logger.tag('nodes').error('Error getting all nodes:', error);
+                        return callback({data: 'Internal error.', type: ErrorTypes.internalError});
+                    }
+
+                    return callback(null, nodes);
+                }
+            );
         },
 
         findNodeDataByMac: function (mac, callback) {
