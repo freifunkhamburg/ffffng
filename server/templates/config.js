@@ -1,6 +1,3 @@
 'use strict';
 
-angular.module('ffffng')
-.factory('config', function () {
-    return <%= JSON.stringify(config) %>;
-});
+angular.module('ffffng').constant('config', <%= JSON.stringify(config) %>);

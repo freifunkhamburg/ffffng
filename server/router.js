@@ -2,12 +2,15 @@
 
 angular.module('ffffng').factory('Router', function (
     app,
+    FrontendResource,
     NodeResource,
     MonitoringResource,
     TaskResource
 ) {
     return {
         init: function () {
+            app.post('/', FrontendResource.render);
+
             app.post('/api/node', NodeResource.create);
             app.put('/api/node/:token', NodeResource.update);
             app.delete('/api/node/:token', NodeResource.delete);

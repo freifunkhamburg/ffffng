@@ -31,4 +31,10 @@ angular.module('ffffng')
     $scope.cancel = function () {
         Navigator.home();
     };
+
+    if (window.__nodeToken) {
+        var token = window.__nodeToken;
+        window.__nodeToken = undefined;
+        $scope.onSubmitToken(token);
+    }
 });

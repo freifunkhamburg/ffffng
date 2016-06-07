@@ -212,7 +212,10 @@ angular.module('ffffng')
             }
 
             _.each(entries, function (value, key) {
-                if (key === 'monitoring') {
+                if (key === 'mac') {
+                    node['mac'] = value;
+                    node['mapId'] = _.toLower(value).replace(/:/g, '')
+                } else if (key === 'monitoring') {
                     var active = value === 'aktiv';
                     var pending = value === 'pending';
                     node.monitoring = active || pending;

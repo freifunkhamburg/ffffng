@@ -24,6 +24,7 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
     app.use('/internal', auth.connect(internalAuth));
 
     app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
 
     var adminDir = __dirname + '/../admin';
     var clientDir = __dirname + '/../client';

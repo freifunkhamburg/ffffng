@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, RestangularProvider, Constraints) {
+angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, RestangularProvider, Constraints, config) {
     RestangularProvider.addFullRequestInterceptor(function(element, operation, what, url, headers, params) {
         if (operation === 'getList') {
             if (params._filters) {
@@ -92,10 +92,16 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                     '<input type="text" ng-model="value" placeholder="Search" class="form-control"></input>' +
                     '<span class="input-group-addon"><i class="fa fa-search"></i></span></div>'),
         ])
-        .listActions([
-            'edit',
-            'delete'
-        ])
+        .listActions(
+            '<ma-edit-button entry="entry" entity="entity" size="sm"></ma-edit-button> ' +
+            '<ma-delete-button entry="entry" entity="entity" size="sm"></ma-delete-button> ' +
+            '<form style="display: inline-block" action="/#!/update" method="POST" target="_blank">' +
+            '<input type="hidden" name="token" value="{{entry.values.token}}"/>' +
+            '<button class="btn btn-primary btn-sm" type="submit"><i class="fa fa-external-link"></i> Open</button>' +
+            '</form> ' +
+            '<a class="btn btn-success btn-sm" href="' + config.map.mapUrl +
+            '/#!v:m;n:{{entry.values.mapId}}" target="_blank"><i class="fa fa-map-o"></i> Map</a>'
+        )
     ;
 
     nodes

@@ -1,9 +1,18 @@
 'use strict';
 
 angular.module('ffffng').factory('Resources', function (_, Constraints, Validator, ErrorTypes) {
-    function respond(res, httpCode, data) {
-        res.writeHead(httpCode, {'Content-Type': 'application/json'});
-        res.end(JSON.stringify(data));
+    function respond(res, httpCode, data, type) {
+        switch (type) {
+            case 'html':
+                res.writeHead(httpCode, {'Content-Type': 'text/html'});
+                res.end(data);
+            break;
+
+            default:
+                res.writeHead(httpCode, {'Content-Type': 'application/json'});
+                res.end(JSON.stringify(data));
+            break;
+        }
     }
 
     return {
@@ -84,11 +93,15 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
         },
 
         success: function (res, data) {
-            respond(res, 200, data);
+            respond(res, 200, data, 'json');
+        },
+
+        successHtml: function (res, html) {
+            respond(res, 200, html, 'html');
         },
 
         error: function (res, err) {
-            respond(res, err.type.code, err.data);
+            respond(res, err.type.code, err.data, 'json');
         }
     };
 });

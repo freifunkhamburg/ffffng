@@ -76,6 +76,4 @@ var config = deepExtend({}, defaultConfig, configJSON);
 
 module.exports = config;
 
-angular.module('ffffng').factory('config', function () {
-    return config;
-});
+angular.module('ffffng').constant('config', config);
