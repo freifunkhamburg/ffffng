@@ -1,6 +1,20 @@
 'use strict';
 
-angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Constraints) {
+angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, RestangularProvider, Constraints) {
+    RestangularProvider.addFullRequestInterceptor(function(element, operation, what, url, headers, params) {
+        if (operation === 'getList') {
+            if (params._filters) {
+                // flatten filter query params
+
+                for (var filter in params._filters) {
+                    params[filter] = params._filters[filter];
+                }
+                delete params._filters;
+            }
+        }
+        return { params: params };
+    });
+
     function formatMoment(unix) {
         return unix ? moment.unix(unix).fromNow() : 'N/A';
     }
@@ -41,9 +55,11 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Cons
         .batchActions([])
         .exportFields([])
         .fields([
+            nga.field('hostname').cssClasses(nodeClasses),
+            nga.field('nickname').cssClasses(nodeClasses),
+            nga.field('email').cssClasses(nodeClasses),
             nga.field('token').cssClasses(nodeClasses),
             nga.field('mac').cssClasses(nodeClasses),
-            nga.field('hostname').cssClasses(nodeClasses),
             nga.field('key').label('VPN').cssClasses(nodeClasses).template(function (node) {
                 return node.values.key
                     ? '<i class="fa fa-lock vpn-key-set" aria-hidden="true" title="VPN key set"></i>'
@@ -66,6 +82,15 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Cons
                         return '<i class="fa fa-times monitoring-disabled" title="disabled"></i>';
                 }
             })
+        ])
+        .filters([
+            nga.field('q')
+                .label('')
+                .pinned(true)
+                .template(
+                    '<div class="input-group">' +
+                    '<input type="text" ng-model="value" placeholder="Search" class="form-control"></input>' +
+                    '<span class="input-group-addon"><i class="fa fa-search"></i></span></div>'),
         ])
         .listActions([
             'edit',

@@ -36,8 +36,33 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
             callback(null, restParams);
         },
 
+        filter: function (entities, allowedFilterFields, restParams) {
+            var query = restParams.q;
+            if (!query) {
+                return entities;
+            }
+
+            query = _.toLower(query.trim());
+
+            return _.filter(entities, function (entity) {
+                return _.some(allowedFilterFields, function (field) {
+                    var value = entity[field];
+                    if (!_.isString(value) || _.isEmpty(value)) {
+                        return false;
+                    }
+
+                    value = _.toLower(value);
+                    if (field === 'mac') {
+                        return _.includes(value.replace(/:/g, ''), query.replace(/:/g, ''));
+                    }
+
+                    return _.includes(value, query);
+                })
+            });
+        },
+
         sort: function (entities, allowedSortFields, restParams) {
-            var sortField = _.indexOf(allowedSortFields, restParams._sortField) >= 0 ? restParams._sortField : undefined;
+            var sortField = _.includes(allowedSortFields, restParams._sortField) ? restParams._sortField : undefined;
             if (!sortField) {
                 return entities;
             }

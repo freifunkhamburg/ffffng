@@ -72,6 +72,11 @@ angular.module('ffffng').constant('Constraints',  {
                 type: 'string',
                 regex: /^[a-zA-Z0-9_]{1,32}$/,
                 optional: true
+            },
+            q: {
+                type: 'string',
+                regex: /^[äöüß a-z0-9!#$%&@:.'*+/=?^_`{|}~-]{1,64}$/i,
+                optional: true
             }
         }
     }

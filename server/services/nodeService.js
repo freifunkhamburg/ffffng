@@ -372,7 +372,6 @@ angular.module('ffffng')
 
         getAllNodes: function (callback) {
             var files = findNodeFiles({});
-            var total = files.length;
 
             async.mapLimit(
                 files,
@@ -384,7 +383,7 @@ angular.module('ffffng')
                         return callback({data: 'Internal error.', type: ErrorTypes.internalError});
                     }
 
-                    return callback(null, nodes, total);
+                    return callback(null, nodes);
                 }
             );
         },

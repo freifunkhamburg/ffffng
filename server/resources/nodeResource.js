@@ -100,16 +100,21 @@ angular.module('ffffng').factory('NodeResource', function (
                     return Resources.error(res, err);
                 }
 
-                // TODO: Filter
-
-                return NodeService.getAllNodes(function (err, nodes, total) {
+                return NodeService.getAllNodes(function (err, nodes) {
                     if (err) {
                         return Resources.error(res, err);
                     }
 
-                    var sortedNodes = Resources.sort(
+                    var filteredNodes = Resources.filter(
                         nodes,
-                        ['token', 'mac', 'hostname', 'key', 'coords', 'monitoringState'],
+                        ['hostname', 'nickname', 'email', 'token', 'mac', 'key'],
+                        restParams
+                    );
+                    var total = filteredNodes.length;
+
+                    var sortedNodes = Resources.sort(
+                        filteredNodes,
+                        ['hostname', 'nickname', 'email', 'token', 'mac', 'key', 'coords', 'monitoringState'],
                         restParams
                     );
                     var pageNodes = Resources.getPageEntities(sortedNodes, restParams);
