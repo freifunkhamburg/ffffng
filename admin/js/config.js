@@ -34,20 +34,31 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Cons
     nodes
         .listView()
         .title('Nodes')
+        .perPage(5)
         .actions([])
         .batchActions([])
         .exportFields([])
         .fields([
             nga.field('token').cssClasses(nodeClasses),
+            nga.field('mac').cssClasses(nodeClasses),
             nga.field('hostname').cssClasses(nodeClasses),
+            nga.field('key').label('VPN').cssClasses(nodeClasses).template(function (node) {
+                return node.values.key
+                    ? '<i class="fa fa-lock vpn-key-set" aria-hidden="true" title="VPN key set"></i>'
+                    : '<i class="fa fa-times vpn-key-unset" aria-hidden="true" title="no VPN key"></i>';
+            }),
+            nga.field('coords').label('GPS').cssClasses(nodeClasses).template(function (node) {
+                return node.values.coords
+                    ? '<i class="fa fa-map-marker coords-set" aria-hidden="true" title="coordinates set"></i>'
+                    : '<i class="fa fa-times coords-unset" aria-hidden="true" title="no coordinates"></i>';
+            }),
             nga.field('monitoring').cssClasses(nodeClasses).template(function (node) {
                 if (!node.values.monitoring) {
-                    return '<span class="glyphicon glyphicon-remove monitoring-disabled" title="disabled"></span>';
+                    return '<i class="fa fa-times monitoring-disabled" title="disabled"></i>';
                 }
                 return node.values.monitoringConfirmed
-                    ? '<span class="glyphicon glyphicon-ok monitoring-active" title="active"></span>'
-                    : '<span class="glyphicon glyphicon-envelope monitoring-confirmation-pending" ' +
-                      'title="confirmation pending"></span>';
+                    ? '<i class="fa fa-check monitoring-active" title="active"></i>'
+                    : '<i class="fa fa-envelope monitoring-confirmation-pending" title="confirmation pending"></i>';
             })
         ])
         .listActions([
@@ -105,8 +116,8 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Cons
         ])
         .listActions(
             '<fa-task-action-button action="run" task="entry" button="primary" label="run" size="sm"></fa-task-action-button> ' +
-            '<fa-task-action-button ng-if="!entry.values.enabled" button="success" action="enable" icon="off" task="entry" label="enable" size="sm"></fa-task-action-button> ' +
-            '<fa-task-action-button ng-if="entry.values.enabled" button="warning" action="disable" icon="off" task="entry" label="disable" size="sm"></fa-task-action-button>'
+            '<fa-task-action-button ng-if="!entry.values.enabled" button="success" action="enable" icon="power-off" task="entry" label="enable" size="sm"></fa-task-action-button> ' +
+            '<fa-task-action-button ng-if="entry.values.enabled" button="warning" action="disable" icon="power-off" task="entry" label="disable" size="sm"></fa-task-action-button>'
         )
     ;
 
@@ -116,17 +127,17 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Cons
             nga.menu()
                 .addChild(nga
                     .menu(nodes)
-                    .icon('<span class="glyphicon glyphicon-record"></span>')
+                    .icon('<i class="fa fa-dot-circle-o"></i>')
                 )
                 .addChild(nga
                     .menu(tasks)
-                    .icon('<span class="glyphicon glyphicon-cog"></span>')
+                    .icon('<span class="fa fa-cog"></span>')
                 )
                 .addChild(nga
                     .menu()
                     .template(
                         '<a href="/internal/logs" target="_blank">' +
-                        '<span class="glyphicon glyphicon-list"></span> Logs' +
+                        '<span class="fa fa-list"></span> Logs' +
                         '</a>'
                     )
                 )

@@ -17,6 +17,11 @@ angular.module('ffffng').factory('Strings', function (_) {
             }
 
             return macParts.join(':');
+        },
+
+        parseInt: function (str) {
+            var parsed = _.parseInt(str, 10);
+            return parsed.toString() === str ? parsed : undefined;
         }
     };
 });

@@ -11,7 +11,7 @@ angular.module('ffffng').factory('NodeResource', function (
 ) {
     var nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords', 'monitoring'];
 
-    function getValidNodeData(reqData) {
+    function getNormalizedNodeData(reqData) {
         var node = {};
         _.each(nodeFields, function (field) {
             var value = Strings.normalizeString(reqData[field]);
@@ -30,7 +30,7 @@ angular.module('ffffng').factory('NodeResource', function (
         create: function (req, res) {
             var data = Resources.getData(req);
 
-            var node = getValidNodeData(data);
+            var node = getNormalizedNodeData(data);
             if (!isValidNode(node)) {
                 return Resources.error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
             }
@@ -51,7 +51,7 @@ angular.module('ffffng').factory('NodeResource', function (
                 return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
             }
 
-            var node = getValidNodeData(data);
+            var node = getNormalizedNodeData(data);
             if (!isValidNode(node)) {
                 return Resources.error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
             }
@@ -95,14 +95,22 @@ angular.module('ffffng').factory('NodeResource', function (
         },
 
         getAll: function (req, res) {
-            // TODO: Paging + Sort + Filter
-
-            return NodeService.getAllNodes(function (err, nodes) {
+            Resources.getValidRestParams('list', req, function (err, restParams) {
                 if (err) {
                     return Resources.error(res, err);
                 }
 
-                return Resources.success(res, nodes);
+                // TODO: Sort + Filter
+
+                return NodeService.getAllNodes(restParams._page, restParams._perPage, function (err, nodes, total) {
+                    if (err) {
+                        return Resources.error(res, err);
+                    }
+
+                    res.set('X-Total-Count', total);
+
+                    return Resources.success(res, nodes);
+                });
             });
         }
     };

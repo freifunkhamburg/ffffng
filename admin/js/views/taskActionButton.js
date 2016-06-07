@@ -36,7 +36,7 @@ angular.module('ffffngAdmin')
 
         'template':
             '<button class="btn btn-{{ button }}" ng-disabled="disabled" ng-class="size ? \'btn-\' + size : \'\'" ng-click="perform()">' +
-            '<span class="glyphicon glyphicon-{{ icon }}" aria-hidden="true"></span>&nbsp;<span class="hidden-xs">{{ label }}</span>' +
+            '<span class="fa fa-{{ icon }}" aria-hidden="true"></span>&nbsp;<span class="hidden-xs">{{ label }}</span>' +
             '</button>'
     };
 });

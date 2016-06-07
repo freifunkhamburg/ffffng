@@ -13,6 +13,10 @@ angular.module('ffffng')
         geolib,
         OutsideOfCommunityDialog
     ) {
+        // backwards compatibility
+        $scope.node.monitoring = $scope.node.monitoring || false;
+        $scope.node.monitoringConfirmed = $scope.node.monitoringConfirmed || false;
+
         var initialEmail = $scope.node.email;
         var initialMonitoring = $scope.node.monitoring;
         var monitoringConfirmed = $scope.node.monitoringConfirmed;

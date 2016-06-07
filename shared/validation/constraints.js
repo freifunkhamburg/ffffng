@@ -46,5 +46,22 @@ angular.module('ffffng').constant('Constraints',  {
             type: 'boolean',
             optional: false
         }
+    },
+    rest: {
+        list: {
+            _page: {
+                type: 'number',
+                min: 1,
+                optional: true,
+                default: 1
+            },
+            _perPage: {
+                type: 'number',
+                min: 1,
+                max: 50,
+                optional: true,
+                default: 20
+            }
+        }
     }
 });

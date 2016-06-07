@@ -369,11 +369,13 @@ angular.module('ffffng')
             deleteNodeFile(token, callback);
         },
 
-        getAllNodes: function (callback) {
-            var files = findNodeFiles({});
+        getAllNodes: function (page, perPage, callback) {
+            var files = _.sortBy(findNodeFiles({}));
+            var total = files.length;
+            var pageFiles = files.slice((page - 1) * perPage, page * perPage);
 
             async.mapLimit(
-                files,
+                pageFiles,
                 MAX_PARALLEL_NODES_PARSING,
                 parseNodeFile,
                 function (err, nodes) {
@@ -382,7 +384,7 @@ angular.module('ffffng')
                         return callback({data: 'Internal error.', type: ErrorTypes.internalError});
                     }
 
-                    return callback(null, nodes);
+                    return callback(null, nodes, total);
                 }
             );
         },
