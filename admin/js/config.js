@@ -148,6 +148,15 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
             nga.field('runningSince').map(formatMoment).cssClasses(taskClasses),
             nga.field('lastRunStarted').map(formatMoment).cssClasses(taskClasses)
         ])
+        .filters([
+            nga.field('q')
+                .label('')
+                .pinned(true)
+                .template(
+                '<div class="input-group">' +
+                '<input type="text" ng-model="value" placeholder="Search" class="form-control"></input>' +
+                '<span class="input-group-addon"><i class="fa fa-search"></i></span></div>'),
+        ])
         .listActions(
             '<fa-task-action-button action="run" task="entry" button="primary" label="run" size="sm"></fa-task-action-button> ' +
             '<fa-task-action-button ng-if="!entry.values.enabled" button="success" action="enable" icon="power-off" task="entry" label="enable" size="sm"></fa-task-action-button> ' +

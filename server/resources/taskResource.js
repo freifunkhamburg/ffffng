@@ -84,9 +84,14 @@ angular.module('ffffng').factory('TaskResource', function (
                     ['id', 'name', 'schedule', 'state', 'runningSince', 'lastRunStarted'],
                     restParams
                 );
-                var total = tasks.length;
+                var filteredTasks = Resources.filter(
+                    tasks,
+                    ['id', 'name', 'schedule', 'state'],
+                    restParams
+                );
+                var total = filteredTasks.length;
 
-                var pageTasks = Resources.getPageEntities(tasks, restParams);
+                var pageTasks = Resources.getPageEntities(filteredTasks, restParams);
 
                 res.set('X-Total-Count', total);
                 return Resources.success(res, _.map(pageTasks, toExternalTask));

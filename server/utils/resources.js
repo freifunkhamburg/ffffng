@@ -47,6 +47,10 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
             return _.filter(entities, function (entity) {
                 return _.some(allowedFilterFields, function (field) {
                     var value = entity[field];
+                    if (_.isNumber(value)) {
+                        value = value.toString();
+                    }
+
                     if (!_.isString(value) || _.isEmpty(value)) {
                         return false;
                     }
