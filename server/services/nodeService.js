@@ -96,7 +96,7 @@ angular.module('ffffng')
                 node.mac + '@' +
                 (node.key || '') + '@' +
                 token + '@' +
-                nodeSecrets.monitoringToken
+                (nodeSecrets.monitoringToken || '')
             ).toLowerCase();
 
         var data = '';
