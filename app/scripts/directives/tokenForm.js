@@ -15,8 +15,8 @@ angular.module('ffffng')
 
             $scope.error = null;
             $scope.onSubmit(token)
-                .catch(function (response, code) {
-                    switch (code) {
+                .catch(function (response) {
+                    switch (response.status) {
                         case 404: // not found
                             $scope.error = 'Zum Token wurde kein passender Eintrag gefunden.';
                             break;

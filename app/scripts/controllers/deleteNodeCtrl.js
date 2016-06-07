@@ -9,10 +9,11 @@ angular.module('ffffng')
     $scope.onSubmitToken = function (token) {
         $scope.token = token;
         return NodeService.getNode(token)
-            .success(function (node) {
+            .then(function (response) {
+                var node = response.data;
                 ConfirmDeletionDialog.open(node).result.then(function () {
                     NodeService.deleteNode(token)
-                        .success(function () {
+                        .then(function () {
                             $scope.deleted = true;
                             $scope.hostname = node.hostname;
                         });

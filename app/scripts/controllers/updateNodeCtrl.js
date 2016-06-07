@@ -21,9 +21,9 @@ angular.module('ffffng')
 
     $scope.save = function (node) {
         return NodeService.updateNode(node, $scope.token)
-            .success(function (response) {
-                $scope.node = response.node;
-                $scope.token = response.token;
+            .then(function (response) {
+                $scope.node = response.data.node;
+                $scope.token = response.data.token;
                 $scope.saved = true;
             });
     };

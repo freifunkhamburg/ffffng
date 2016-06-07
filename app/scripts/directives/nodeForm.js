@@ -159,11 +159,11 @@ angular.module('ffffng')
             }
 
             $scope.error = null;
-            $scope.save(node).catch(function (response, code) {
+            $scope.save(node).catch(function (response) {
                 // error
-                switch (code) {
+                switch (response.status) {
                     case 409: // conflict
-                        $scope.error = duplicateError[response.field];
+                        $scope.error = duplicateError[response.data.field];
                         break;
                     default:
                         $scope.error = 'Es ist ein Fehler aufgetreten. Versuche es später noch einmal.';

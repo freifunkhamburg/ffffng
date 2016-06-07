@@ -16,9 +16,9 @@ angular.module('ffffng')
 
     $scope.save = function (node) {
         return NodeService.createNode(node)
-            .success(function (response) {
-                $scope.node = response.node;
-                $scope.token = response.token;
+            .then(function (response) {
+                $scope.node = response.data.node;
+                $scope.token = response.data.token;
                 $scope.saved = true;
             });
     };
