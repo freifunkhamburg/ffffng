@@ -11,9 +11,9 @@ angular.module('ffffng').factory('TaskResource', function (
 ) {
     var isValidId = Validator.forConstraint(Constraints.id);
 
-    function toExternalTask(task, id) {
+    function toExternalTask(task) {
         return {
-            id: id,
+            id: task.id,
             name: task.name,
             schedule: task.schedule,
             runningSince: task.runningSince && task.runningSince.unix(),
@@ -55,31 +55,47 @@ angular.module('ffffng').factory('TaskResource', function (
                     return callback(err);
                 }
 
-                callback(null, id, task);
+                callback(null, task);
             });
         });
     }
 
     function setTaskEnabled(req, res, enable) {
-        withTask(req, res, function (err, id, task) {
+        withTask(req, res, function (err, task) {
             if (err) {
                 return Resources.error(res, err);
             }
 
             task.enabled = !!enable; // ensure boolean
 
-            return Resources.success(res, toExternalTask(task, id));
+            return Resources.success(res, toExternalTask(task));
         });
     }
 
     return {
         getAll: function (req, res) {
-            var tasks = Scheduler.getTasks();
-            return Resources.success(res, _.map(tasks, toExternalTask));
+            Resources.getValidRestParams('list', req, function (err, restParams) {
+                if (err) {
+                    return Resources.error(res, err);
+                }
+
+                // TODO: Sort
+
+                var tasks = _.values(Scheduler.getTasks());
+                var total = tasks.length;
+
+                var page = restParams._page;
+                var perPage = restParams._perPage;
+
+                var pageTasks = tasks.slice((page - 1) * perPage, page * perPage);
+
+                res.set('X-Total-Count', total);
+                return Resources.success(res, _.map(pageTasks, toExternalTask));
+            });
         },
 
         run: function (req, res) {
-            withTask(req, res, function (err, id, task) {
+            withTask(req, res, function (err, task) {
                 if (err) {
                     return Resources.error(res, err);
                 }
@@ -90,7 +106,7 @@ angular.module('ffffng').factory('TaskResource', function (
 
                 task.run();
 
-                return Resources.success(res, toExternalTask(task, id));
+                return Resources.success(res, toExternalTask(task));
             });
         },
 

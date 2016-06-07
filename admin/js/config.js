@@ -34,7 +34,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Cons
     nodes
         .listView()
         .title('Nodes')
-        .perPage(5)
+        .perPage(30)
         .actions([])
         .batchActions([])
         .exportFields([])
@@ -103,6 +103,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Cons
     tasks
         .listView()
         .title('Background-Jobs')
+        .perPage(30)
         .actions([])
         .batchActions([])
         .exportFields([])

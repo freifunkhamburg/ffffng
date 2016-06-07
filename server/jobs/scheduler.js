@@ -31,6 +31,7 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
 
         var id = nextTaskId();
         var task = {
+            id: id,
             name: jobName,
             schedule: expr,
             job: job,

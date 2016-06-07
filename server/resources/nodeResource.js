@@ -108,7 +108,6 @@ angular.module('ffffng').factory('NodeResource', function (
                     }
 
                     res.set('X-Total-Count', total);
-
                     return Resources.success(res, nodes);
                 });
             });
