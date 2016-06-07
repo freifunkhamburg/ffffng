@@ -35,6 +35,8 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Cons
         .listView()
         .title('Nodes')
         .perPage(30)
+        .sortDir('ASC')
+        .sortField('hostname')
         .actions([])
         .batchActions([])
         .exportFields([])
@@ -52,13 +54,17 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Cons
                     ? '<i class="fa fa-map-marker coords-set" aria-hidden="true" title="coordinates set"></i>'
                     : '<i class="fa fa-times coords-unset" aria-hidden="true" title="no coordinates"></i>';
             }),
-            nga.field('monitoring').cssClasses(nodeClasses).template(function (node) {
-                if (!node.values.monitoring) {
-                    return '<i class="fa fa-times monitoring-disabled" title="disabled"></i>';
+            nga.field('monitoringState').cssClasses(nodeClasses).template(function (node) {
+                switch (node.values.monitoringState) {
+                    case 'active':
+                        return '<i class="fa fa-check monitoring-active" title="active"></i>';
+
+                    case 'pending':
+                        return '<i class="fa fa-envelope monitoring-confirmation-pending" title="confirmation pending"></i>';
+
+                    default:
+                        return '<i class="fa fa-times monitoring-disabled" title="disabled"></i>';
                 }
-                return node.values.monitoringConfirmed
-                    ? '<i class="fa fa-check monitoring-active" title="active"></i>'
-                    : '<i class="fa fa-envelope monitoring-confirmation-pending" title="confirmation pending"></i>';
             })
         ])
         .listActions([
@@ -104,6 +110,8 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Cons
         .listView()
         .title('Background-Jobs')
         .perPage(30)
+        .sortDir('ASC')
+        .sortField('id')
         .actions([])
         .batchActions([])
         .exportFields([])

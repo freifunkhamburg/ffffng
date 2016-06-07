@@ -61,6 +61,17 @@ angular.module('ffffng').constant('Constraints',  {
                 max: 50,
                 optional: true,
                 default: 20
+            },
+            _sortDir: {
+                type: 'enum',
+                allowed: ['ASC', 'DESC'],
+                optional: true,
+                default: 'ASC'
+            },
+            _sortField: {
+                type: 'string',
+                regex: /^[a-zA-Z0-9_]{1,32}$/,
+                optional: true
             }
         }
     }

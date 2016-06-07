@@ -79,15 +79,14 @@ angular.module('ffffng').factory('TaskResource', function (
                     return Resources.error(res, err);
                 }
 
-                // TODO: Sort
-
-                var tasks = _.values(Scheduler.getTasks());
+                var tasks = Resources.sort(
+                    _.values(Scheduler.getTasks()),
+                    ['id', 'name', 'schedule', 'state', 'runningSince', 'lastRunStarted'],
+                    restParams
+                );
                 var total = tasks.length;
 
-                var page = restParams._page;
-                var perPage = restParams._perPage;
-
-                var pageTasks = tasks.slice((page - 1) * perPage, page * perPage);
+                var pageTasks = Resources.getPageEntities(tasks, restParams);
 
                 res.set('X-Total-Count', total);
                 return Resources.success(res, _.map(pageTasks, toExternalTask));

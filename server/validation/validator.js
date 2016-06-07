@@ -1,8 +1,10 @@
 'use strict';
 
 angular.module('ffffng').factory('Validator', function (_, Strings, Logger) {
+    // TODO: sanitize input for further processing as specified by constraints (correct types, trimming, etc.)
+
     function isValidBoolean(value) {
-        return _.isBoolean(value);
+        return _.isBoolean(value) || value === 'true' || value === 'false';
     }
 
     function isValidNumber(constraint, value) {
@@ -29,6 +31,14 @@ angular.module('ffffng').factory('Validator', function (_, Strings, Logger) {
         return true;
     }
 
+    function isValidEnum(constraint, value) {
+        if (!_.isString(value)) {
+            return false;
+        }
+
+        return _.indexOf(constraint.allowed, value) >= 0;
+    }
+
     function isValidString(constraint, value) {
         if (!_.isString(value)) {
             return false;
@@ -49,6 +59,9 @@ angular.module('ffffng').factory('Validator', function (_, Strings, Logger) {
 
             case 'number':
                 return isValidNumber(constraint, value);
+
+            case 'enum':
+                return isValidEnum(constraint, value);
 
             case 'string':
                 return isValidString(constraint, value);

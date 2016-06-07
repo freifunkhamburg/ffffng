@@ -100,15 +100,22 @@ angular.module('ffffng').factory('NodeResource', function (
                     return Resources.error(res, err);
                 }
 
-                // TODO: Sort + Filter
+                // TODO: Filter
 
-                return NodeService.getAllNodes(restParams._page, restParams._perPage, function (err, nodes, total) {
+                return NodeService.getAllNodes(function (err, nodes, total) {
                     if (err) {
                         return Resources.error(res, err);
                     }
 
+                    var sortedNodes = Resources.sort(
+                        nodes,
+                        ['token', 'mac', 'hostname', 'key', 'coords', 'monitoringState'],
+                        restParams
+                    );
+                    var pageNodes = Resources.getPageEntities(sortedNodes, restParams);
+
                     res.set('X-Total-Count', total);
-                    return Resources.success(res, nodes);
+                    return Resources.success(res, pageNodes);
                 });
             });
         }

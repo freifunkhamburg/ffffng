@@ -217,6 +217,7 @@ angular.module('ffffng')
                     var pending = value === 'pending';
                     node.monitoring = active || pending;
                     node.monitoringConfirmed = active;
+                    node.monitoringState = active ? 'active' : (pending ? 'pending' : '');
                 } else if (key === 'monitoringToken') {
                     nodeSecrets.monitoringToken = value;
                 } else {
@@ -369,13 +370,12 @@ angular.module('ffffng')
             deleteNodeFile(token, callback);
         },
 
-        getAllNodes: function (page, perPage, callback) {
-            var files = _.sortBy(findNodeFiles({}));
+        getAllNodes: function (callback) {
+            var files = findNodeFiles({});
             var total = files.length;
-            var pageFiles = files.slice((page - 1) * perPage, page * perPage);
 
             async.mapLimit(
-                pageFiles,
+                files,
                 MAX_PARALLEL_NODES_PARSING,
                 parseNodeFile,
                 function (err, nodes) {

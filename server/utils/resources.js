@@ -36,6 +36,24 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
             callback(null, restParams);
         },
 
+        sort: function (entities, allowedSortFields, restParams) {
+            var sortField = _.indexOf(allowedSortFields, restParams._sortField) >= 0 ? restParams._sortField : undefined;
+            if (!sortField) {
+                return entities;
+            }
+
+            var sorted = _.sortBy(entities, [sortField]);
+
+            return restParams._sortDir === 'ASC' ? sorted : _.reverse(sorted);
+        },
+
+        getPageEntities: function (entities, restParams) {
+            var page = restParams._page;
+            var perPage = restParams._perPage;
+
+            return entities.slice((page - 1) * perPage, page * perPage);
+        },
+
         success: function (res, data) {
             respond(res, 200, data);
         },
