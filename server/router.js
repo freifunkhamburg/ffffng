@@ -25,6 +25,8 @@ angular.module('ffffng').factory('Router', function (
             app.put('/internal/api/tasks/enable/:id', TaskResource.enable);
             app.put('/internal/api/tasks/disable/:id', TaskResource.disable);
 
+            app.get('/internal/api/monitoring', MonitoringResource.getAll);
+
             app.get('/internal/api/mails', MailResource.getAll);
             app.get('/internal/api/mails/:id', MailResource.get);
             app.delete('/internal/api/mails/:id', MailResource.delete);

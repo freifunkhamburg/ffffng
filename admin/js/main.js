@@ -73,7 +73,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
             nga.field('monitoringState').cssClasses(nodeClasses).template(function (node) {
                 switch (node.values.monitoringState) {
                     case 'active':
-                        return '<i class="fa fa-check monitoring-active" title="active"></i>';
+                        return '<i class="fa fa-heartbeat monitoring-active" title="active"></i>';
 
                     case 'pending':
                         return '<i class="fa fa-envelope monitoring-confirmation-pending" title="confirmation pending"></i>';
@@ -128,6 +128,51 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
     ;
 
     admin.addEntity(nodes);
+
+    function monitoringStateClasses(monitoringState) {
+        if (!monitoringState) {
+            return;
+        }
+        return;
+    }
+
+    var monitoringStates = nga.entity('monitoring').label('Monitoring');
+    monitoringStates
+        .listView()
+        .title('Monitoring')
+        .perPage(30)
+        .sortDir('ASC')
+        .sortField('id')
+        .actions([])
+        .batchActions([])
+        .exportFields([])
+        .fields([
+            nga.field('id').cssClasses(monitoringStateClasses()),
+            nga.field('mac').cssClasses(monitoringStateClasses()),
+            nga.field('state').cssClasses(monitoringStateClasses()),
+            nga.field('last_seen').map(formatMoment).cssClasses(monitoringStateClasses()),
+            nga.field('import_timestamp').map(formatMoment).cssClasses(monitoringStateClasses()),
+            nga.field('last_status_mail_type').cssClasses(monitoringStateClasses()),
+            nga.field('last_status_mail_sent').map(formatMoment).cssClasses(monitoringStateClasses()),
+            nga.field('created_at').map(formatMoment).cssClasses(monitoringStateClasses()),
+            nga.field('modified_at').map(formatMoment).cssClasses(monitoringStateClasses())
+        ])
+        .filters([
+            nga.field('q')
+                .label('')
+                .pinned(true)
+                .template(
+                '<div class="input-group">' +
+                '<input type="text" ng-model="value" placeholder="Search" class="form-control"></input>' +
+                '<span class="input-group-addon"><i class="fa fa-search"></i></span></div>'),
+        ])
+        .listActions(
+            '<a class="btn btn-success btn-sm" href="' + config.map.mapUrl +
+            '/#!v:m;n:{{entry.values.mapId}}" target="_blank"><i class="fa fa-map-o"></i> Map</a>'
+        )
+    ;
+
+    admin.addEntity(monitoringStates);
 
     function mailClasses(mail) {
         if (!mail) {
@@ -231,6 +276,10 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                 .addChild(nga
                     .menu(nodes)
                     .icon('<i class="fa fa-dot-circle-o"></i>')
+                )
+                .addChild(nga
+                    .menu(monitoringStates)
+                    .icon('<span class="fa fa-heartbeat"></span>')
                 )
                 .addChild(nga
                     .menu(mails)

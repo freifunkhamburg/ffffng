@@ -15,7 +15,8 @@ angular.module('ffffng')
         Strings,
         UrlBuilder,
         Validator,
-        Constraints
+        Constraints,
+        Resources
 ) {
     var MONITORING_MAILS_DB_BATCH_SIZE = 50;
     var MONITORING_OFFLINE_MAILS_SCHEDULE = {
@@ -352,6 +353,53 @@ angular.module('ffffng')
     }
 
     return {
+        getAll: function (restParams, callback) {
+            Database.get(
+                'SELECT count(*) AS total FROM node_state',
+                [],
+                function (err, row) {
+                    if (err) {
+                        return callback(err);
+                    }
+
+                    var total = row.total;
+
+                    var filter = Resources.filterClause(
+                        restParams,
+                        'id',
+                        [
+                            'id',
+                            'mac',
+                            'state',
+                            'last_seen',
+                            'import_timestamp',
+                            'last_status_mail_type',
+                            'last_status_mail_sent',
+                            'created_at',
+                            'modified_at'
+                        ],
+                        [
+                            'mac',
+                            'state',
+                            'last_status_mail_type'
+                        ]
+                    );
+
+                    Database.all(
+                        'SELECT * FROM node_state WHERE ' + filter.query,
+                        _.concat([], filter.params),
+                        function (err, rows) {
+                            if (err) {
+                                return callback(err);
+                            }
+
+                            callback(null, rows, total);
+                        }
+                    );
+                }
+            );
+        },
+
         confirm: function (token, callback) {
             NodeService.getNodeDataByMonitoringToken(token, function (err, node, nodeSecrets) {
                 if (err) {
