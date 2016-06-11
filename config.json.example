@@ -38,12 +38,12 @@
     },
     "client": {
         "community": {
-            "name": "Freifunk Hamburg",
-            "domain": "hamburg.freifunk.net",
-            "contactEmail": "kontakt@hamburg.freifunk.net"
+            "name": "Freifunk Musterstadt",
+            "domain": "musterstadt.freifunk.net",
+            "contactEmail": "kontakt@musterstadt.freifunk.net"
         },
         "map": {
-            "mapUrl": "http://map.hamburg.freifunk.net"
+            "mapUrl": "http://map.musterstadt.freifunk.net"
         },
         "monitoring": {
             "enabled": false
