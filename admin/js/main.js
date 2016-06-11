@@ -133,7 +133,17 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
         if (!monitoringState) {
             return;
         }
-        return;
+
+        switch (monitoringState.values.state) {
+            case 'ONLINE':
+                return 'monitoring-state-online';
+
+            case 'OFFLINE':
+                return 'monitoring-state-offline';
+
+            default:
+                return;
+        }
     }
 
     var monitoringStates = nga.entity('monitoring').label('Monitoring');
@@ -147,15 +157,15 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
         .batchActions([])
         .exportFields([])
         .fields([
-            nga.field('id').cssClasses(monitoringStateClasses()),
-            nga.field('mac').cssClasses(monitoringStateClasses()),
-            nga.field('state').cssClasses(monitoringStateClasses()),
-            nga.field('last_seen').map(formatMoment).cssClasses(monitoringStateClasses()),
-            nga.field('import_timestamp').map(formatMoment).cssClasses(monitoringStateClasses()),
-            nga.field('last_status_mail_type').cssClasses(monitoringStateClasses()),
-            nga.field('last_status_mail_sent').map(formatMoment).cssClasses(monitoringStateClasses()),
-            nga.field('created_at').map(formatMoment).cssClasses(monitoringStateClasses()),
-            nga.field('modified_at').map(formatMoment).cssClasses(monitoringStateClasses())
+            nga.field('id').cssClasses(monitoringStateClasses),
+            nga.field('mac').cssClasses(monitoringStateClasses),
+            nga.field('state').cssClasses(monitoringStateClasses),
+            nga.field('last_seen').map(formatMoment).cssClasses(monitoringStateClasses),
+            nga.field('import_timestamp').label('Imported').map(formatMoment).cssClasses(monitoringStateClasses),
+            nga.field('last_status_mail_type').cssClasses(monitoringStateClasses),
+            nga.field('last_status_mail_sent').map(formatMoment).cssClasses(monitoringStateClasses),
+            nga.field('created_at').map(formatMoment).cssClasses(monitoringStateClasses),
+            nga.field('modified_at').map(formatMoment).cssClasses(monitoringStateClasses)
         ])
         .filters([
             nga.field('q')
