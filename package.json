@@ -1,7 +1,22 @@
 {
     "name": "ffffng",
     "version": "0.2.0-SNAPSHOT",
+    "description": "Node managent form for Freifunk",
     "license": "MIT",
+
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/freifunkhamburg/ffffng"
+    },
+    "bugs": {
+        "url": "https://github.com/freifunkhamburg/ffffng/issues"
+    },
+
+    "bin": {
+        "ffffng": "server/main.js",
+        "ffffng-fix-key-file-names": "bin/fix_key_file_names.py"
+    },
+
     "dependencies": {
         "async": "~1.5.2",
         "body-parser": "~1.15.1",
