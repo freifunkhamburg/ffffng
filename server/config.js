@@ -1,5 +1,33 @@
 'use strict';
 
+var commandLineArgs = require('command-line-args');
+var commandLineUsage = require('command-line-usage');
+
+var commandLineDefs = [
+    { name: 'help', alias: 'h', type: Boolean, description: 'Show this help' },
+    { name: 'config', alias: 'c', type: String, description: 'Location of config.json' }
+];
+
+var commandLineOptions;
+try {
+    commandLineOptions = commandLineArgs(commandLineDefs);
+} catch (e) {
+    console.error(e.message);
+    console.error('Try \'--help\' for more information.');
+    process.exit(1);
+}
+
+if (commandLineOptions.help || !commandLineOptions.config) {
+    console.log(commandLineUsage([
+        {
+            header: 'ffffng - Freifunk node management form',
+            optionList: commandLineDefs
+        }
+    ]));
+    process.exit(1);
+}
+
+
 var fs = require('fs');
 var deepExtend = require('deep-extend');
 
@@ -65,11 +93,14 @@ var defaultConfig = {
     }
 };
 
-var configJSONFile = __dirname + '/../config.json';
+var configJSONFile = commandLineOptions.config;
 var configJSON = {};
 
 if (fs.existsSync(configJSONFile)) {
     configJSON = JSON.parse(fs.readFileSync(configJSONFile, 'utf8'));
+} else {
+    console.error('config.json not found: ' + configJSONFile);
+    process.exit(1);
 }
 
 var config = deepExtend({}, defaultConfig, configJSON);

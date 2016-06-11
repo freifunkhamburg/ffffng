@@ -20,6 +20,8 @@
     "dependencies": {
         "async": "~1.5.2",
         "body-parser": "~1.15.1",
+        "command-line-args": "~3.0.0",
+        "command-line-usage": "~3.0.1",
         "compression": "~1.6.2",
         "deep-extend": "~0.4.1",
         "express": "~4.13.4",
