@@ -3,7 +3,7 @@
 angular.module('ffffng')
 .service('MailService', function (
         Database,
-        UrlBuilder,
+        MailTemplateService,
         config,
         _,
         async,
@@ -25,10 +25,7 @@ angular.module('ffffng')
         }
     ));
 
-    var htmlToText = require('nodemailer-html-to-text').htmlToText;
-    transporter.use('compile', htmlToText({
-        tables: ['.table']
-    }));
+    MailTemplateService.configureTransporter(transporter);
 
     function sendMail(options, callback) {
         Logger
@@ -39,44 +36,17 @@ angular.module('ffffng')
                 options.id, options.email, options.failures
             );
 
-        var templateBasePath = __dirname + '/../mailTemplates/' + options.email;
-        async.parallel({
-                subject: _.partial(fs.readFile, templateBasePath + '.subject.txt'),
-                body: _.partial(fs.readFile, templateBasePath + '.body.html')
-            },
-            function (err, templates) {
+        MailTemplateService.render(options, function (err, renderedTemplate) {
                 if (err) {
                     return callback(err);
                 }
 
-                var data = deepExtend(
-                    {},
-                    options.data,
-                    {
-                        community: config.client.community,
-                        editNodeUrl: UrlBuilder.editNodeUrl()
-                    }
-                );
-
-                function render(field) {
-                    return _.template(templates[field].toString())(data);
-                }
-
-                var mailOptions;
-                try {
-                    mailOptions = {
-                        from: options.sender,
-                        to: options.recipient,
-                        subject: _.trim(render('subject')),
-                        html: render('body')
-                    };
-                }
-                catch (error) {
-                    Logger
-                        .tag('mail', 'queue')
-                        .error('Error rendering template for pending mail[' + options.id + ']:', error);
-                    return callback(error);
-                }
+                var mailOptions = {
+                    from: options.sender,
+                    to: options.recipient,
+                    subject: renderedTemplate.subject,
+                    html: renderedTemplate.body
+                };
 
                 transporter.sendMail(mailOptions, function (err) {
                     if (err) {

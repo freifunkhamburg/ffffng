@@ -26,6 +26,7 @@ require('./resources/nodeResource');
 require('./resources/monitoringResource');
 
 require('./services/mailService');
+require('./services/mailTemplateService');
 require('./services/nodeService');
 require('./services/monitoringService');
 
