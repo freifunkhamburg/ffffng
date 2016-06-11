@@ -1,106 +1,42 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<%= header() %>
 
-    <style type="text/css">
-        body {
-            margin: 0;
-            padding: 0;
-        }
+<p>
+    für einen Deiner Knoten wurde der automatisierte Versand von Status-E-Mails aktiviert. Um sicherzustellen, dass
+    Du wirklich der richtige Empfänger für diese E-Mails bist, bitten wir Dich, Deine E-Mail-Adresse durch einen
+    Klick auf den Bestätiguns-Link unten zu bestätigen. Erst danach wird der Versand von Status-E-Mails wirklich
+    stattfinden.
+</p>
 
-        th {
-            font-weight: bold;
-            text-align: left;
-            padding-right: 10px;
-        }
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 45px;">
+    <tr>
+        <td align="center">
+            <table class="table" style="border: 3px dashed #666666; padding: 10px; background-color: #F5F5F5; font-size: 1.3em;">
+                <tr>
+                    <th>Knoten</th>
+                    <td><%- node.hostname %></td>
+                </tr>
 
-        em {
-            font-size: 0.9em;
-        }
-    </style>
-</head>
+                <tr>
+                    <th>Empfänger</th>
+                    <td><%= link('mailto:' + node.email, node.email) %></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 
-<body>
-    <table border="0" cellpadding="10" cellspacing="0" bgcolor="#EDEDED">
-        <tr>
-            <td style="color: #444444; font-family: HelveticaNeue, 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-                <p>
-                    <strong style="font-size: 1.5em;">Hallo <%- node.nickname %>,</strong>
-                </p>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 45px; margin-bottom: 45px;">
+    <tr>
+        <td align="center" style="font-size: 1.5em;">
+            <strong>
+                <%= link(confirmUrl, '» E-Mail-Adresse bestätigen «') %>
+            </strong>
+        </td>
+    </tr>
+</table>
 
-                <p>
-                    für einen Deiner Knoten wurde der automatisierte Versand von Status-E-Mails aktiviert. Um sicherzustellen, dass
-                    Du wirklich der richtige Empfänger für diese E-Mails bist, bitten wir Dich, Deine E-Mail-Adresse durch einen
-                    Klick auf den Bestätiguns-Link unten zu bestätigen. Erst danach wird der Versand von Status-E-Mails wirklich
-                    stattfinden.
-                </p>
+<p></p>
 
-                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 45px;">
-                    <tr>
-                        <td align="center">
-                            <table class="table" style="border: 3px dashed #666666; padding: 10px; background-color: #F5F5F5; font-size: 1.3em;">
-                                <tr>
-                                    <th>Knoten</th>
-                                    <td><%- node.hostname %></td>
-                                </tr>
+<%= monitoringFooter() %>
 
-                                <tr>
-                                    <th>Empfänger</th>
-                                    <td><a href="mailto:<%- node.email %>" style="color: #E5287A;"><%- node.email %></a></td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-
-                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 45px; margin-bottom: 45px;">
-                    <tr>
-                        <td align="center" style="font-size: 1.5em;">
-                            <strong>
-                                <a href="<%- confirmUrl %>" style="color: #E5287A;">» E-Mail-Adresse bestätigen «</a>
-                            </strong>
-                        </td>
-                    </tr>
-                </table>
-
-                <p></p>
-
-                <p>
-                    Bei Fragen wende Dich gerne an
-                    <a href="mailto:<%- community.contactEmail %>" style="color: #E5287A;"><%- community.contactEmail %></a>.
-                </p>
-
-                <p>
-                    <strong>
-                        Viele Grüße<br />
-                        Dein <%- community.name %>
-                    </strong>
-                </p>
-
-                <hr style="border-top: 1px solid #333333; border-left: 0; border-right: 0; border-bottom: 0;" />
-
-                <p>
-                    <em>
-                        Möchtest Du keine Status-E-Mails zu Diesem Knoten mehr erhalten, so kannst Du den Versand
-                        jederzeit <a href="<%- disableUrl %>" style="color: #E5287A;">deaktivieren</a>.
-                    </em>
-                </p>
-                <p>
-                    <em>
-                        Alternativ kannst Du die Versandeinstellungen auch jederzeit unter
-                        <a href="<%- editNodeUrl %>" style="color: #E5287A;"><%- editNodeUrl %></a>
-                        ändern.
-                    </em>
-                </p>
-                <p>
-                    <em>
-                        Bitte habe Verständnis dafür, dass das An- und Abschalten des Versands für jeden Deiner Knoten
-                        einzeln erfolgt.
-                    </em>
-                </p>
-            </td>
-        </tr>
-    </table>
-</body>
-</html>
+<%= footer() %>

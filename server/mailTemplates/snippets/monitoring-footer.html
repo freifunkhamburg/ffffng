@@ -1,0 +1,32 @@
+<p>
+    Bei Fragen wende Dich gerne an
+    <%= link('mailto:' + community.contactEmail, community.contactEmail) %>
+</p>
+
+<p>
+    <strong>
+        Viele Grüße<br />
+        Dein <%- community.name %>
+    </strong>
+</p>
+
+<%= hr() %>
+
+<p>
+    <em>
+        Möchtest Du keine Status-E-Mails zu Diesem Knoten mehr erhalten, so kannst Du den Versand
+        jederzeit <%= link(disableUrl, 'deaktivieren') %>.
+    </em>
+</p>
+<p>
+    <em>
+        Alternativ kannst Du die Versandeinstellungen auch jederzeit unter
+        <%= link(editNodeUrl, editNodeUrl) %> ändern.
+    </em>
+</p>
+<p>
+    <em>
+        Bitte habe Verständnis dafür, dass das An- und Abschalten des Versands für jeden Deiner Knoten
+        einzeln erfolgt.
+    </em>
+</p>

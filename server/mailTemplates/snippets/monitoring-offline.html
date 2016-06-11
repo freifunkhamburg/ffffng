@@ -1,0 +1,23 @@
+<p>
+    Dein Knoten ist <% if (mailNum === 1) { %>akutell<% } else { %>weiterhin<% } %> offline.
+</p>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 45px; margin-bottom: 45px;">
+    <tr>
+        <td align="center">
+            <table class="table" style="border: 3px dashed #666666; padding: 10px; background-color: #F5F5F5; font-size: 1.3em;">
+                <tr>
+                    <th>Knoten</th>
+                    <td><%- node.hostname %></td>
+                </tr>
+
+                <tr>
+                    <th>Zuletzt online</th>
+                    <td><%= formatFromNow(lastSeen) %> (<%= formatDateTime(lastSeen) %>)</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<p></p>
