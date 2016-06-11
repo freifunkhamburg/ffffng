@@ -14,6 +14,18 @@
             text-decoration: line-through;
         }
 
+        .mails-pending {
+            color: green;
+        }
+
+        .mails-failed {
+            color: #eea236;
+        }
+
+        .mails-failed-max {
+            color: red;
+        }
+
         .monitoring-active {
             color: green;
         }
@@ -40,9 +52,14 @@
 
     <script src="js/moment-with-locales.min.js"></script>
     <script src="js/ng-admin.min.js"></script>
+
     <script src="js/app.js"></script>
+
     <script src="js/validation/constraints.js"></script>
+
+    <script src="js/views/mailActionButton.js"></script>
     <script src="js/views/taskActionButton.js"></script>
+
     <script src="js/main.js"></script>
     <script src="/config.js"></script>
 </body>

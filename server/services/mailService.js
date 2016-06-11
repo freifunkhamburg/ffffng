@@ -1,7 +1,18 @@
 'use strict';
 
 angular.module('ffffng')
-.service('MailService', function (Database, UrlBuilder, config, _, async, deepExtend, fs, moment, Logger) {
+.service('MailService', function (
+        Database,
+        UrlBuilder,
+        config,
+        _,
+        async,
+        deepExtend,
+        fs,
+        moment,
+        Logger,
+        Resources
+) {
     var MAIL_QUEUE_DB_BATCH_SIZE = 50;
     var MAIL_QUEUE_MAX_PARALLEL_SENDING = 3;
 
@@ -83,7 +94,7 @@ angular.module('ffffng')
     function findPendingMailsBefore(beforeMoment, limit, callback) {
         Database.all(
             'SELECT * FROM email_queue WHERE modified_at < ? AND failures < ? ORDER BY id ASC LIMIT ?',
-            [beforeMoment.unix(), 5, limit], // TODO: retrycount
+            [beforeMoment.unix(), 5, limit],
             function (err, rows) {
                 if (err) {
                     return callback(err);
@@ -141,6 +152,10 @@ angular.module('ffffng')
         });
     }
 
+    function doGetMail(id, callback) {
+        Database.get('SELECT * FROM email_queue WHERE id = ?', [id], callback);
+    }
+
     return {
         enqueue: function (sender, recipient, email, data, callback) {
             if (!_.isPlainObject(data)) {
@@ -153,6 +168,65 @@ angular.module('ffffng')
                 [0, sender, recipient, email, JSON.stringify(data)],
                 function (err, res) {
                     callback(err, res);
+                }
+            );
+        },
+
+        getMail: function (id, callback) {
+            doGetMail(id, callback);
+        },
+
+        getPendingMails: function (restParams, callback) {
+            Database.get(
+                'SELECT count(*) AS total FROM email_queue',
+                [],
+                function (err, row) {
+                    if (err) {
+                        return callback(err);
+                    }
+
+                    var total = row.total;
+
+                    var filter = Resources.filterClause(
+                        restParams,
+                        'id',
+                        ['id', 'failures', 'sender', 'recipient', 'email', 'created_at', 'modified_at'],
+                        ['id', 'failures', 'sender', 'recipient', 'email']
+                    );
+
+                    Database.all(
+                        'SELECT * FROM email_queue WHERE ' + filter.query,
+                        _.concat([], filter.params),
+                        function (err, rows) {
+                            if (err) {
+                                return callback(err);
+                            }
+
+                            callback(null, rows, total);
+                        }
+                    );
+                }
+            );
+        },
+
+        deleteMail: function (id, callback) {
+            removePendingMailFromQueue(id, callback);
+        },
+
+        resetFailures: function (id, callback) {
+            Database.run(
+                'UPDATE email_queue SET failures = 0, modified_at = ? WHERE id = ?',
+                [moment().unix(), id],
+                function (err) {
+                    if (err) {
+                        return callback(err);
+                    }
+
+                    if (!this.changes) {
+                        return callback('Error: could not reset failure count for mail: ' + id);
+                    }
+
+                    doGetMail(id, callback);
                 }
             );
         },

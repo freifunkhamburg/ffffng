@@ -15,6 +15,61 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
         }
     }
 
+    function orderByClause(restParams, defaultSortField, allowedSortFields) {
+        var sortField = _.includes(allowedSortFields, restParams._sortField) ? restParams._sortField : undefined;
+        if (!sortField) {
+            sortField = defaultSortField;
+        }
+
+        return {
+            query: 'ORDER BY ' + sortField + ' ' + (restParams._sortDir === 'ASC' ? 'ASC' : 'DESC'),
+            params: []
+        }
+    }
+
+    function limitOffsetClause(restParams) {
+        var page = restParams._page;
+        var perPage = restParams._perPage;
+
+        return {
+            query: 'LIMIT ? OFFSET ?',
+            params: [perPage, ((page - 1) * perPage)]
+        };
+    }
+
+    function escapeForLikePattern(str) {
+        return str
+            .replace(/\\/g, '\\\\')
+            .replace(/%/g, '\\%')
+            .replace(/_/g, '\\_')
+    }
+
+    function filterCondition(restParams, filterFields) {
+        if (_.isEmpty(filterFields)) {
+            return {
+                query: '1 = 1',
+                params: []
+            }
+        }
+
+        var query = _.join(
+            _.map(filterFields, function (field) {
+                return 'LOWER(' + field + ') LIKE ?';
+            }),
+            ' OR '
+        );
+
+        query += ' ESCAPE \'\\\'';
+
+        var search = '%' + (_.isString(restParams.q) ? escapeForLikePattern(_.toLower(restParams.q.trim())) : '') + '%';
+        var params = _.times(filterFields.length, _.constant(search));
+
+        return {
+            query: query,
+            params: params
+        };
+    }
+
     return {
         getData: function (req) {
             return _.extend({}, req.body, req.params, req.query);
@@ -90,6 +145,25 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
             var perPage = restParams._perPage;
 
             return entities.slice((page - 1) * perPage, page * perPage);
+        },
+
+        filterClause: function (restParams, defaultSortField, allowedSortFields, filterFields) {
+            var orderBy = orderByClause(
+                restParams,
+                defaultSortField,
+                allowedSortFields
+            );
+            var limitOffset = limitOffsetClause(restParams);
+
+            var filter = filterCondition(
+                restParams,
+                filterFields
+            );
+
+            return {
+                query: filter.query + ' ' + orderBy.query + ' ' + limitOffset.query,
+                params: _.concat(filter.params, orderBy.params, limitOffset.params)
+            }
         },
 
         success: function (res, data) {

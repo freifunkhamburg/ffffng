@@ -5,7 +5,8 @@ angular.module('ffffng').factory('Router', function (
     FrontendResource,
     NodeResource,
     MonitoringResource,
-    TaskResource
+    TaskResource,
+    MailResource
 ) {
     return {
         init: function () {
@@ -23,6 +24,11 @@ angular.module('ffffng').factory('Router', function (
             app.put('/internal/api/tasks/run/:id', TaskResource.run);
             app.put('/internal/api/tasks/enable/:id', TaskResource.enable);
             app.put('/internal/api/tasks/disable/:id', TaskResource.disable);
+
+            app.get('/internal/api/mails', MailResource.getAll);
+            app.get('/internal/api/mails/:id', MailResource.get);
+            app.delete('/internal/api/mails/:id', MailResource.delete);
+            app.put('/internal/api/mails/reset/:id', MailResource.resetFailures);
 
             app.put('/internal/api/nodes/:token', NodeResource.update);
             app.delete('/internal/api/nodes/:token', NodeResource.delete);

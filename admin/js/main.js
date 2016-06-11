@@ -129,6 +129,60 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
 
     admin.addEntity(nodes);
 
+    function mailClasses(mail) {
+        if (!mail) {
+            return;
+        }
+
+        var failures = mail.values.failures;
+
+        if (failures === 0) {
+            return 'mails-pending';
+        }
+
+        if (failures >= 5) {
+            return 'mails-failed-max';
+        }
+
+        return 'mails-failed';
+    }
+
+    var mails = nga.entity('mails').label('Mail-Queue');
+    mails
+        .listView()
+        .title('Mail-Queue')
+        .perPage(30)
+        .sortDir('ASC')
+        .sortField('id')
+        .actions([])
+        .batchActions([])
+        .exportFields([])
+        .fields([
+            nga.field('id').cssClasses(mailClasses),
+            nga.field('failures').cssClasses(mailClasses),
+            nga.field('sender').cssClasses(mailClasses),
+            nga.field('recipient').cssClasses(mailClasses),
+            nga.field('email').cssClasses(mailClasses),
+            nga.field('created_at').map(formatMoment).cssClasses(mailClasses),
+            nga.field('modified_at').map(formatMoment).cssClasses(mailClasses)
+        ])
+        .filters([
+            nga.field('q')
+                .label('')
+                .pinned(true)
+                .template(
+                '<div class="input-group">' +
+                '<input type="text" ng-model="value" placeholder="Search" class="form-control"></input>' +
+                '<span class="input-group-addon"><i class="fa fa-search"></i></span></div>'),
+        ])
+        .listActions(
+        '<fa-mail-action-button disabled="entry.values.failures === 0" action="reset" icon="refresh" label="Retry" mail="entry" button="success" label="run" size="sm"></fa-mail-action-button> ' +
+        '<ma-delete-button entry="entry" entity="entity" size="sm"></ma-delete-button>'
+    )
+    ;
+
+    admin.addEntity(mails);
+
     function taskClasses(task) {
         if (!task) {
             return;
@@ -177,6 +231,10 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                 .addChild(nga
                     .menu(nodes)
                     .icon('<i class="fa fa-dot-circle-o"></i>')
+                )
+                .addChild(nga
+                    .menu(mails)
+                    .icon('<span class="fa fa-envelope"></span>')
                 )
                 .addChild(nga
                     .menu(tasks)

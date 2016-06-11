@@ -21,6 +21,7 @@ require('./utils/urlBuilder');
 
 require('./resources/frontendResource');
 require('./resources/taskResource');
+require('./resources/mailResource');
 require('./resources/nodeResource');
 require('./resources/monitoringResource');
 
