@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.5.6-build.4801+sha.3b5751d
+ * @license AngularJS v1.5.6
  * (c) 2010-2016 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -369,7 +369,7 @@ function htmlParser(html, handler) {
 
     var nextNode;
     if (!(nextNode = node.firstChild)) {
-      if (node.nodeType === 1) {
+      if (node.nodeType == 1) {
         handler.end(node.nodeName.toLowerCase());
       }
       nextNode = node.nextSibling;
@@ -378,7 +378,7 @@ function htmlParser(html, handler) {
           node = node.parentNode;
           if (node === inertBodyElement) break;
           nextNode = node.nextSibling;
-          if (node.nodeType === 1) {
+          if (node.nodeType == 1) {
             handler.end(node.nodeName.toLowerCase());
           }
         }
@@ -494,7 +494,7 @@ function stripCustomNsAttrs(node) {
     for (var i = 0, l = attrs.length; i < l; i++) {
       var attrNode = attrs[i];
       var attrName = attrNode.name.toLowerCase();
-      if (attrName === 'xmlns:ns1' || attrName.indexOf('ns1:') === 0) {
+      if (attrName === 'xmlns:ns1' || attrName.lastIndexOf('ns1:', 0) === 0) {
         node.removeAttributeNode(attrNode);
         i--;
         l--;

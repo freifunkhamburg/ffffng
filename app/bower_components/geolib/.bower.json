@@ -27,6 +27,6 @@
     "commit": "0406fbd120cb371a89a1676e47e9de5f0e51a4a5"
   },
   "_source": "https://github.com/manuelbieh/Geolib.git",
-  "_target": "~2.0.21",
+  "_target": "2.0.21",
   "_originalSource": "geolib"
 }
