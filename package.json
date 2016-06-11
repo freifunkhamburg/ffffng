@@ -4,6 +4,11 @@
     "description": "Node management form for Freifunk",
     "license": "MIT",
 
+    "author": {
+        "name": "Andreas Baldeau",
+        "email": "andreas@baldeau.net"
+    },
+
     "private": true,
 
     "repository": {
