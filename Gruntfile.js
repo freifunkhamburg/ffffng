@@ -368,7 +368,12 @@ module.exports = function (grunt) {
                         expand: true,
                         cwd: '.',
                         dest: '<%= yeoman.dist %>/',
-                        src: ['package.json']
+                        src: [
+                            'config.json.example',
+                            'package.json',
+                            'LICENSE',
+                            'README.md'
+                        ]
                     },
                     {
                         expand: true,
