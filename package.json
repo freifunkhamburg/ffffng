@@ -1,8 +1,10 @@
 {
     "name": "ffffng",
     "version": "0.2.0-SNAPSHOT",
-    "description": "Node managent form for Freifunk",
+    "description": "Node management form for Freifunk",
     "license": "MIT",
+
+    "private": true,
 
     "repository": {
         "type": "git",
@@ -41,6 +43,9 @@
         "sqlite3": "3.1.4"
     },
     "devDependencies": {
+        "bower": "1.7.9",
+        "grunt-cli": "1.2.0",
+
         "escape-string-regexp": "1.0.5",
         "grunt": "~0.4.1",
         "grunt-autoprefixer": "~3.0.4",
@@ -61,6 +66,7 @@
         "grunt-html2js": "~0.3.6",
         "grunt-newer": "~1.2.0",
         "grunt-ng-annotate": "~2.0.2",
+        "grunt-replace": "~1.0.1",
         "grunt-rev": "~0.1.0",
         "grunt-svgmin": "~3.2.0",
         "grunt-usemin": "~3.1.1",

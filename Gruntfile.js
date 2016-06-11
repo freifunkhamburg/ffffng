@@ -370,7 +370,6 @@ module.exports = function (grunt) {
                         dest: '<%= yeoman.dist %>/',
                         src: [
                             'config.json.example',
-                            'package.json',
                             'LICENSE',
                             'README.md'
                         ]
@@ -394,6 +393,23 @@ module.exports = function (grunt) {
                 cwd: '<%= yeoman.app %>/styles',
                 dest: '.tmp/styles/',
                 src: '{,**/}*.css'
+            }
+        },
+
+        // Toggle private flag in package.json when copying to dist/.
+        replace: {
+            dist: {
+                options: {
+                    patterns: [{
+                        match: /"private": true/g,
+                        replacement: '"private": false'
+                    }]
+                },
+                files: [{
+                    src: ['package.json'],
+                    dest: 'dist/',
+                    cwd: '.'
+                }]
             }
         },
 
@@ -442,6 +458,7 @@ module.exports = function (grunt) {
         'concat',
         'ngAnnotate',
         'copy:dist',
+        'replace:dist',
         'cssmin',
         'uglify',
         'rev',
