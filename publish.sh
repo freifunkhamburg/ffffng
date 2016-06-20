@@ -25,18 +25,13 @@ function confirm() {
 cd $(dirname $0)
 
 version=$(grep '^ *"version": *"[^"]*" *, *$' package.json | cut -d '"' -f4)
-npm_tag=$1
 
 if [ -z "$version" ]; then
     echo "Could not determine current version."
     exit 1
 fi
 
-if [ -z "$npm_tag" ]; then
-    npm_tag=latest
-fi
-
-echo "Current version: $version#$npm_tag"
+echo "Current version: $version"
 
 if [[ $version =~ 'SNAPSHOT' ]]; then
     echo "Will not publish SNAPSHOT version."
@@ -49,6 +44,6 @@ if confirm "Continue publishing?"; then
     ./node_modules/.bin/grunt clean build
 
     cd dist
-    npm publish -t $npm_tag
+    npm publish
 fi
 
