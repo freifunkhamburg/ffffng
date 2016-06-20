@@ -4,7 +4,7 @@ angular.module('ffffng').factory('UrlBuilder', function (_, config) {
     function formUrl(route, queryParams) {
         var url = config.server.baseUrl;
         if (route || queryParams) {
-            url += '/#!/';
+            url += '/#/';
         }
         if (route) {
             url += route;
