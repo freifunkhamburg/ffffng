@@ -355,6 +355,7 @@ module.exports = function (grunt) {
                         src: [
                             '{,**/}*.html',
                             '{,**/}*.js',
+                            '{,**/}*.sql',
                             '{,**/}*.txt'
                         ]
                     },
