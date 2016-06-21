@@ -105,8 +105,13 @@ angular.module('ffffng').factory('NodeResource', function (
                         return Resources.error(res, err);
                     }
 
+                    var realNodes = _.filter(nodes, function (node) {
+                        // We ignore nodes without tokens as those are only manually added ones like gateways.
+                        return node.token;
+                    });
+
                     var filteredNodes = Resources.filter(
-                        nodes,
+                        realNodes,
                         ['hostname', 'nickname', 'email', 'token', 'mac', 'key'],
                         restParams
                     );
