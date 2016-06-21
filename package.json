@@ -20,8 +20,7 @@
     },
 
     "bin": {
-        "ffffng": "server/main.js",
-        "ffffng-fix-key-file-names": "bin/fix_key_file_names.py"
+        "ffffng": "server/main.js"
     },
 
     "dependencies": {

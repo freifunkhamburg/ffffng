@@ -69,6 +69,7 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
 
             try {
                 schedule('0 */1 * * * *', 'MailQueueJob');
+                schedule('15 */1 * * * *', 'FixNodeFilenamesJob');
 
                 if (config.client.monitoring.enabled) {
                     schedule('30 */15 * * * *', 'NodeInformationRetrievalJob');

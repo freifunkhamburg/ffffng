@@ -44,6 +44,14 @@ angular.module('ffffng')
         return glob.sync(config.server.peersPath + '/' + pattern.toLowerCase());
     }
 
+    function findFilesInPeersPath() {
+        var files = glob.sync(config.server.peersPath + '/*');
+
+        return _.filter(files, function (file) {
+            return file[0] !== '.' && fs.lstatSync(file).isFile();
+        });
+    }
+
     function parseNodeFilename(filename) {
         var parts = _.split(filename, '@', filenameParts.length);
         var parsed = {};
@@ -88,18 +96,20 @@ angular.module('ffffng')
         return null;
     }
 
-    function writeNodeFile(isUpdate, token, node, nodeSecrets, callback) {
-        var filename =
-            config.server.peersPath + '/' +
-            (
-                node.hostname + '@' +
-                node.mac + '@' +
-                (node.key || '') + '@' +
-                token + '@' +
-                (nodeSecrets.monitoringToken || '')
-            ).toLowerCase();
+        function toNodeFilename(token, node, nodeSecrets) {
+            return config.server.peersPath + '/' +
+                (
+                    node.hostname + '@' +
+                    node.mac + '@' +
+                    (node.key || '') + '@' +
+                    token + '@' +
+                    (nodeSecrets.monitoringToken || '')
+                ).toLowerCase();
+        }
 
-        var data = '';
+        function writeNodeFile(isUpdate, token, node, nodeSecrets, callback) {
+            var filename = toNodeFilename(token, node, nodeSecrets);
+            var data = '';
         _.each(linePrefixes, function (prefix, key) {
             var value;
             switch (key) {
@@ -401,6 +411,42 @@ angular.module('ffffng')
 
         getNodeDataByMonitoringToken: function (monitoringToken, callback) {
             return getNodeDataByFilePattern({ monitoringToken: monitoringToken }, callback);
+        },
+
+        fixNodeFilenames: function (callback) {
+            var files = findFilesInPeersPath();
+
+            async.mapLimit(
+                files,
+                MAX_PARALLEL_NODES_PARSING,
+                function (file, fileCallback) {
+                    parseNodeFile(file, function (err, node, nodeSecrets) {
+                        if (err) {
+                            return fileCallback(err);
+                        }
+
+                        var expectedFilename = toNodeFilename(node.token, node, nodeSecrets);
+                        if (file !== expectedFilename) {
+                            try {
+                                fs.renameSync(file, expectedFilename);
+                            } catch (e) {
+                                return fileCallback(new Error(
+                                    'Cannot rename file ' + file + ' to ' + expectedFilename + ' => ' + e
+                                ));
+                            }
+                        }
+
+                        fileCallback(null);
+                    });
+                },
+                function (err) {
+                    if (err) {
+                        return callback(err);
+                    }
+
+                    return callback(null);
+                }
+            );
         }
     };
 });
