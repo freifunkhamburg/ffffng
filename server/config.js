@@ -28,7 +28,7 @@ if (commandLineOptions.help || !commandLineOptions.config) {
 }
 
 
-var fs = require('fs');
+var fs = require('graceful-fs');
 var deepExtend = require('deep-extend');
 
 var defaultConfig = {

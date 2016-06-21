@@ -33,7 +33,7 @@ angular.module('ffffng')
         return crypto.randomBytes(8).toString('hex');
     }
 
-    function findNodeFiles(filter) {
+    function toNodeFilesPattern(filter) {
         var pattern = _.join(
             _.map(filenameParts, function (field) {
                 return filter.hasOwnProperty(field) ? filter[field] : '*';
@@ -41,7 +41,15 @@ angular.module('ffffng')
             '@'
         );
 
-        return glob.sync(config.server.peersPath + '/' + pattern.toLowerCase());
+        return config.server.peersPath + '/' + pattern.toLowerCase();
+    }
+
+    function findNodeFiles(filter, callback) {
+        glob(toNodeFilesPattern(filter), callback);
+    }
+
+    function findNodeFilesSync(filter) {
+        return glob.sync(toNodeFilesPattern(filter));
     }
 
     function findFilesInPeersPath(callback) {
@@ -76,7 +84,7 @@ angular.module('ffffng')
     }
 
     function isDuplicate(filter, token) {
-        var files = findNodeFiles(filter);
+        var files = findNodeFilesSync(filter);
         if (files.length === 0) {
             return false;
         }
@@ -159,7 +167,7 @@ angular.module('ffffng')
         var error;
 
         if (isUpdate) {
-            var files = findNodeFiles({ token: token });
+            var files = findNodeFilesSync({ token: token });
             if (files.length !== 1) {
                 return callback({data: 'Node not found.', type: ErrorTypes.notFound});
             }
@@ -196,20 +204,26 @@ angular.module('ffffng')
     }
 
     function deleteNodeFile(token, callback) {
-        var files = findNodeFiles({ token: token });
-        if (files.length !== 1) {
-            return callback({data: 'Node not found.', type: ErrorTypes.notFound});
-        }
+        findNodeFiles({ token: token }, function (err, files) {
+            if (err) {
+                Logger.tag('node', 'delete').error('Could not find node file: ' + file, error);
+                return callback({data: 'Could not delete node.', type: ErrorTypes.internalError});
+            }
 
-        try {
-            fs.unlinkSync(files[0]);
-        }
-        catch (error) {
-            Logger.tag('node', 'delete').error('Could not delete node file: ' + file, error);
-            return callback({data: 'Could not delete node.', type: ErrorTypes.internalError});
-        }
+            if (files.length !== 1) {
+                return callback({data: 'Node not found.', type: ErrorTypes.notFound});
+            }
 
-        return callback(null);
+            try {
+                fs.unlinkSync(files[0]);
+            }
+            catch (error) {
+                Logger.tag('node', 'delete').error('Could not delete node file: ' + file, error);
+                return callback({data: 'Could not delete node.', type: ErrorTypes.internalError});
+            }
+
+            return callback(null);
+        });
     }
 
     function parseNodeFile(file, callback) {
@@ -263,14 +277,18 @@ angular.module('ffffng')
     }
 
     function findNodeDataByFilePattern(filter, callback) {
-        var files = findNodeFiles(filter);
+        findNodeFiles(filter, function (err, files) {
+            if (err) {
+                return callback(err);
+            }
 
-        if (files.length !== 1) {
-            return callback(null);
-        }
+            if (files.length !== 1) {
+                return callback(null);
+            }
 
-        var file = files[0];
-        return parseNodeFile(file, callback);
+            var file = files[0];
+            return parseNodeFile(file, callback);
+        });
     }
 
     function getNodeDataByFilePattern(filter, callback) {
@@ -404,21 +422,26 @@ angular.module('ffffng')
         },
 
         getAllNodes: function (callback) {
-            var files = findNodeFiles({});
-
-            async.mapLimit(
-                files,
-                MAX_PARALLEL_NODES_PARSING,
-                parseNodeFile,
-                function (err, nodes) {
-                    if (err) {
-                        Logger.tag('nodes').error('Error getting all nodes:', error);
-                        return callback({data: 'Internal error.', type: ErrorTypes.internalError});
-                    }
-
-                    return callback(null, nodes);
+            findNodeFiles({}, function (err, files) {
+                if (err) {
+                    Logger.tag('nodes').error('Error getting all nodes:', error);
+                    return callback({data: 'Internal error.', type: ErrorTypes.internalError});
                 }
-            );
+
+                async.mapLimit(
+                    files,
+                    MAX_PARALLEL_NODES_PARSING,
+                    parseNodeFile,
+                    function (err, nodes) {
+                        if (err) {
+                            Logger.tag('nodes').error('Error getting all nodes:', error);
+                            return callback({data: 'Internal error.', type: ErrorTypes.internalError});
+                        }
+
+                        return callback(null, nodes);
+                    }
+                );
+            });
         },
 
         findNodeDataByMac: function (mac, callback) {

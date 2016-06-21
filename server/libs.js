@@ -17,7 +17,7 @@
     lib('async');
     lib('crypto');
     lib('deepExtend', 'deep-extend');
-    lib('fs');
+    lib('fs', 'graceful-fs');
     lib('glob');
     lib('moment');
     lib('request');

@@ -7,6 +7,13 @@ global.angular = require('ng-di');
 
 angular.module('ffffng', []);
 
+(function () {
+    // Use graceful-fs instead of fs also in all libraries to have more robust fs handling.
+    var realFs = require('fs');
+    var gracefulFs = require('graceful-fs');
+    gracefulFs.gracefulify(realFs);
+})();
+
 require('./config');
 
 require('./logger').tag('main', 'startup').info('Server starting up...');
