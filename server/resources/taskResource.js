@@ -15,6 +15,7 @@ angular.module('ffffng').factory('TaskResource', function (
         return {
             id: task.id,
             name: task.name,
+            description: task.description,
             schedule: task.schedule,
             runningSince: task.runningSince && task.runningSince.unix(),
             lastRunStarted: task.lastRunStarted && task.lastRunStarted.unix(),

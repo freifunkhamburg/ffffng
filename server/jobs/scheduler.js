@@ -33,6 +33,7 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
         var task = {
             id: id,
             name: jobName,
+            description: job.description,
             schedule: expr,
             job: job,
             runningSince: false,

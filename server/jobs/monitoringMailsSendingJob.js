@@ -2,6 +2,8 @@
 
 angular.module('ffffng').factory('MonitoringMailsSendingJob', function (MonitoringService, Logger) {
     return {
+        description: 'Sends monitoring emails depending on the monitoring state of nodes retrieved by the NodeInformationRetrievalJob.',
+
         run: function (callback) {
             MonitoringService.sendMonitoringMails(function (err) {
                 if (err) {

@@ -238,11 +238,13 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
 
     admin.addEntity(mails);
 
-    function taskClasses(task) {
-        if (!task) {
-            return;
-        }
-        return task.values.enabled ? 'task-enabled' : 'task-disabled';
+    function taskClasses(field) {
+        return function(task) {
+            if (!task) {
+                return;
+            }
+            return 'task-' + field + ' ' + (task.values.enabled ? 'task-enabled' : 'task-disabled');
+        };
     }
 
     var tasks = nga.entity('tasks').label('Background-Jobs');
@@ -256,12 +258,13 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
         .batchActions([])
         .exportFields([])
         .fields([
-            nga.field('id').cssClasses(taskClasses),
-            nga.field('name').cssClasses(taskClasses),
-            nga.field('schedule').cssClasses(taskClasses),
-            nga.field('state').cssClasses(taskClasses),
-            nga.field('runningSince').map(formatMoment).cssClasses(taskClasses),
-            nga.field('lastRunStarted').map(formatMoment).cssClasses(taskClasses)
+            nga.field('id').cssClasses(taskClasses('id')),
+            nga.field('name').cssClasses(taskClasses('name')),
+            nga.field('description').cssClasses(taskClasses('description')),
+            nga.field('schedule').cssClasses(taskClasses('schedule')),
+            nga.field('state').cssClasses(taskClasses('state')),
+            nga.field('runningSince').map(formatMoment).cssClasses(taskClasses('runningSince')),
+            nga.field('lastRunStarted').map(formatMoment).cssClasses(taskClasses('lastRunStarted'))
         ])
         .filters([
             nga.field('q')
