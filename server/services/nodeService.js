@@ -44,11 +44,25 @@ angular.module('ffffng')
         return glob.sync(config.server.peersPath + '/' + pattern.toLowerCase());
     }
 
-    function findFilesInPeersPath() {
-        var files = glob.sync(config.server.peersPath + '/*');
+    function findFilesInPeersPath(callback) {
+        glob(config.server.peersPath + '/*', function (err, files) {
+            if (err) {
+                return callback(err);
+            }
 
-        return _.filter(files, function (file) {
-            return file[0] !== '.' && fs.lstatSync(file).isFile();
+            async.filter(files, function (file, fileCallback) {
+                if (file[0] === '.') {
+                    return fileCallback(null, false);
+                }
+
+                fs.lstat(file, function (err, stats) {
+                    if (err) {
+                        return fileCallback(err);
+                    }
+
+                    fileCallback(null, stats.isFile());
+                });
+            }, callback);
         });
     }
 
@@ -199,47 +213,53 @@ angular.module('ffffng')
     }
 
     function parseNodeFile(file, callback) {
-        var lines = fs.readFileSync(file).toString();
+        fs.readFile(file, function (err, contents) {
+            if (err) {
+                return callback(err);
+            }
 
-        var node = {};
-        var nodeSecrets = {};
+            var lines = contents.toString();
 
-        _.each(lines.split('\n'), function (line) {
-            var entries = {};
+            var node = {};
+            var nodeSecrets = {};
 
-            for (var key in linePrefixes) {
-                if (linePrefixes.hasOwnProperty(key)) {
-                    var prefix = linePrefixes[key];
-                    if (line.substring(0, prefix.length) === prefix) {
-                        entries[key] = Strings.normalizeString(line.substr(prefix.length));
-                        break;
+            _.each(lines.split('\n'), function (line) {
+                var entries = {};
+
+                for (var key in linePrefixes) {
+                    if (linePrefixes.hasOwnProperty(key)) {
+                        var prefix = linePrefixes[key];
+                        if (line.substring(0, prefix.length) === prefix) {
+                            entries[key] = Strings.normalizeString(line.substr(prefix.length));
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (_.isEmpty(entries) && line.substring(0, 5) === 'key "') {
-                entries.key = Strings.normalizeString(line.split('"')[1]);
-            }
-
-            _.each(entries, function (value, key) {
-                if (key === 'mac') {
-                    node['mac'] = value;
-                    node['mapId'] = _.toLower(value).replace(/:/g, '')
-                } else if (key === 'monitoring') {
-                    var active = value === 'aktiv';
-                    var pending = value === 'pending';
-                    node.monitoring = active || pending;
-                    node.monitoringConfirmed = active;
-                    node.monitoringState = active ? 'active' : (pending ? 'pending' : '');
-                } else if (key === 'monitoringToken') {
-                    nodeSecrets.monitoringToken = value;
-                } else {
-                    node[key] = value;
+                if (_.isEmpty(entries) && line.substring(0, 5) === 'key "') {
+                    entries.key = Strings.normalizeString(line.split('"')[1]);
                 }
-            });
-        });
 
-        callback(null, node, nodeSecrets);
+                _.each(entries, function (value, key) {
+                    if (key === 'mac') {
+                        node['mac'] = value;
+                        node['mapId'] = _.toLower(value).replace(/:/g, '')
+                    } else if (key === 'monitoring') {
+                        var active = value === 'aktiv';
+                        var pending = value === 'pending';
+                        node.monitoring = active || pending;
+                        node.monitoringConfirmed = active;
+                        node.monitoringState = active ? 'active' : (pending ? 'pending' : '');
+                    } else if (key === 'monitoringToken') {
+                        nodeSecrets.monitoringToken = value;
+                    } else {
+                        node[key] = value;
+                    }
+                });
+            });
+
+            callback(null, node, nodeSecrets);
+        });
     }
 
     function findNodeDataByFilePattern(filter, callback) {
@@ -414,39 +434,39 @@ angular.module('ffffng')
         },
 
         fixNodeFilenames: function (callback) {
-            var files = findFilesInPeersPath();
-
-            async.mapLimit(
-                files,
-                MAX_PARALLEL_NODES_PARSING,
-                function (file, fileCallback) {
-                    parseNodeFile(file, function (err, node, nodeSecrets) {
-                        if (err) {
-                            return fileCallback(err);
-                        }
-
-                        var expectedFilename = toNodeFilename(node.token, node, nodeSecrets);
-                        if (file !== expectedFilename) {
-                            try {
-                                fs.renameSync(file, expectedFilename);
-                            } catch (e) {
-                                return fileCallback(new Error(
-                                    'Cannot rename file ' + file + ' to ' + expectedFilename + ' => ' + e
-                                ));
-                            }
-                        }
-
-                        fileCallback(null);
-                    });
-                },
-                function (err) {
-                    if (err) {
-                        return callback(err);
-                    }
-
-                    return callback(null);
+            findFilesInPeersPath(function (err, files) {
+                if (err) {
+                    return callback(err);
                 }
-            );
+
+                async.mapLimit(
+                    files,
+                    MAX_PARALLEL_NODES_PARSING,
+                    function (file, fileCallback) {
+                        parseNodeFile(file, function (err, node, nodeSecrets) {
+                            if (err) {
+                                return fileCallback(err);
+                            }
+
+                            var expectedFilename = toNodeFilename(node.token, node, nodeSecrets);
+                            if (file !== expectedFilename) {
+                                return fs.rename(file, expectedFilename, function (err) {
+                                    if (err) {
+                                        return fileCallback(new Error(
+                                            'Cannot rename file ' + file + ' to ' + expectedFilename + ' => ' + err
+                                        ));
+                                    }
+
+                                    fileCallback(null);
+                                });
+                            }
+
+                            fileCallback(null);
+                        });
+                    },
+                    callback
+                );
+            });
         }
     };
 });
