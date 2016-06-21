@@ -121,10 +121,10 @@ angular.module('ffffng')
         function toNodeFilename(token, node, nodeSecrets) {
             return config.server.peersPath + '/' +
                 (
-                    node.hostname + '@' +
-                    node.mac + '@' +
+                    (node.hostname || '') + '@' +
+                    (node.mac || '') + '@' +
                     (node.key || '') + '@' +
-                    token + '@' +
+                    (token || '') + '@' +
                     (nodeSecrets.monitoringToken || '')
                 ).toLowerCase();
         }
