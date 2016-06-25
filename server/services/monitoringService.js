@@ -330,18 +330,19 @@ angular.module('ffffng')
                 var allowNull = mailNumber === 1 ? ' OR last_status_mail_type IS NULL' : '';
 
                 var schedule = MONITORING_OFFLINE_MAILS_SCHEDULE[mailNumber];
-                var lastSeenBefore = moment().subtract(schedule.amount, schedule.unit);
+                var scheduleTimeBefore = moment().subtract(schedule.amount, schedule.unit);
 
                 Database.all(
                     'SELECT * FROM node_state ' +
                     'WHERE modified_at < ? AND state = ? AND (last_status_mail_type = ?' + allowNull + ') AND ' +
-                    'last_seen < ? ' +
+                    'last_seen <= ? AND last_status_mail_send <= ? ' +
                     'ORDER BY id ASC LIMIT ?',
                     [
                         startTime.unix(),
                         'OFFLINE',
                         previousType,
-                        lastSeenBefore.unix(),
+                        scheduleTimeBefore.unix(),
+                        scheduleTimeBefore.unix(),
 
                         MONITORING_MAILS_DB_BATCH_SIZE
                     ],
