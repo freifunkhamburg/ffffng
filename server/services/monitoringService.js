@@ -34,7 +34,7 @@ angular.module('ffffng')
 
         return Database.run(
             'INSERT INTO node_state ' +
-            '(mac, state, last_seen, import_timestamp, last_status_mail_sent, last_status_mail_type) ' +
+            '(mac, state, last_seen, import_timestamp, (last_status_mail_sent, last_status_mail_type) OR last_status_mail_type IS NULL) ' +
             'VALUES (?, ?, ?, ?, ?, ?)',
             [
                 node.mac,
@@ -267,7 +267,7 @@ angular.module('ffffng')
                                         var now = moment().unix();
                                         Database.run(
                                             'UPDATE node_state ' +
-                                            'SET modified_at = ?, last_status_mail_sent = ?, last_status_mail_type = ?' +
+                                            'SET modified_at = ?, (last_status_mail_sent = ?, last_status_mail_type =  OR last_status_mail_type IS NULL)?' +
                                             'WHERE id = ?',
                                             [
                                                 now, now, mailType,
@@ -335,7 +335,7 @@ angular.module('ffffng')
                 Database.all(
                     'SELECT * FROM node_state ' +
                     'WHERE modified_at < ? AND state = ? AND (last_status_mail_type = ?' + allowNull + ') AND ' +
-                    'last_seen <= ? AND last_status_mail_sent <= ? ' +
+                    'last_seen <= ? AND (last_status_mail_sent <= ? OR last_status_mail_sent IS NULL) ' +
                     'ORDER BY id ASC LIMIT ?',
                     [
                         startTime.unix(),
