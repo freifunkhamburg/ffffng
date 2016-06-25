@@ -267,7 +267,7 @@ angular.module('ffffng')
                                         var now = moment().unix();
                                         Database.run(
                                             'UPDATE node_state ' +
-                                            'SET modified_at = ?, (last_status_mail_sent = ?, last_status_mail_type =  OR last_status_mail_type IS NULL)?' +
+                                            'SET modified_at = ?, last_status_mail_sent = ?, last_status_mail_type = ?' +
                                             'WHERE id = ?',
                                             [
                                                 now, now, mailType,
