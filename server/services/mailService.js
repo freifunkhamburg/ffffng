@@ -202,7 +202,7 @@ angular.module('ffffng')
         },
 
         sendPendingMails: function (callback) {
-            Logger.tag('mail', 'queue').info('Start sending pending mails...');
+            Logger.tag('mail', 'queue').debug('Start sending pending mails...');
 
             var startTime = moment();
 
@@ -211,7 +211,7 @@ angular.module('ffffng')
                     return callback(err);
                 }
 
-                Logger.tag('mail', 'queue').info('Sending next batch...');
+                Logger.tag('mail', 'queue').debug('Sending next batch...');
 
                 findPendingMailsBefore(startTime, MAIL_QUEUE_DB_BATCH_SIZE, function (err, pendingMails) {
                     if (err) {
@@ -219,7 +219,7 @@ angular.module('ffffng')
                     }
 
                     if (_.isEmpty(pendingMails)) {
-                        Logger.tag('mail', 'queue').info('Done sending pending mails.');
+                        Logger.tag('mail', 'queue').debug('Done sending pending mails.');
                         return callback(null);
                     }
 

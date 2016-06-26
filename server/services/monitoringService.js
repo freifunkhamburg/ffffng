@@ -110,7 +110,7 @@ angular.module('ffffng')
     var isValidMac = Validator.forConstraint(Constraints.node.mac);
 
     function parseNodesJson(body, callback) {
-        Logger.tag('monitoring', 'information-retrieval').info('Parsing nodes.json...');
+        Logger.tag('monitoring', 'information-retrieval').debug('Parsing nodes.json...');
 
         function parseTimestamp(timestamp) {
             if (!_.isString(json.timestamp)) {
@@ -197,14 +197,14 @@ angular.module('ffffng')
     }
 
     function sendMonitoringMailsBatched(name, mailType, findBatchFun, callback) {
-        Logger.tag('monitoring', 'mail-sending').info('Sending "%s" mails...', name);
+        Logger.tag('monitoring', 'mail-sending').debug('Sending "%s" mails...', name);
 
         var sendNextBatch = function (err) {
             if (err) {
                 return callback(err);
             }
 
-            Logger.tag('monitoring', 'mail-sending').info('Sending next batch...');
+            Logger.tag('monitoring', 'mail-sending').debug('Sending next batch...');
 
             findBatchFun(function (err, nodeStates) {
                 if (err) {
@@ -212,7 +212,7 @@ angular.module('ffffng')
                 }
 
                 if (_.isEmpty(nodeStates)) {
-                    Logger.tag('monitoring', 'mail-sending').info('Done sending "%s" mails.', name);
+                    Logger.tag('monitoring', 'mail-sending').debug('Done sending "%s" mails.', name);
                     return callback(null);
                 }
 
@@ -450,7 +450,7 @@ angular.module('ffffng')
 
         retrieveNodeInformation: function (callback) {
             var url = config.server.map.nodesJsonUrl;
-            Logger.tag('monitoring', 'information-retrieval').info('Retrieving nodes.json: %s', url);
+            Logger.tag('monitoring', 'information-retrieval').debug('Retrieving nodes.json: %s', url);
             request(url, function (err, response, body) {
                 if (err) {
                     return callback(err);
@@ -471,7 +471,7 @@ angular.module('ffffng')
                     if (previousImportTimestamp !== null && !data.importTimestamp.isAfter(previousImportTimestamp)) {
                         Logger
                             .tag('monitoring', 'information-retrieval')
-                            .info(
+                            .debug(
                                 'No new data, skipping. Current timestamp: %s, previous timestamp: %s',
                                 data.importTimestamp.format(),
                                 previousImportTimestamp.format()
@@ -523,7 +523,7 @@ angular.module('ffffng')
         },
 
         sendMonitoringMails: function (callback) {
-            Logger.tag('monitoring', 'mail-sending').info('Sending monitoring mails...');
+            Logger.tag('monitoring', 'mail-sending').debug('Sending monitoring mails...');
 
             var startTime = moment();
 
@@ -570,7 +570,7 @@ angular.module('ffffng')
             var daysBeforeCleanup = 30;
             Logger
                 .tag('monitoring', 'information-cleanup')
-                .info('Cleaning up node data not updated for %s days...', daysBeforeCleanup);
+                .debug('Cleaning up node data not updated for %s days...', daysBeforeCleanup);
             Database.run(
                 'DELETE FROM node_state WHERE modified_at < ?',
                 [moment().subtract(daysBeforeCleanup, 'days').unix()],
@@ -581,7 +581,7 @@ angular.module('ffffng')
 
                     Logger
                         .tag('monitoring', 'information-retrieval')
-                        .info('Node data cleanup done.');
+                        .debug('Node data cleanup done.');
 
                     callback();
                 }
