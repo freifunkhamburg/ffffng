@@ -85,7 +85,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                     ? '<i class="fa fa-map-marker coords-set" aria-hidden="true" title="coordinates set"></i>'
                     : '<i class="fa fa-times coords-unset" aria-hidden="true" title="no coordinates"></i>';
             }),
-            nga.field('onlineState').cssClasses(nodeClasses),
+            nga.field('onlineState').map(nullable).cssClasses(nodeClasses),
             nga.field('monitoringState').cssClasses(nodeClasses).template(function (node) {
                 switch (node.values.monitoringState) {
                     case 'active':
