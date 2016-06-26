@@ -44,3 +44,31 @@
         }
     }
 }
+
+.wrapper {
+    position: relative;
+
+    padding: {
+        top: 72px;
+        bottom: 30px;
+    }
+
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    width: 100%;
+
+    margin: 0 auto;
+}
+
+.main {
+    padding-bottom: 30px;
+
+    a[target="_blank"]:after {
+        @extend .fa;
+        content: "\f08e";
+        vertical-align: 0.3em;
+        font-size: 0.8em;
+        margin-left: 0.1em;
+    }
+}

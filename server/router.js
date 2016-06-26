@@ -13,6 +13,8 @@ angular.module('ffffng').factory('Router', function (
         init: function () {
             app.post('/', FrontendResource.render);
 
+            app.get('/api/version', VersionResource.get);
+
             app.post('/api/node', NodeResource.create);
             app.put('/api/node/:token', NodeResource.update);
             app.delete('/api/node/:token', NodeResource.delete);
@@ -20,8 +22,6 @@ angular.module('ffffng').factory('Router', function (
 
             app.put('/api/monitoring/confirm/:token', MonitoringResource.confirm);
             app.put('/api/monitoring/disable/:token', MonitoringResource.disable);
-
-            app.get('/internal/api/version', VersionResource.get);
 
             app.get('/internal/api/tasks', TaskResource.getAll);
             app.put('/internal/api/tasks/run/:id', TaskResource.run);

@@ -45,8 +45,13 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
             '</a>' +
             '</div>' +
             '<p class="navbar-text navbar-right">' +
+            '<a href="https://github.com/freifunkhamburg/ffffng/issues" target="_blank">' +
+            '<i class="fa fa-bug" aria-hidden="true"></i> Report Error' +
+            '</a>' +
+            '</p>' +
+            '<p class="navbar-text navbar-right">' +
             '<a href="https://github.com/freifunkhamburg/ffffng" target="_blank">' +
-            '<i class="fa fa-github" aria-hidden="true"></i> Source Code' +
+            '<i class="fa fa-code" aria-hidden="true"></i> Source Code' +
             '</a>' +
             '</p>' +
             '<p class="navbar-text navbar-right">' +

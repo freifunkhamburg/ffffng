@@ -8,6 +8,8 @@
 @import "../bower_components/font-awesome/scss/font-awesome";
 
 @import "views/_main";
+@import "views/_navbar";
+@import "views/_footer";
 @import "views/_newNodeForm";
 @import "views/_updateNodeForm";
 @import "views/_deleteNodeForm";
@@ -20,8 +22,13 @@
 @import "views/dialogs/_confirmDeletionDialog";
 @import "views/dialogs/_outsideOfCommunityDialog";
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    padding-bottom: 40px;
     text-align: justify;
 }
 
@@ -38,14 +45,6 @@ label {
 
 button.cancel {
     @extend .btn, .btn-default;
-}
-
-a[target="_blank"]:after {
-    @extend .fa;
-    content: "\f08e";
-    vertical-align: 0.3em;
-    font-size: 0.8em;
-    margin-left: 0.1em;
 }
 
 .has-error .help-block {

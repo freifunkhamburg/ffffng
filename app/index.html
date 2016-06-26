@@ -20,7 +20,10 @@
 
 <body ng-app="ffffng">
     <f-navbar></f-navbar>
-    <div ng-view=""></div>
+    <div class="wrapper">
+        <div class="main" ng-view=""></div>
+        <f-footer></f-footer>
+    </div>
 
     <!--[if lt IE 9]>
     <script src="bower_components/es5-shim/es5-shim.js"></script>
@@ -58,6 +61,7 @@
 
     <script src="scripts/directives/help.js"></script>
     <script src="scripts/directives/navbar.js"></script>
+    <script src="scripts/directives/footer.js"></script>
     <script src="scripts/directives/nodeForm.js"></script>
     <script src="scripts/directives/nodeSaved.js"></script>
     <script src="scripts/directives/tokenForm.js"></script>
