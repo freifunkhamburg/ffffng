@@ -147,6 +147,8 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
             return entities.slice((page - 1) * perPage, page * perPage);
         },
 
+        whereCondition: filterCondition,
+
         filterClause: function (restParams, defaultSortField, allowedSortFields, filterFields) {
             var orderBy = orderByClause(
                 restParams,

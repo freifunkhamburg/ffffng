@@ -355,9 +355,28 @@ angular.module('ffffng')
 
     return {
         getAll: function (restParams, callback) {
+            var sortFields = [
+                'id',
+                'mac',
+                'state',
+                'last_seen',
+                'import_timestamp',
+                'last_status_mail_type',
+                'last_status_mail_sent',
+                'created_at',
+                'modified_at'
+            ];
+            var filterFields = [
+                'mac',
+                'state',
+                'last_status_mail_type'
+            ];
+
+            var where = Resources.whereCondition(restParams, filterFields);
+
             Database.get(
-                'SELECT count(*) AS total FROM node_state',
-                [],
+                'SELECT count(*) AS total FROM node_state WHERE ' + where.query,
+                _.concat([], where.params),
                 function (err, row) {
                     if (err) {
                         return callback(err);
@@ -368,22 +387,8 @@ angular.module('ffffng')
                     var filter = Resources.filterClause(
                         restParams,
                         'id',
-                        [
-                            'id',
-                            'mac',
-                            'state',
-                            'last_seen',
-                            'import_timestamp',
-                            'last_status_mail_type',
-                            'last_status_mail_sent',
-                            'created_at',
-                            'modified_at'
-                        ],
-                        [
-                            'mac',
-                            'state',
-                            'last_status_mail_type'
-                        ]
+                        sortFields,
+                        filterFields
                     );
 
                     Database.all(
