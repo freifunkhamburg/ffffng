@@ -5,7 +5,8 @@ var commandLineUsage = require('command-line-usage');
 
 var commandLineDefs = [
     { name: 'help', alias: 'h', type: Boolean, description: 'Show this help' },
-    { name: 'config', alias: 'c', type: String, description: 'Location of config.json' }
+    { name: 'config', alias: 'c', type: String, description: 'Location of config.json' },
+    { name: 'version', alias: 'v', type: Boolean, description: 'Show ffffng version' }
 ];
 
 var commandLineOptions;
@@ -17,18 +18,38 @@ try {
     process.exit(1);
 }
 
-if (commandLineOptions.help || !commandLineOptions.config) {
+var fs = require('graceful-fs');
+
+var packageJsonFile = __dirname + '/../package.json';
+var version = 'unknown';
+if (fs.existsSync(packageJsonFile)) {
+    version = JSON.parse(fs.readFileSync(packageJsonFile, 'utf8')).version;
+}
+
+function usage() {
     console.log(commandLineUsage([
         {
-            header: 'ffffng - Freifunk node management form',
+            header: 'ffffng - ' + version + ' - Freifunk node management form',
             optionList: commandLineDefs
         }
     ]));
+}
+
+if (commandLineOptions.help) {
+    usage();
+    process.exit(0);
+}
+
+if (commandLineOptions.version) {
+    console.log('ffffng - ' + version);
+    process.exit(0);
+}
+
+if (!commandLineOptions.config) {
+    usage();
     process.exit(1);
 }
 
-
-var fs = require('graceful-fs');
 var deepExtend = require('deep-extend');
 
 var defaultConfig = {
@@ -108,3 +129,4 @@ var config = deepExtend({}, defaultConfig, configJSON);
 module.exports = config;
 
 angular.module('ffffng').constant('config', config);
+angular.module('ffffng').constant('version', version);

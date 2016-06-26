@@ -38,6 +38,23 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
     var admin = nga.application('Knotenverwaltung - Admin-Panel');
 
     admin
+        .header(
+            '<div class="navbar-header">' +
+            '<a class="navbar-brand" href="#" ng-click="appController.displayHome()">' +
+            'Knotenverwaltung - Admin-Panel <small style="font-size: 0.7em;">(<fa-version></fa-version>)</small>' +
+            '</a>' +
+            '</div>' +
+            '<p class="navbar-text navbar-right">' +
+            '<a href="https://github.com/freifunkhamburg/ffffng" target="_blank">' +
+            '<i class="fa fa-github" aria-hidden="true"></i> Source Code' +
+            '</a>' +
+            '</p>' +
+            '<p class="navbar-text navbar-right">' +
+            '<a href="/" target="_blank">' +
+            '<i class="fa fa-external-link" aria-hidden="true"></i> Frontend' +
+            '</a>' +
+            '</p>'
+        )
         .baseApiUrl('/internal/api/')
         .debug(true);
 
