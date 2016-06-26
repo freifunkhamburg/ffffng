@@ -20,6 +20,7 @@ angular.module('ffffng')
         Constraints,
         Resources
 ) {
+    var MONITORING_STATE_MACS_CHUNK_SIZE = 100;
     var MONITORING_MAILS_DB_BATCH_SIZE = 50;
     var MONITORING_OFFLINE_MAILS_SCHEDULE = {
         1: { amount: 3, unit: 'hours' },
@@ -411,22 +412,28 @@ angular.module('ffffng')
                 return callback(null, {});
             }
 
-            var inCondition = DatabaseUtil.inCondition('mac', macs);
+            async.map(
+                _.chunk(macs, MONITORING_STATE_MACS_CHUNK_SIZE),
+                function (subMacs, subCallback) {
+                    var inCondition = DatabaseUtil.inCondition('mac', subMacs);
 
-            Database.all(
-                'SELECT * FROM node_state WHERE ' + inCondition.query,
-                _.concat([], inCondition.params),
-                function (err, rows) {
+                    Database.all(
+                        'SELECT * FROM node_state WHERE ' + inCondition.query,
+                        _.concat([], inCondition.params),
+                        subCallback
+                    );
+                },
+                function (err, rowsArrays) {
                     if (err) {
                         return callback(err);
                     }
 
                     var nodeStateByMac = {};
-                    _.each(rows, function (row) {
+                    _.each(_.flatten(rowsArrays), function (row) {
                         nodeStateByMac[row.mac] = row;
                     });
 
-                    callback(null, nodeStateByMac);
+                    return callback(null, nodeStateByMac);
                 }
             );
         },
