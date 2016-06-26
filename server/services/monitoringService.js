@@ -38,7 +38,7 @@ angular.module('ffffng')
         return Database.run(
             'INSERT INTO node_state ' +
             '(hostname, mac, monitoring_state, state, last_seen, import_timestamp, last_status_mail_sent, last_status_mail_type) ' +
-            'VALUES (?, ?, ?, ?, ?, ?)',
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 node.hostname,
                 node.mac,
