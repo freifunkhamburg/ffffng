@@ -2,7 +2,7 @@
 
 angular.module('ffffng').factory('NodeInformationRetrievalJob', function (MonitoringService, Logger) {
     return {
-        description: 'Fetches the nodes.json and calculates and stores the monitoring status for nodes with active monitoring.',
+        description: 'Fetches the nodes.json and calculates and stores the monitoring / online status for registered nodes.',
 
         run: function (callback) {
             MonitoringService.retrieveNodeInformation(function (err) {

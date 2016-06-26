@@ -3,8 +3,11 @@
 angular.module('ffffng').factory('NodeResource', function (
     Constraints,
     Validator,
+    Logger,
+    MonitoringService,
     NodeService,
     _,
+    deepExtend,
     Strings,
     Resources,
     ErrorTypes
@@ -110,22 +113,62 @@ angular.module('ffffng').factory('NodeResource', function (
                         return node.token;
                     });
 
-                    var filteredNodes = Resources.filter(
-                        realNodes,
-                        ['hostname', 'nickname', 'email', 'token', 'mac', 'key'],
-                        restParams
-                    );
-                    var total = filteredNodes.length;
+                    var macs = _.map(realNodes, function (node) {
+                        return node.mac;
+                    });
 
-                    var sortedNodes = Resources.sort(
-                        filteredNodes,
-                        ['hostname', 'nickname', 'email', 'token', 'mac', 'key', 'coords', 'monitoringState'],
-                        restParams
-                    );
-                    var pageNodes = Resources.getPageEntities(sortedNodes, restParams);
+                    MonitoringService.getByMacs(macs, function (err, nodeStateByMac) {
+                        if (err) {
+                            Logger.tag('nodes', 'admin').error('Error getting nodes by MACs:', err);
+                            return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
+                        }
 
-                    res.set('X-Total-Count', total);
-                    return Resources.success(res, pageNodes);
+                        var enhancedNodes = _.map(realNodes, function (node) {
+                            var nodeState = nodeStateByMac[node.mac];
+                            if (nodeState) {
+                                return deepExtend({}, node, {
+                                    onlineState: nodeState.state
+                                });
+                            }
+
+                            return node;
+                        });
+
+                        var filteredNodes = Resources.filter(
+                            enhancedNodes,
+                            [
+                                'hostname',
+                                'nickname',
+                                'email',
+                                'token',
+                                'mac',
+                                'key',
+                                'onlineState'
+                            ],
+                            restParams
+                        );
+                        var total = filteredNodes.length;
+
+                        var sortedNodes = Resources.sort(
+                            filteredNodes,
+                            [
+                                'hostname',
+                                'nickname',
+                                'email',
+                                'token',
+                                'mac',
+                                'key',
+                                'coords',
+                                'onlineState',
+                                'monitoringState'
+                            ],
+                            restParams
+                        );
+                        var pageNodes = Resources.getPageEntities(sortedNodes, restParams);
+
+                        res.set('X-Total-Count', total);
+                        return Resources.success(res, pageNodes);
+                    });
                 });
             });
         }

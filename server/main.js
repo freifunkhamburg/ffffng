@@ -22,6 +22,7 @@ require('./app');
 require('./router');
 require('./libs');
 
+require('./utils/databaseUtil');
 require('./utils/errorTypes');
 require('./utils/resources');
 require('./utils/strings');

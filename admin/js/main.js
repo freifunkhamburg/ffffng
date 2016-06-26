@@ -15,6 +15,10 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
         return { params: params };
     });
 
+    function nullable(value) {
+        return value ? value : 'N/A';
+    }
+
     function formatMoment(unix) {
         return unix ? moment.unix(unix).fromNow() : 'N/A';
     }
@@ -41,8 +45,19 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
         if (!node) {
             return;
         }
-        return;
+
+        switch (node.values.onlineState) {
+            case 'ONLINE':
+                return 'node-online';
+
+            case 'OFFLINE':
+                return 'node-offline';
+
+            default:
+                return;
+        }
     }
+
 
     var nodes = nga.entity('nodes').label('Nodes').identifier(nga.field('token'));
     nodes
@@ -70,6 +85,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                     ? '<i class="fa fa-map-marker coords-set" aria-hidden="true" title="coordinates set"></i>'
                     : '<i class="fa fa-times coords-unset" aria-hidden="true" title="no coordinates"></i>';
             }),
+            nga.field('onlineState').cssClasses(nodeClasses),
             nga.field('monitoringState').cssClasses(nodeClasses).template(function (node) {
                 switch (node.values.monitoringState) {
                     case 'active':
@@ -158,11 +174,24 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
         .exportFields([])
         .fields([
             nga.field('id').cssClasses(monitoringStateClasses),
+            nga.field('hostname').cssClasses(monitoringStateClasses),
             nga.field('mac').cssClasses(monitoringStateClasses),
+            nga.field('monitoring_state').cssClasses(monitoringStateClasses).template(function (monitoringState) {
+                switch (monitoringState.values.monitoring_state) {
+                    case 'active':
+                        return '<i class="fa fa-heartbeat monitoring-active" title="active"></i>';
+
+                    case 'pending':
+                        return '<i class="fa fa-envelope monitoring-confirmation-pending" title="confirmation pending"></i>';
+
+                    default:
+                        return '<i class="fa fa-times monitoring-disabled" title="disabled"></i>';
+                }
+            }),
             nga.field('state').cssClasses(monitoringStateClasses),
             nga.field('last_seen').map(formatMoment).cssClasses(monitoringStateClasses),
             nga.field('import_timestamp').label('Imported').map(formatMoment).cssClasses(monitoringStateClasses),
-            nga.field('last_status_mail_type').cssClasses(monitoringStateClasses),
+            nga.field('last_status_mail_type').map(nullable).cssClasses(monitoringStateClasses),
             nga.field('last_status_mail_sent').map(formatMoment).cssClasses(monitoringStateClasses),
             nga.field('created_at').map(formatMoment).cssClasses(monitoringStateClasses),
             nga.field('modified_at').map(formatMoment).cssClasses(monitoringStateClasses)

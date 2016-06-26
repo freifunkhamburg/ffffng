@@ -424,7 +424,7 @@ angular.module('ffffng')
         getAllNodes: function (callback) {
             findNodeFiles({}, function (err, files) {
                 if (err) {
-                    Logger.tag('nodes').error('Error getting all nodes:', error);
+                    Logger.tag('nodes').error('Error getting all nodes:', err);
                     return callback({data: 'Internal error.', type: ErrorTypes.internalError});
                 }
 
@@ -434,7 +434,7 @@ angular.module('ffffng')
                     parseNodeFile,
                     function (err, nodes) {
                         if (err) {
-                            Logger.tag('nodes').error('Error getting all nodes:', error);
+                            Logger.tag('nodes').error('Error getting all nodes:', err);
                             return callback({data: 'Internal error.', type: ErrorTypes.internalError});
                         }
 
@@ -444,7 +444,7 @@ angular.module('ffffng')
             });
         },
 
-        findNodeDataByMac: function (mac, callback) {
+        getNodeDataByMac: function (mac, callback) {
             return findNodeDataByFilePattern({ mac: mac }, callback);
         },
 

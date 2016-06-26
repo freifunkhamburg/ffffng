@@ -5,7 +5,9 @@ angular.module('ffffng')
         _,
         async,
         config,
+        deepExtend,
         Database,
+        DatabaseUtil,
         ErrorTypes,
         Logger,
         moment,
@@ -34,10 +36,12 @@ angular.module('ffffng')
 
         return Database.run(
             'INSERT INTO node_state ' +
-            '(mac, state, last_seen, import_timestamp, (last_status_mail_sent, last_status_mail_type) OR last_status_mail_type IS NULL) ' +
+            '(hostname, mac, monitoring_state, state, last_seen, import_timestamp, last_status_mail_sent, last_status_mail_type) ' +
             'VALUES (?, ?, ?, ?, ?, ?)',
             [
+                node.hostname,
                 node.mac,
+                node.monitoringState,
                 nodeData.state,
                 nodeData.lastSeen.unix(),
                 nodeData.importTimestamp.unix(),
@@ -66,45 +70,37 @@ angular.module('ffffng')
 
         return Database.run(
             'UPDATE node_state ' +
-            'SET state = ?, last_seen = ?, import_timestamp = ?, modified_at = ?' +
+            'SET hostname = ?, monitoring_state = ?, state = ?, last_seen = ?, import_timestamp = ?, modified_at = ?' +
             'WHERE id = ? AND mac = ?',
             [
-                nodeData.state, nodeData.lastSeen.unix(), nodeData.importTimestamp.unix(), moment().unix(),
-                row.id, node.mac
+                node.hostname,
+                node.monitoringState,
+                nodeData.state,
+                nodeData.lastSeen.unix(),
+                nodeData.importTimestamp.unix(),
+                moment().unix(),
+
+                row.id,
+                node.mac
             ],
             callback
         );
     }
 
-    function deleteNodeInformation(nodeData, node, callback) {
-        Logger
-            .tag('monitoring', 'information-retrieval')
-            .debug('Node is not being monitored, deleting monitoring data: %s', nodeData.mac);
-        return Database.run(
-            'DELETE FROM node_state WHERE mac = ? AND import_timestamp < ?',
-            [node.mac, nodeData.importTimestamp.unix()],
-            callback
-        );
-    }
-
     function storeNodeInformation(nodeData, node, callback) {
-        if (node.monitoring && node.monitoringConfirmed) {
-            Logger.tag('monitoring', 'information-retrieval').debug('Node is being monitored: %s', nodeData.mac);
+        Logger.tag('monitoring', 'information-retrieval').debug('Storing status for node: %s', nodeData.mac);
 
-            return Database.get('SELECT * FROM node_state WHERE mac = ?', [node.mac], function (err, row) {
-                if (err) {
-                    return callback(err);
-                }
+        return Database.get('SELECT * FROM node_state WHERE mac = ?', [node.mac], function (err, row) {
+            if (err) {
+                return callback(err);
+            }
 
-                if (_.isUndefined(row)) {
-                    return insertNodeInformation(nodeData, node, callback);
-                } else {
-                    return updateNodeInformation(nodeData, node, row, callback);
-                }
-            });
-        } else {
-            return deleteNodeInformation(nodeData, node, callback);
-        }
+            if (_.isUndefined(row)) {
+                return insertNodeInformation(nodeData, node, callback);
+            } else {
+                return updateNodeInformation(nodeData, node, row, callback);
+            }
+        });
     }
 
     var isValidMac = Validator.forConstraint(Constraints.node.mac);
@@ -221,7 +217,7 @@ angular.module('ffffng')
                     function (nodeState, mailCallback) {
                         var mac = nodeState.mac;
                         Logger.tag('monitoring', 'mail-sending').debug('Loading node data for: %s', mac);
-                        NodeService.findNodeDataByMac(mac, function (err, node, nodeSecrets) {
+                        NodeService.getNodeDataByMac(mac, function (err, node, nodeSecrets) {
                             if (err) {
                                 Logger
                                     .tag('monitoring', 'mail-sending')
@@ -267,10 +263,10 @@ angular.module('ffffng')
                                         var now = moment().unix();
                                         Database.run(
                                             'UPDATE node_state ' +
-                                            'SET modified_at = ?, last_status_mail_sent = ?, last_status_mail_type = ?' +
+                                            'SET hostname = ?, monitoring_state = ?, modified_at = ?, last_status_mail_sent = ?, last_status_mail_type = ?' +
                                             'WHERE id = ?',
                                             [
-                                                now, now, mailType,
+                                                node.hostname, node.monitoringState, now, now, mailType,
                                                 nodeState.id
                                             ],
                                             mailCallback
@@ -357,7 +353,9 @@ angular.module('ffffng')
         getAll: function (restParams, callback) {
             var sortFields = [
                 'id',
+                'hostname',
                 'mac',
+                'monitoring_state',
                 'state',
                 'last_seen',
                 'import_timestamp',
@@ -367,7 +365,9 @@ angular.module('ffffng')
                 'modified_at'
             ];
             var filterFields = [
+                'hostname',
                 'mac',
+                'monitoring_state',
                 'state',
                 'last_status_mail_type'
             ];
@@ -402,6 +402,31 @@ angular.module('ffffng')
                             callback(null, rows, total);
                         }
                     );
+                }
+            );
+        },
+
+        getByMacs: function (macs, callback) {
+            if (_.isEmpty(macs)) {
+                return callback(null, {});
+            }
+
+            var inCondition = DatabaseUtil.inCondition('mac', macs);
+
+            Database.all(
+                'SELECT * FROM node_state WHERE ' + inCondition.query,
+                _.concat([], inCondition.params),
+                function (err, rows) {
+                    if (err) {
+                        return callback(err);
+                    }
+
+                    var nodeStateByMac = {};
+                    _.each(rows, function (row) {
+                        nodeStateByMac[row.mac] = row;
+                    });
+
+                    callback(null, nodeStateByMac);
                 }
             );
         },
@@ -490,7 +515,7 @@ angular.module('ffffng')
                         function (nodeData, nodeCallback) {
                             Logger.tag('monitoring', 'information-retrieval').debug('Importing: %s', nodeData.mac);
 
-                            NodeService.findNodeDataByMac(nodeData.mac, function (err, node) {
+                            NodeService.getNodeDataByMac(nodeData.mac, function (err, node) {
                                 if (err) {
                                     Logger
                                         .tag('monitoring', 'information-retrieval')
