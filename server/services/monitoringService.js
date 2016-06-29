@@ -193,7 +193,20 @@ angular.module('ffffng')
         callback(null, data);
     }
 
-    function sendMonitoringMailsBatched(name, mailType, findBatchFun, callback) {
+        function updateSkippedNode(id, node, callback) {
+            Database.run(
+                'UPDATE node_state ' +
+                'SET hostname = ?, monitoring_state = ?, modified_at = ?' +
+                'WHERE id = ?',
+                [
+                    node ? node.hostname : '', node ? node.monitoringState : '', moment().unix(),
+                    id
+                ],
+                callback
+            );
+        }
+
+        function sendMonitoringMailsBatched(name, mailType, findBatchFun, callback) {
         Logger.tag('monitoring', 'mail-sending').debug('Sending "%s" mails...', name);
 
         var sendNextBatch = function (err) {
@@ -230,9 +243,9 @@ angular.module('ffffng')
                                 Logger
                                     .tag('monitoring', 'mail-sending')
                                     .debug(
-                                        'Node not found. Skipping sending of "' + name + '" mail: ' + mac
-                                    );
-                                return mailCallback(null);
+                                    'Node not found. Skipping sending of "' + name + '" mail: ' + mac
+                                );
+                                return updateSkippedNode(nodeState.id, {}, mailCallback);
                             }
 
                             if (node.monitoring && node.monitoringConfirmed) {
@@ -278,7 +291,7 @@ angular.module('ffffng')
                                 Logger
                                     .tag('monitoring', 'mail-sending')
                                     .info('Monitoring disabled, skipping "%s" mail for: %s', name, mac);
-                                return mailCallback(null);
+                                return updateSkippedNode(nodeState.id, {}, mailCallback);
                             }
                         });
                     },
