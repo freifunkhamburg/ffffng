@@ -223,16 +223,16 @@ angular.module('ffffng')
                                 Logger
                                     .tag('monitoring', 'mail-sending')
                                     .error('Error sending "' + name + '" mail for node: ' + mac, err);
-                                return callback(err);
+                                return mailCallback(err);
                             }
 
                             if (!node) {
                                 Logger
                                     .tag('monitoring', 'mail-sending')
-                                    .warn(
+                                    .debug(
                                         'Node not found. Skipping sending of "' + name + '" mail: ' + mac
                                     );
-                                return callback(null);
+                                return mailCallback(null);
                             }
 
                             if (node.monitoring && node.monitoringConfirmed) {
