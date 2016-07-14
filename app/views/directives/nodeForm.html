@@ -59,7 +59,7 @@
                 </div>
                 <div class="col-md-8">
                     <leaflet
-                        class="map"
+                        class="map" ng-class="{'map-hide-layers-control' : !map.hasMultipleLayers }"
                         center="map.center"
                         layers="map.layers"
                         markers="map.markers"

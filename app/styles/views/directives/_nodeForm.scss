@@ -123,8 +123,24 @@ f-node-form {
         margin-top: 5px;
         margin-bottom: 20px;
 
-        .leaflet-control-layers.leaflet-control {
+        &.map-hide-layers-control .leaflet-control-layers.leaflet-control {
             display: none;
+        }
+
+        // reset styling from bootstrap as it breaks the layer control
+        .leaflet-control-layers {
+            input {
+                display: initial;
+                border: initial;
+                box-shadow: initial;
+                width: initial;
+                height: initial;
+            }
+
+            input, label {
+                margin: initial;
+                padding: initial;
+            }
         }
     }
 

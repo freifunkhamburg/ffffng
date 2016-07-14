@@ -109,7 +109,8 @@ var defaultConfig = {
             localCommunityPolygon: [],
             lat: 53.565278,
             lng: 10.001389,
-            defaultZoom: 10
+            defaultZoom: 10,
+            layers: {}
         }
     }
 };

@@ -29,20 +29,9 @@ angular.module('ffffng')
                 zoom: config.coordsSelector.defaultZoom
             },
             markers: {},
+            hasMultipleLayers: _.size(config.coordsSelector.layers) > 1,
             layers: {
-                baselayers: {
-                    osm: {
-                        name: 'MapQuest (OSM)',
-                        url: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg',
-                        type: 'xyz',
-                        layerOptions: {
-                            subdomains: '1234',
-                            attribution:
-                                'Tiles &copy; <a href=\"https://www.mapquest.com/\" target=\"_blank\">MapQuest</a>, ' +
-                                'Data CC-BY-SA OpenStreetMap'
-                        }
-                    }
-                }
+                baselayers: config.coordsSelector.layers
             }
         };
 
