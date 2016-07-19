@@ -89,3 +89,44 @@ msgstr ""
 
 Auf diese Weise landet der Nutzer direkt im teilweise vorausgefüllten Formular und muss nicht mehr den Knotennamen,
 fastd-Key und die MAC-Adresse angeben.
+
+
+## Entwicklung
+
+### Abhängigkeiten
+
+* node.js + NPM
+* compass (Installation z. B. via Ruby's `gem`)
+* grunt (Installation z. B. via `npm install grunt-cli`)
+* ggf. bower (Installation z. B. via `npm install bower`)
+
+
+### Build
+
+`grunt clean build`
+
+Der Output landet dann unter `dist/`.
+
+
+### Server starten
+
+1. Zunächst eine `config.json` anlegen wie oben unter "Installation / Konfiguration" beschrieben.
+2. `node server/main.js -c config.json`
+
+Der Server ist dann erreichbar unter [http://localhost:8080]().
+
+
+### Life-Reload vom Client
+
+`grunt serve`
+
+Der Client ist dann erreichbar via [http://localhost:9000](), erwartet aber, dass der Server für die REST-API auch läuft
+(s. o.) und auf Port `8080` erreichbar ist.
+
+
+### Publishen auf npmjs.com
+
+Geht nur, wenn man die Berechtigungen für das Package auf npmjs.com hat.
+
+Zunächst sicherstellen, dass in der `package.json` die korrekte neue Versionsnummer eingetragen und committed ist,
+dann einfach `./publish.sh` aufrufen.
