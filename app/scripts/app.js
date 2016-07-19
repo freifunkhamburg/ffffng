@@ -61,8 +61,9 @@ angular.module('ffffng', [
         }
     };
 })
-.run(function ($location, $rootScope, config) {
+.run(function ($location, $rootScope, $window, config) {
     $rootScope.$on('$routeChangeSuccess', function (event, current) {
+        $window.scrollTo(0, 0);
         $rootScope.title = current.$$route ? (current.$$route.title || '') : '';
         $rootScope.config = config;
     });
