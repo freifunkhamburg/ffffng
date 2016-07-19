@@ -338,6 +338,14 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
     admin.menu(
             nga.menu()
                 .addChild(nga
+                    .menu()
+                    .template(
+                        '<a href="/internal/admin">' +
+                        '<span class="fa fa-dashboard"></span> Dashboard / Statistics' +
+                        '</a>'
+                    )
+                )
+                .addChild(nga
                     .menu(nodes)
                     .icon('<i class="fa fa-dot-circle-o"></i>')
                 )
@@ -361,6 +369,21 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                         '</a>'
                     )
                 )
+    );
+
+    admin.dashboard(nga.dashboard()
+        .template(
+            '<div class="row dashboard-starter"></div>' +
+            '<fa-dashboard-stats></fa-dashboard-stats>' +
+
+            '<div class="row dashboard-content">' +
+                '<div class="col-lg-6">' +
+                    '<div class="panel panel-default" ng-repeat="collection in dashboardController.collections | orderElement" ng-if="$even">' +
+                        '<ma-dashboard-panel collection="collection" entries="dashboardController.entries[collection.name()]"></ma-dashboard-panel>' +
+                    '</div>' +
+                '</div>' +
+            '</div>'
+        )
     );
 
     nga.configure(admin);

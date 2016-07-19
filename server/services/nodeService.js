@@ -490,6 +490,45 @@ angular.module('ffffng')
                     callback
                 );
             });
+        },
+
+        getNodeStatistics: function (callback) {
+            this.getAllNodes(function (err, nodes) {
+                if (err) {
+                    return callback(err);
+                }
+
+                var nodeStatistics = {
+                    registered: _.size(nodes),
+                    withVPN: 0,
+                    withCoords: 0,
+                    monitoring: {
+                        active: 0,
+                        pending: 0
+                    }
+                };
+
+                _.each(nodes, function (node) {
+                    if (node.key) {
+                        nodeStatistics.withVPN += 1;
+                    }
+
+                    if (node.coords) {
+                        nodeStatistics.withCoords += 1;
+                    }
+
+                    switch (node.monitoringState) {
+                        case 'active':
+                            nodeStatistics.monitoring.active += 1;
+                        break;
+                        case 'pending':
+                            nodeStatistics.monitoring.pending += 1;
+                        break;
+                    }
+                });
+
+                callback(null, nodeStatistics);
+            })
         }
     };
 });
