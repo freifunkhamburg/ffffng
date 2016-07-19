@@ -50,7 +50,8 @@ TODO
 
 ## Administration
 
-Das Admin-Panel ist dann entsprechend erreichbar unter: [https://formular.musterstadt.freifunk.net/internal/admin]().
+Das Admin-Panel ist dann entsprechend erreichbar unter: 
+[https://formular.musterstadt.freifunk.net/internal/admin](https://formular.musterstadt.freifunk.net/internal/admin).
 (Die Domain muss natürlich angepasst werden.)
 
 Das Admin-Panel besteht aus folgenden Bereichen:
@@ -113,15 +114,15 @@ Der Output landet dann unter `dist/`.
 1. Zunächst eine `config.json` anlegen wie oben unter "Installation / Konfiguration" beschrieben.
 2. `node server/main.js -c config.json`
 
-Der Server ist dann erreichbar unter [http://localhost:8080]().
+Der Server ist dann erreichbar unter [http://localhost:8080](http://localhost:8080).
 
 
 ### Life-Reload vom Client
 
 `grunt serve`
 
-Der Client ist dann erreichbar via [http://localhost:9000](), erwartet aber, dass der Server für die REST-API auch läuft
-(s. o.) und auf Port `8080` erreichbar ist.
+Der Client ist dann erreichbar via [http://localhost:9000](http://localhost:9000), erwartet aber, dass der Server für
+die REST-API auch läuft (s. o.) und auf Port `8080` erreichbar ist.
 
 
 ### Publishen auf npmjs.com
