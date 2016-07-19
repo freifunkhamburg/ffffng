@@ -8,7 +8,18 @@ TODO
 
 ## Features
 
-TODO
+* Anlegen, Bearbeiten und Löschen von Knoten.
+* Auswahl der Koordinaten über eingebettete Karte.
+* Automatische Benachrichtigung, wenn ein Knoten zu lange offline ist.
+* Admin-Panel mit Statistiken, Suchfunktion, ...
+
+
+## Anti-Features
+
+* Zentrale Ablage der Daten auf einem Server statt auf den Knoten selber.
+* Migration der Daten zurück auf die Knoten oder in andere Systeme bisher nicht möglich. D. h. sobald einmal diese
+  Knotenverwaltung verwendet wird, ist es nicht einfach möglich, diese wieder loszuwerden.
+* Angepasste Version des Karten-Backends für die Knotenkarte (meshviewer o.ä.) nötig.
 
 
 ## Screenshots
