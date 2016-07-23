@@ -290,7 +290,7 @@ angular.module('ffffng')
                             } else {
                                 Logger
                                     .tag('monitoring', 'mail-sending')
-                                    .info('Monitoring disabled, skipping "%s" mail for: %s', name, mac);
+                                    .debug('Monitoring disabled, skipping "%s" mail for: %s', name, mac);
                                 return updateSkippedNode(nodeState.id, {}, mailCallback);
                             }
                         });
