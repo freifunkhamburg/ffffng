@@ -263,7 +263,7 @@ angular.module('ffffng')
                         var pending = value === 'pending';
                         node.monitoring = active || pending;
                         node.monitoringConfirmed = active;
-                        node.monitoringState = active ? 'active' : (pending ? 'pending' : '');
+                        node.monitoringState = active ? 'active' : (pending ? 'pending' : 'disabled');
                     } else if (key === 'monitoringToken') {
                         nodeSecrets.monitoringToken = value;
                     } else {

@@ -98,7 +98,7 @@ angular.module('ffffng').factory('NodeResource', function (
         },
 
         getAll: function (req, res) {
-            Resources.getValidRestParams('list', req, function (err, restParams) {
+            Resources.getValidRestParams('list', 'node', req, function (err, restParams) {
                 if (err) {
                     return Resources.error(res, err);
                 }

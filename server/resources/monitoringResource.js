@@ -14,7 +14,7 @@ angular.module('ffffng').factory('MonitoringResource', function (
 
     return {
         getAll: function (req, res) {
-            Resources.getValidRestParams('list', req, function (err, restParams) {
+            Resources.getValidRestParams('list', null, req, function (err, restParams) {
                 if (err) {
                     return Resources.error(res, err);
                 }

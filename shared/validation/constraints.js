@@ -47,6 +47,26 @@ angular.module('ffffng').constant('Constraints',  {
             optional: false
         }
     },
+    nodeFilters: {
+        hasKey: {
+            type: 'boolean',
+            optional: true
+        },
+        hasCoords: {
+            type: 'boolean',
+            optional: true
+        },
+        onlineState: {
+            type: 'string',
+            regex: /^(ONLINE|OFFLINE)$/,
+            optional: true
+        },
+        monitoringState: {
+            type: 'string',
+            regex: /^(disabled|active|pending)$/,
+            optional: true
+        }
+    },
     rest: {
         list: {
             _page: {

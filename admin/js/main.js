@@ -122,14 +122,44 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
             })
         ])
         .filters([
-            nga.field('q')
+            nga.field('q', 'template')
                 .label('')
                 .pinned(true)
                 .template(
                     '<div class="input-group">' +
                     '<input type="text" ng-model="value" placeholder="Search" class="form-control"></input>' +
                     '<span class="input-group-addon"><i class="fa fa-search"></i></span></div>'),
+            nga.field('hasKey', 'choice')
+                .label('VPN key')
+                .pinned(false)
+                .choices([
+                    { label: 'VPN key set', value: true },
+                    { label: 'no VPN key', value: false }
+                ]),
+            nga.field('hasCoords', 'choice')
+                .label('GPS coordinates')
+                .pinned(false)
+                .choices([
+                    { label: 'coordinates set', value: true },
+                    { label: 'no coordinates', value: false }
+                ]),
+            nga.field('onlineState', 'choice')
+                .label('Online state')
+                .pinned(false)
+                .choices([
+                    { label: 'online', value: 'ONLINE' },
+                    { label: 'offline', value: 'OFFLINE' }
+                ]),
+            nga.field('monitoringState', 'choice')
+                .label('Monitoring')
+                .pinned(false)
+                .choices([
+                    { label: 'pending', value: 'pending' },
+                    { label: 'active', value: 'active' },
+                    { label: 'disabled', value: 'disabled' }
+                ])
         ])
+        .actions(['<ma-filter-button filters="filters()" enabled-filters="enabledFilters" enable-filter="enableFilter()"></ma-filter-button>'])
         .listActions(
             '<ma-edit-button entry="entry" entity="entity" size="sm"></ma-edit-button> ' +
             '<ma-delete-button entry="entry" entity="entity" size="sm"></ma-delete-button> ' +

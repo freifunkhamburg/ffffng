@@ -70,45 +70,64 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
         };
     }
 
+    function getConstrainedValues(data, constraints) {
+        var values = {};
+        _.each(_.keys(constraints), function (key) {
+            var value = data[key];
+            values[key] = _.isUndefined(value) && !_.isUndefined(constraints[key].default)
+                ? constraints[key].default
+                : value;
+        });
+        return values;
+    }
+
     return {
         getData: function (req) {
             return _.extend({}, req.body, req.params, req.query);
         },
 
-        getValidRestParams: function(type, req, callback) {
+        getValidRestParams: function(type, subtype, req, callback) {
             var constraints = Constraints.rest[type];
             if (!_.isPlainObject(constraints)) {
                 Logger.tag('validation', 'rest').error('Unknown REST resource type: {}', type);
                 return callback({data: 'Internal error.', type: ErrorTypes.internalError});
             }
 
+            var filterConstraints = {};
+            if (subtype) {
+                filterConstraints = Constraints[subtype + 'Filters'];
+                if (!_.isPlainObject(filterConstraints)) {
+                    Logger.tag('validation', 'rest').error('Unknown REST resource subtype: {}', subtype);
+                    return callback({data: 'Internal error.', type: ErrorTypes.internalError});
+                }
+            }
+
             var data = this.getData(req);
 
-            var restParams = {};
-            _.each(_.keys(constraints), function (key) {
-                var value = data[key];
-                restParams[key] = _.isUndefined(value) && !_.isUndefined(constraints[key].default)
-                                ? constraints[key].default
-                                : value;
-            });
+            var restParams = getConstrainedValues(data, constraints);
+            var filterParams = getConstrainedValues(data, filterConstraints);
 
             var areValidParams = Validator.forConstraints(constraints);
-            if (!areValidParams(restParams)) {
+            var areValidFilters = Validator.forConstraints(filterConstraints);
+            if (!areValidParams(restParams) || !areValidFilters(filterParams)) {
                 return callback({data: 'Invalid REST parameters.', type: ErrorTypes.badRequest});
             }
+
+            restParams.filters = filterParams;
 
             callback(null, restParams);
         },
 
         filter: function (entities, allowedFilterFields, restParams) {
             var query = restParams.q;
-            if (!query) {
-                return entities;
+            if (query) {
+                query = _.toLower(query.trim());
             }
 
-            query = _.toLower(query.trim());
-
-            return _.filter(entities, function (entity) {
+            function queryMatches(entity) {
+                if (!query) {
+                    return true;
+                }
                 return _.some(allowedFilterFields, function (field) {
                     var value = entity[field];
                     if (_.isNumber(value)) {
@@ -125,7 +144,30 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
                     }
 
                     return _.includes(value, query);
-                })
+                });
+            }
+
+            var filters = restParams.filters;
+
+            function filtersMatch(entity) {
+                if (_.isEmpty(filters)) {
+                    return true;
+                }
+
+                return _.every(filters, function (value, key) {
+                    if (_.isUndefined(value)) {
+                        return true;
+                    }
+                    if (_.startsWith(key, 'has')) {
+                        var entityKey = key.substr(3, 1).toLowerCase() + key.substr(4);
+                        return _.isEmpty(entity[entityKey]).toString() !== value;
+                    }
+                    return entity[key] === value;
+                });
+            }
+
+            return _.filter(entities, function (entity) {
+                return queryMatches(entity) && filtersMatch(entity);
             });
         },
 
