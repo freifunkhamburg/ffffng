@@ -3,7 +3,7 @@
 
 ## Motivation / Disclaimer
 
-TODO
+**TODO**
 
 
 ## Features
@@ -56,7 +56,153 @@ TODO
 
 ## Installation / Konfiguration
 
-TODO
+### Vorbereitungen
+
+Verzeichnisstruktur für die Installation anlegen (im Weiteren `$FFFFNG_HOME`). Z. B.:
+
+```
+mkdir -p $FFFFNG_HOME
+mkdir -p $FFFFNG_HOME/fastdkeys
+mkdir -p $FFFFNG_HOME/logs
+```
+
+Nicht vergessen: Berechtigungen anpassen für den User unter dem der Server läuft.
+
+
+### Installation
+
+Abhängigkeiten installieren:
+
+* node.js + NPM
+* nginx o.ä. für SSL-Offloading und Proxy (hier nicht weiter beschrieben)
+
+Danach die Knotenverwaltung via `npm` installieren:
+
+```
+cd $FFFFNG_HOME
+npm install ffffng
+```
+
+### Konfiguration
+
+```
+cp $FFFFNG_HOME/node_modules/ffffng/config.json.example $FFFFNG_HOME/config.json
+```
+
+Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurations-Optionen:
+
+* **`server.baseUrl`** Basis-URL unter der die Knotenverwaltung erreichbar ist, z. B.:
+  `"https://formular.musterstadt.freifunk.net"` 
+* **`server.port`** Port unter dem der Server lokal läuft, z. B.: `8080`
+
+* **`server.databaseFile`** Pfad zur Datenbank-Datei, z. B.: `"$FFFFNG_HOME/ffffng.sqlite"`
+* **`server.peersPath`** Verzeichnis unter dem die `fastd` Key-Files angelegt werden, z. B.: `"$FFFFNG_HOME/fastdkeys"`
+
+* **`server.logging.directory`** Verzeichnis unter dem Log-Files abgelegt werden, z. B.: `"$FFFFNG_HOME/logs"`
+* **`server.logging.debug`** Gibt an, ob Debug-Output geloggt werden soll (Achtung, viel!), z. B.: `false`
+* **`server.logging.logRequests`** Gib an, ob HTTP-Requests geloggt werden sollen (Achtung, Datenschutz!), z. B.: `false`
+
+* **`server.internal.active`** Gibt an, ob interne URLs, wie Admin-Panel und Logging-Interface, erreichbar sein sollen,
+  z. B.: `true`
+* **`server.internal.user`** Benutzername für den Login beim Aufrufen interner URLs, z. B.: `"admin"`
+* **`server.internal.password`** Das zugehörige Passwort, z. B.: `"secret"`
+
+* **`server.email.from`** Absender für versendete E-Mails, z. B.: `"Freifunk Knotenformular <no-reply@musterstadt.freifunk.net>"`
+* **`server.email.smtp`** Konfiguration des SMTP-Servers für den E-Mail-Versand entsprechend der Dokumentation unter
+  [https://nodemailer.com/2-0-0-beta/setup-smtp/](https://nodemailer.com/2-0-0-beta/setup-smtp/), z. B.:
+
+```
+{
+    "server": {
+        ...
+        
+        "email": {
+            ...
+            
+            "smtp": {
+                "host": "mail.example.com",
+                "port": 465,
+                "secure": true,
+                "auth": {
+                    "user": "user@example.com",
+                    "pass": "pass"
+                }
+            }
+        }
+        
+        ...
+    }
+    ...
+}
+```
+
+* **`server.map.nodesJsonUrl`** URL der `nodes.json` des meshviewers, z. B.: `"http://musterstadt.freifunk.net/nodes.json"`
+
+* **`client.community.name`** Name der Freifunk-Community, z. B.: `"Freifunk Musterstadt"`
+* **`client.community.domain`** Domain der Freifunk-Community, z. B.: `"musterstadt.freifunk.net"`
+* **`client.community.contactEmail`** Kontakt-E-Mail-Adresse der Freifunk-Community, z. B.: `"kontakt@musterstadt.freifunk.net"`
+
+* **`client.map.mapUrl`** URL der Knotenkarte, z. B.: `"http://map.musterstadt.freifunk.net"`
+
+* **`client.monitoring.enabled`** Gibt an, ob die Nutzer Monitoring für ihre Knoten aktivieren können sollen, z. B.: `true`
+
+* **`client.coordsSelector.lat`** Breitengrad auf den die Karte zur Auswahl der Koordinaten zentriert werden soll, z. B.: `53.565278`
+* **`client.coordsSelector.lng`** Längengrad auf den die Karte zur Auswahl der Koordinaten zentriert werden soll, z. B.: `10.001389`
+* **`client.coordsSelector.defaultZoom`** Default-Zoom-Level für die Karte, z. B.: `10`
+* **`client.coordsSelector.layers`** **TODO**
+
+* **`client.otherCommunityInfo.showInfo`** Gibt an, ob für Knoten außerhalb der Community-Grenzen ein Info-Dialog
+  angezeigt werden soll, z. B.: `true`
+* **`client.otherCommunityInfo.showBorderForDebugging`** Gibt an, ob in der Karte die Community-Grenze (zum Debugging)
+  angezeigt werden soll, z. B.: `false`
+* **`client.otherCommunityInfo.localCommunityPolygon`** Polygon für die Community-Grenze (Tipp: Koordinaten durch Klicken
+  in der Karte bestimmen und kopieren), z. B.:
+
+```
+{
+    ...
+    "client": {
+        ...
+        "otherCommunityInfo": {
+            ...
+            "localCommunityPolygon": [{
+                "lat": 53.63975308945899, "lng": 9.764785766601562
+            }, {
+                "lat": 53.578646152866504, "lng": 10.208358764648438
+            }, {
+                "lat": 53.49039461941655, "lng": 9.795341491699219
+            }, {
+                "lat": 53.60921067445695, "lng": 9.737663269042969
+            }]
+        }
+    }
+}
+```
+
+
+### Starten des Servers
+
+Je nach System ggf. z. B. ein Init-Skript oder eine systemd-Unit schreiben. Dabei sollte der Server vorzugsweise nicht
+als root laufen. Generell lässt sich der Server wie folgt starten:
+
+```
+$FFFFNG_HOME/node_modules/.bin/ffffng -c $FFFFNG_HOME/config.json
+```
+
+Der Server ist dann via HTTP unter dem in der `config.json` konfigurierten Port erreichbar. Für vhost-Konfiguration und
+HTTPs biete es sich an, nginx o.ä. als Proxy zu verwenden.
+
+
+### Synchronisierung der fastd-Keys
+
+Die Synchronisierung und Verteilung der fastd-Keys auf die Gateways lässt sich z. B. via git und cron-Jobs realisieren.
+Details hierzu auf Anfrage.
+
+
+### Karten-Backend
+
+Für die Verwendung von meshviewer o.ä. muss das jeweilige Kartenbackend angepasst werden, sodass die Knotendaten aus
+dem Formular zusätzlich zu denen aus alfred verwendet werden. Details hierzu auf Anfrage.
 
 
 ## Administration
