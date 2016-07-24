@@ -149,7 +149,57 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 * **`client.coordsSelector.lat`** Breitengrad auf den die Karte zur Auswahl der Koordinaten zentriert werden soll, z. B.: `53.565278`
 * **`client.coordsSelector.lng`** Längengrad auf den die Karte zur Auswahl der Koordinaten zentriert werden soll, z. B.: `10.001389`
 * **`client.coordsSelector.defaultZoom`** Default-Zoom-Level für die Karte, z. B.: `10`
-* **`client.coordsSelector.layers`** **TODO**
+* **`client.coordsSelector.layers`** Die Layers für die Karte. Hier können einer oder mehrere Tile-Provider eingetragen
+  werden. Eine Übersicht über mögliche Kandidaten gibt es z. B. unter
+  [http://leaflet-extras.github.io/leaflet-providers/preview/index.html](http://leaflet-extras.github.io/leaflet-providers/preview/index.html).
+  Die Tile-Provider können dann z. B. wie folgt eingetragen werden (erlaubt ist alles, was von
+  [https://github.com/tombatossals/angular-leaflet-directive](https://github.com/tombatossals/angular-leaflet-directive)
+  als Konfiguration für `baseLayers` verwendet werden kann):
+  
+```
+{
+    ...
+
+    "client": {
+        ...
+
+        "coordsSelector": {
+            ...
+
+            "layers": {
+                "example-provider": {
+                    "name": "Beispiel Tile Server",
+                    "url": "https:///tiles{s}.example.com/{z}/{x}/{y}.png",
+                    "type": "xyz",
+                    "layerOptions": {
+                        "maxZoom": 18,
+                        "subdomains": "1234",
+                        "attribution": "&copy; Beispiel Tile Provider und OSM"
+                    }
+                },
+                "another-provider": {
+                    "name": "Noch ein Tile Server",
+                    "url": "https://more-tiles-{s}.example.com/foo/{z}/{x}/{y}.png",
+                    "type": "xyz",
+                    "layerOptions": {
+                        "maxZoom": 18,
+                        "subdomains": "abcd",
+                        "attribution": "Attribution goes here"
+                    }
+                }
+                
+                ...
+            }
+            
+            ...
+        }
+        
+        ...
+    }
+    
+    ...
+}
+```
 
 * **`client.otherCommunityInfo.showInfo`** Gibt an, ob für Knoten außerhalb der Community-Grenzen ein Info-Dialog
   angezeigt werden soll, z. B.: `true`
