@@ -22,6 +22,9 @@ angular.module('ffffng')
 ) {
     var MONITORING_STATE_MACS_CHUNK_SIZE = 100;
     var MONITORING_MAILS_DB_BATCH_SIZE = 50;
+    /**
+     * Defines the intervals emails are sent if a node is offline
+     */
     var MONITORING_OFFLINE_MAILS_SCHEDULE = {
         1: { amount: 3, unit: 'hours' },
         2: { amount: 1, unit: 'days' },
@@ -193,20 +196,20 @@ angular.module('ffffng')
         callback(null, data);
     }
 
-        function updateSkippedNode(id, node, callback) {
-            Database.run(
-                'UPDATE node_state ' +
-                'SET hostname = ?, monitoring_state = ?, modified_at = ?' +
-                'WHERE id = ?',
-                [
-                    node ? node.hostname : '', node ? node.monitoringState : '', moment().unix(),
-                    id
-                ],
-                callback
-            );
-        }
+    function updateSkippedNode(id, node, callback) {
+        Database.run(
+            'UPDATE node_state ' +
+            'SET hostname = ?, monitoring_state = ?, modified_at = ?' +
+            'WHERE id = ?',
+            [
+                node ? node.hostname : '', node ? node.monitoringState : '', moment().unix(),
+                id
+            ],
+            callback
+        );
+    }
 
-        function sendMonitoringMailsBatched(name, mailType, findBatchFun, callback) {
+    function sendMonitoringMailsBatched(name, mailType, findBatchFun, callback) {
         Logger.tag('monitoring', 'mail-sending').debug('Sending "%s" mails...', name);
 
         var sendNextBatch = function (err) {
@@ -327,11 +330,20 @@ angular.module('ffffng')
         );
     }
 
+    /**
+     * sends one of three mails if a node is offline
+     * @param  {moment}   startTime  the moment the job started
+     * @param  {Number}   mailNumber which of three mails
+     * @param  {Function} callback   gets all nodes that are offline
+     */
     function sendOfflineMails(startTime, mailNumber, callback) {
         sendMonitoringMailsBatched(
             'offline ' + mailNumber,
             'monitoring-offline-' + mailNumber,
             function (findBatchCallback) {
+                /**
+                 * descriptive string that stores, which was the last mail type, stored in the database as last_status_mail_type
+                 */
                 var previousType =
                     mailNumber === 1
                         ? 'monitoring-online-again'
