@@ -1,9 +1,25 @@
 # ffffng – Freifunk Knotenverwaltung
 
 
-## Motivation / Disclaimer
+## Disclaimer
 
-**TODO**
+**ACHTUNG:** Die Knotenverwaltung legt aktuell die Daten zentral ab. Im Freifunk-Sinne ist eine dezentrale Datenhaltung
+auf den Knoten sinnvoller, daher führt diese Knotenverwaltung bitte *nicht* neu in Freifunk-Communities ein, in denen
+die Knotendaten bereits auf den Knoten hinterlegt sind. 
+
+
+## Beschreibung / Motivation
+
+Die Freifunk Knotenverwaltung ist in Hamburg ursprünglich entstanden (damals noch `ffff`), um eine Registrierung von
+`fastd`-Keys neuer Knoten zu ermöglichen. Dabei wurden auch die MAC-Adresse, der Knotenname und die GPS-Koordinaten
+erfasst. Die Idee war die Verwendung in der Knotenkarte. Da der Config-Mode von gluon keinen Internet-Zugang bietet,
+wurde die Erfassung der Koordinaten ausgelagert, um zunächst die Koordinaten in einem neuen Tab aus der Karte kopieren
+und später mit `ffffng` die Karte zur Positionierung direkt in die Knotenverwaltung einbetten zu können.
+
+Zusätzlich werden Kontaktdaten erfasst (Pflichtfelder), um im Notfall die Knotenbetreiber erreichen zu können. Die
+Kontaktdaten sind nicht öffentlich einsehbar.
+ 
+Mit der Version `0.9.0` sind die neue Monitoring-Funktion sowie das Admin-Panel hinzugekommen.
 
 
 ## Features
