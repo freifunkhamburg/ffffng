@@ -22,6 +22,7 @@ angular.module('ffffng')
 ) {
     var MONITORING_STATE_MACS_CHUNK_SIZE = 100;
     var MONITORING_MAILS_DB_BATCH_SIZE = 50;
+    var MONITORING_MAX_PARALLEL_NODE_IMPORTS = 20;
     var MONITORING_OFFLINE_MAILS_SCHEDULE = {
         1: { amount: 3, unit: 'hours' },
         2: { amount: 1, unit: 'days' },
@@ -531,8 +532,9 @@ angular.module('ffffng')
                     }
                     previousImportTimestamp = data.importTimestamp;
 
-                    async.each(
+                    async.eachLimit(
                         data.nodes,
+                        MONITORING_MAX_PARALLEL_NODE_IMPORTS,
                         function (nodeData, nodeCallback) {
                             Logger.tag('monitoring', 'information-retrieval').debug('Importing: %s', nodeData.mac);
 
