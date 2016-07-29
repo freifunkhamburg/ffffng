@@ -35,13 +35,17 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
     }
 
     var nga = NgAdminConfigurationProvider;
-    var admin = nga.application('Knotenverwaltung - Admin-Panel');
+
+    var title = 'Knotenverwaltung - ' + config.community.name + ' - Admin-Panel';
+    var admin = nga.application(title);
+    document.title = title;
 
     admin
         .header(
             '<div class="navbar-header">' +
             '<a class="navbar-brand" href="#" ng-click="appController.displayHome()">' +
-            'Knotenverwaltung - Admin-Panel <small style="font-size: 0.7em;">(<fa-version></fa-version>)</small>' +
+            title + ' ' +
+            '<small style="font-size: 0.7em;">(<fa-version></fa-version>)</small>' +
             '</a>' +
             '</div>' +
             '<p class="navbar-text navbar-right">' +
