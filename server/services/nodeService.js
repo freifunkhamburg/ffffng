@@ -118,20 +118,20 @@ angular.module('ffffng')
         return null;
     }
 
-        function toNodeFilename(token, node, nodeSecrets) {
-            return config.server.peersPath + '/' +
-                (
-                    (node.hostname || '') + '@' +
-                    (node.mac || '') + '@' +
-                    (node.key || '') + '@' +
-                    (token || '') + '@' +
-                    (nodeSecrets.monitoringToken || '')
-                ).toLowerCase();
-        }
+    function toNodeFilename(token, node, nodeSecrets) {
+        return config.server.peersPath + '/' +
+            (
+                (node.hostname || '') + '@' +
+                (node.mac || '') + '@' +
+                (node.key || '') + '@' +
+                (token || '') + '@' +
+                (nodeSecrets.monitoringToken || '')
+            ).toLowerCase();
+    }
 
-        function writeNodeFile(isUpdate, token, node, nodeSecrets, callback) {
-            var filename = toNodeFilename(token, node, nodeSecrets);
-            var data = '';
+    function writeNodeFile(isUpdate, token, node, nodeSecrets, callback) {
+        var filename = toNodeFilename(token, node, nodeSecrets);
+        var data = '';
         _.each(linePrefixes, function (prefix, key) {
             var value;
             switch (key) {
