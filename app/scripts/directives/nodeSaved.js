@@ -1,8 +1,10 @@
 'use strict';
 
 angular.module('ffffng')
-.directive('fNodeSaved', function () {
+.directive('fNodeSaved', function (config) {
     var ctrl = function ($scope, Navigator) {
+        $scope.config = config;
+
         $scope.goHome = function () {
             Navigator.home();
         };
