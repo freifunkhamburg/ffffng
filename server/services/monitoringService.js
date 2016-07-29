@@ -96,10 +96,22 @@ angular.module('ffffng')
                 return callback(err);
             }
 
-            if (_.isUndefined(row)) {
-                return insertNodeInformation(nodeData, node, callback);
+            var nodeDataForStoring;
+            if (nodeData === 'missing') {
+                nodeDataForStoring = {
+                    mac: node.mac,
+                    state: 'OFFLINE',
+                    lastSeen: _.isUndefined(row) ? moment() : moment.unix(row.last_seen),
+                    importTimestamp: moment()
+                };
             } else {
-                return updateNodeInformation(nodeData, node, row, callback);
+                nodeDataForStoring = nodeData;
+            }
+
+            if (_.isUndefined(row)) {
+                return insertNodeInformation(nodeDataForStoring, node, callback);
+            } else {
+                return updateNodeInformation(nodeDataForStoring, node, row, callback);
             }
         });
     }
@@ -193,20 +205,20 @@ angular.module('ffffng')
         callback(null, data);
     }
 
-        function updateSkippedNode(id, node, callback) {
-            Database.run(
-                'UPDATE node_state ' +
-                'SET hostname = ?, monitoring_state = ?, modified_at = ?' +
-                'WHERE id = ?',
-                [
-                    node ? node.hostname : '', node ? node.monitoringState : '', moment().unix(),
-                    id
-                ],
-                callback
-            );
-        }
+    function updateSkippedNode(id, node, callback) {
+        Database.run(
+            'UPDATE node_state ' +
+            'SET hostname = ?, monitoring_state = ?, modified_at = ?' +
+            'WHERE id = ?',
+            [
+                node ? node.hostname : '', node ? node.monitoringState : '', moment().unix(),
+                id
+            ],
+            callback
+        );
+    }
 
-        function sendMonitoringMailsBatched(name, mailType, findBatchFun, callback) {
+    function sendMonitoringMailsBatched(name, mailType, findBatchFun, callback) {
         Logger.tag('monitoring', 'mail-sending').debug('Sending "%s" mails...', name);
 
         var sendNextBatch = function (err) {
@@ -362,6 +374,32 @@ angular.module('ffffng')
             },
             callback
         );
+    }
+
+    function markMissingNodesAsOffline(nodes, callback) {
+        var knownNodes = {};
+        _.each(nodes, function (node) {
+            knownNodes[Strings.normalizeMac(node.mac)] = 1;
+        });
+
+        NodeService.getAllNodes(function (err, nodes) {
+            if (err) {
+                return callback(err);
+            }
+
+            async.eachSeries(
+                nodes,
+                function (node, nodeCallback) {
+                    if (knownNodes[Strings.normalizeMac(node.mac)]) {
+                        // node is known in nodes.json so it has already been handled
+                        return nodeCallback(null);
+                    }
+
+                    storeNodeInformation('missing', node, nodeCallback);
+                },
+                callback
+            );
+        });
     }
 
     return {
@@ -569,7 +607,13 @@ angular.module('ffffng')
                                 });
                             });
                         },
-                        callback
+                        function (err) {
+                            if (err) {
+                                return callback(err);
+                            }
+
+                            markMissingNodesAsOffline(data.nodes, callback);
+                        }
                     );
                 });
             });
