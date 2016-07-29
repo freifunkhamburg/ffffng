@@ -18,15 +18,20 @@ var scribe = require('scribe-js')({
     rootPath: config.server.logging.directory,
 });
 
-if (config.server.logging.debug) {
-    process.console.addLogger('debug', 'grey', {
-        logInConsole: false
-    });
-} else {
-    process.console.debug = function () {
-        this._reset(); // forget tags, etc. for this logging event
-    };
+function addLogger(name, color, active) {
+    if (active) {
+        process.console.addLogger(name, color, {
+            logInConsole: false
+        });
+    } else {
+        process.console[name] = function () {
+            this._reset(); // forget tags, etc. for this logging event
+        };
+    }
 }
+
+addLogger('debug', 'grey', config.server.logging.debug);
+addLogger('profile', 'blue', config.server.logging.profile);
 
 angular.module('ffffng').factory('Logger', function (app) {
     if (config.server.logging.logRequests) {

@@ -63,6 +63,7 @@ var defaultConfig = {
         logging: {
             directory: '/tmp/logs',
             debug: false,
+            profile: false,
             logRequests: false
         },
 

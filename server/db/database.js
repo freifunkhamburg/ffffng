@@ -91,6 +91,10 @@ module.exports = {
             throw error;
         }
 
+        db.on('profile', function (sql, time) {
+            Logger.tag('database').profile('[%sms]\t%s', time, sql);
+        });
+
         applyMigrations(db, function (err) {
             if (err) {
                 Logger.tag('database').error('Error migrating database:', err);

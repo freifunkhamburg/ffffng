@@ -116,6 +116,7 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 
 * **`server.logging.directory`** Verzeichnis unter dem Log-Files abgelegt werden, z. B.: `"$FFFFNG_HOME/logs"`
 * **`server.logging.debug`** Gibt an, ob Debug-Output geloggt werden soll (Achtung, viel!), z. B.: `false`
+* **`server.logging.profile`** Gibt an, ob Profiling-Output geloggt werden soll (Achtung, viel!), z. B.: `false`
 * **`server.logging.logRequests`** Gib an, ob HTTP-Requests geloggt werden sollen (Achtung, Datenschutz!), z. B.: `false`
 
 * **`server.internal.active`** Gibt an, ob interne URLs, wie Admin-Panel und Logging-Interface, erreichbar sein sollen,

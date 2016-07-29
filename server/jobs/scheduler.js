@@ -53,6 +53,8 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
             task.state = 'running';
 
             job.run(function () {
+                var now = moment();
+                Logger.tag('jobs').profile('[%sms]\t%s', now.diff(task.runningSince), task.name);
                 task.runningSince = false;
                 task.state = 'idle';
             });
