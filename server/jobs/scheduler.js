@@ -76,7 +76,7 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
                 if (config.client.monitoring.enabled) {
                     schedule('30 */15 * * * *', 'NodeInformationRetrievalJob');
                     schedule('45 */5 * * * *', 'MonitoringMailsSendingJob');
-                    schedule('0 0 3 * * *', 'NodeInformationCleanupJob'); // every night at 3:00
+                    schedule('0 0 3 * * *', 'OfflineNodesDeletionJob'); // every night at 3:00
                 }
             }
             catch (error) {

@@ -27,6 +27,10 @@ angular.module('ffffng')
         2: { amount: 1, unit: 'days' },
         3: { amount: 7, unit: 'days' }
     };
+    var DELETE_OFFLINE_NODES_AFTER_DURATION = {
+        amount: 100,
+        unit: 'days'
+    };
 
     var previousImportTimestamp = null;
 
@@ -663,26 +667,62 @@ angular.module('ffffng')
             });
         },
 
-        cleanupNodeInformation: function (callback) {
-            var daysBeforeCleanup = 30;
+        deleteOfflineNodes: function (callback) {
             Logger
-                .tag('monitoring', 'information-cleanup')
-                .debug('Cleaning up node data not updated for %s days...', daysBeforeCleanup);
-            Database.run(
-                'DELETE FROM node_state WHERE modified_at < ?',
-                [moment().subtract(daysBeforeCleanup, 'days').unix()],
-                function (err) {
-                    if (err) {
-                        return callback(err);
-                    }
+                .tag('nodes', 'delete-offline')
+                .info(
+                    'Deleting offline nodes older than ' +
+                    DELETE_OFFLINE_NODES_AFTER_DURATION.amount + ' ' +
+                    DELETE_OFFLINE_NODES_AFTER_DURATION.unit
+                );
 
-                    Logger
-                        .tag('monitoring', 'information-retrieval')
-                        .debug('Node data cleanup done.');
+            Database.all(
+                'SELECT * FROM node_state WHERE state = ? AND last_seen < ?',
+                [
+                    'OFFLINE',
+                    moment().subtract(
+                        DELETE_OFFLINE_NODES_AFTER_DURATION.amount,
+                        DELETE_OFFLINE_NODES_AFTER_DURATION.unit
+                    ).unix()
+                ],
+                function (err, rows) {
+                    async.eachSeries(
+                        rows,
+                        function (row, nodeCallback) {
+                            var mac = row.mac;
+                            Logger.tag('nodes', 'delete-offline').info('Deleting node ' + mac);
+                            NodeService.getNodeDataByMac(mac, function (err, node) {
+                                if (err) {
+                                    Logger.tag('nodes', 'delete-offline').error('Error getting node ' + mac, err);
+                                    return nodeCallback(err);
+                                }
 
-                    callback();
+                                NodeService.deleteNode(node.token, function (err) {
+                                    if (err) {
+                                        Logger.tag('nodes', 'delete-offline').error('Error deleting node ' + mac, err);
+                                        return nodeCallback(err);
+                                    }
+
+                                    Database.run(
+                                        'DELETE FROM node_state WHERE mac = ? AND state = ?',
+                                        [mac, 'OFFLINE'],
+                                        function (err) {
+                                            if (err) {
+                                                Logger
+                                                    .tag('nodes', 'delete-offline')
+                                                    .error('Error deleting monitoring data for node ' + mac, err);
+                                                return nodeCallback(err);
+                                            }
+                                            nodeCallback(null);
+                                        }
+                                    );
+                                });
+                            });
+                        },
+                        callback
+                    );
                 }
             );
         }
-    };
+    }
 });
