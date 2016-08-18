@@ -6,6 +6,8 @@
         "databaseFile": "/tmp/ffffng.sqlite",
         "peersPath": "/tmp/peers",
 
+        "pruneTime": 100,
+
         "logging": {
             "directory": "/tmp/logs",
             "debug": false,
@@ -48,6 +50,7 @@
         },
         "monitoring": {
             "enabled": false
+            "prunePeriodString": "3 Monate",
         },
         "coordsSelector": {
             "lat": 53.565278,
