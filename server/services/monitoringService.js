@@ -709,25 +709,27 @@ angular.module('ffffng')
                                     return nodeCallback(err);
                                 }
 
-                                NodeService.deleteNode(node.token, function (err) {
+                                async.seq(
+                                    function (callback) {
+                                        if (node) {
+                                            return NodeService.deleteNode(node.token, callback);
+                                        }
+                                        return callback(null);
+                                    },
+                                    function (callback) {
+                                        Database.run(
+                                            'DELETE FROM node_state WHERE mac = ? AND state = ?',
+                                            [mac, 'OFFLINE'],
+                                            callback
+                                        );
+                                    }
+                                )(function (err) {
                                     if (err) {
                                         Logger.tag('nodes', 'delete-offline').error('Error deleting node ' + mac, err);
                                         return nodeCallback(err);
                                     }
 
-                                    Database.run(
-                                        'DELETE FROM node_state WHERE mac = ? AND state = ?',
-                                        [mac, 'OFFLINE'],
-                                        function (err) {
-                                            if (err) {
-                                                Logger
-                                                    .tag('nodes', 'delete-offline')
-                                                    .error('Error deleting monitoring data for node ' + mac, err);
-                                                return nodeCallback(err);
-                                            }
-                                            nodeCallback(null);
-                                        }
-                                    );
+                                    nodeCallback(null);
                                 });
                             });
                         },
