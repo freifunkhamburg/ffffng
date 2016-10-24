@@ -35,7 +35,7 @@ angular.module('ffffng')
 
     function renderLink(href, text) {
         return _.template(
-            '<a href="<%- href %>" style="color: #E5287A;"><%- text %></a>'
+            '<a href="<%- href %>#" style="color: #E5287A;"><%- text %></a>'
         )({
             href: href,
             text: text || href
