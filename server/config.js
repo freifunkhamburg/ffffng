@@ -89,7 +89,7 @@ var defaultConfig = {
         },
 
         map: {
-            nodesJsonUrl: 'http://map.musterstadt.freifunk.net/nodes.json'
+            nodesJsonUrl: ['http://map.musterstadt.freifunk.net/nodes.json']
         }
     },
     client: {

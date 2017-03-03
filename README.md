@@ -153,7 +153,7 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 }
 ```
 
-* **`server.map.nodesJsonUrl`** URL der `nodes.json` des meshviewers, z. B.: `"http://musterstadt.freifunk.net/nodes.json"`
+* **`server.map.nodesJsonUrl`** URL der `nodes.json` des meshviewers (kann eine URL oder eine Liste von URLs sein), z. B.: `["http://musterstadt.freifunk.net/nodes.json"]`
 
 * **`client.community.name`** Name der Freifunk-Community, z. B.: `"Freifunk Musterstadt"`
 * **`client.community.domain`** Domain der Freifunk-Community, z. B.: `"musterstadt.freifunk.net"`

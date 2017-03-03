@@ -34,7 +34,7 @@
         },
 
         "map": {
-            "nodesJsonUrl": "http://musterstadt.freifunk.net/nodes.json"
+            "nodesJsonUrl": ["http://musterstadt.freifunk.net/nodes.json"]
         }
     },
     "client": {
