@@ -418,84 +418,100 @@ angular.module('ffffng')
         });
     }
 
-    function retrieveNodeInformationForUrl(url, callback) {
-        Logger.tag('monitoring', 'information-retrieval').debug('Retrieving nodes.json: %s', url);
-        request(url, function (err, response, body) {
+    function withUrlsData(urls, callback) {
+        async.map(urls, function (url, urlCallback) {
+            Logger.tag('monitoring', 'information-retrieval').debug('Retrieving nodes.json: %s', url);
+            request(url, function (err, response, body) {
+                if (err) {
+                    return urlCallback(err);
+                }
+
+                if (response.statusCode !== 200) {
+                    return urlCallback(new Error(
+                        'Could not download nodes.json from ' + url + ': ' +
+                        response.statusCode + ' - ' + response.statusMessage
+                    ));
+                }
+
+                parseNodesJson(body, urlCallback);
+            });
+        }, callback);
+    }
+
+    function retrieveNodeInformationForUrls(urls, callback) {
+        withUrlsData(urls, function (err, datas) {
             if (err) {
                 return callback(err);
             }
 
-            if (response.statusCode !== 200) {
-                return callback(new Error(
-                    'Could not download nodes.json from ' + url + ': ' +
-                    response.statusCode + ' - ' + response.statusMessage
-                ));
+            var maxTimestamp = datas[0].importTimestamp;
+            _.each(datas, function (data) {
+                if (data.importTimestamp.isAfter(maxTimestamp)) {
+                    maxTimestamp = data.importTimestamp;
+                }
+            });
+
+            if (previousImportTimestamp !== null && !maxTimestamp.isAfter(previousImportTimestamp)) {
+                Logger
+                    .tag('monitoring', 'information-retrieval')
+                    .debug(
+                        'No new data, skipping. Current timestamp: %s, previous timestamp: %s',
+                        maxTimestamp.format(),
+                        previousImportTimestamp.format()
+                    );
+                return callback();
             }
+            previousImportTimestamp = maxTimestamp;
 
-            parseNodesJson(body, function (err, data) {
-                if (err) {
-                    return callback(err);
-                }
+            // We do not parallelize here as the sqlite will start slowing down and blocking with too many
+            // parallel queries. This has resulted in blocking other requests too and thus in a major slowdonw.
+            var nodes = _.flatMap(datas, function (data) {
+                return data.nodes;
+            });
+            async.eachSeries(
+                nodes,
+                function (nodeData, nodeCallback) {
+                    Logger.tag('monitoring', 'information-retrieval').debug('Importing: %s', nodeData.mac);
 
-                if (previousImportTimestamp !== null && !data.importTimestamp.isAfter(previousImportTimestamp)) {
-                    Logger
-                        .tag('monitoring', 'information-retrieval')
-                        .debug(
-                            'No new data, skipping. Current timestamp: %s, previous timestamp: %s',
-                            data.importTimestamp.format(),
-                            previousImportTimestamp.format()
-                        );
-                    return callback();
-                }
-                previousImportTimestamp = data.importTimestamp;
+                    NodeService.getNodeDataByMac(nodeData.mac, function (err, node) {
+                        if (err) {
+                            Logger
+                                .tag('monitoring', 'information-retrieval')
+                                .error('Error importing: ' + nodeData.mac, err);
+                            return nodeCallback(err);
+                        }
 
-                // We do not parallelize here as the sqlite will start slowing down and blocking with too many
-                // parallel queries. This has resulted in blocking other requests too and thus in a major slowdonw.
-                async.eachSeries(
-                    data.nodes,
-                    function (nodeData, nodeCallback) {
-                        Logger.tag('monitoring', 'information-retrieval').debug('Importing: %s', nodeData.mac);
+                        if (!node) {
+                            Logger
+                                .tag('monitoring', 'information-retrieval')
+                                .debug('Unknown node, skipping: %s', nodeData.mac);
+                            return nodeCallback(null);
+                        }
 
-                        NodeService.getNodeDataByMac(nodeData.mac, function (err, node) {
+                        storeNodeInformation(nodeData, node, function (err) {
                             if (err) {
                                 Logger
                                     .tag('monitoring', 'information-retrieval')
-                                    .error('Error importing: ' + nodeData.mac, err);
+                                    .debug('Could not update / deleting node data: %s', nodeData.mac, err);
                                 return nodeCallback(err);
                             }
 
-                            if (!node) {
-                                Logger
-                                    .tag('monitoring', 'information-retrieval')
-                                    .debug('Unknown node, skipping: %s', nodeData.mac);
-                                return nodeCallback(null);
-                            }
+                            Logger
+                                .tag('monitoring', 'information-retrieval')
+                                .debug('Updating / deleting node data done: %s', nodeData.mac);
 
-                            storeNodeInformation(nodeData, node, function (err) {
-                                if (err) {
-                                    Logger
-                                        .tag('monitoring', 'information-retrieval')
-                                        .debug('Could not update / deleting node data: %s', nodeData.mac, err);
-                                    return nodeCallback(err);
-                                }
-
-                                Logger
-                                    .tag('monitoring', 'information-retrieval')
-                                    .debug('Updating / deleting node data done: %s', nodeData.mac);
-
-                                nodeCallback();
-                            });
+                            nodeCallback();
                         });
-                    },
-                    function (err) {
-                        if (err) {
-                            return callback(err);
-                        }
-
-                        markMissingNodesAsOffline(data.nodes, callback);
+                    });
+                },
+                function (err) {
+                    if (err) {
+                        return callback(err);
                     }
-                );
-            });
+
+                    markMissingNodesAsOffline(nodes, callback);
+                }
+            );
         });
     }
 
@@ -636,11 +652,14 @@ angular.module('ffffng')
 
         retrieveNodeInformation: function (callback) {
             var urls = config.server.map.nodesJsonUrl;
+            if (_.isEmpty(urls)) {
+                return callback(null);
+            }
             if (_.isString(urls)) {
                 urls = [urls];
             }
 
-            async.eachSeries(urls, retrieveNodeInformationForUrl, callback);
+            retrieveNodeInformationForUrls(urls, callback);
         },
 
         sendMonitoringMails: function (callback) {
