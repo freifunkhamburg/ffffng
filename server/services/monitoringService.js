@@ -465,11 +465,19 @@ angular.module('ffffng')
 
             // We do not parallelize here as the sqlite will start slowing down and blocking with too many
             // parallel queries. This has resulted in blocking other requests too and thus in a major slowdonw.
-            var nodes = _.flatMap(datas, function (data) {
+            var allNodes = _.flatMap(datas, function (data) {
                 return data.nodes;
             });
+
+            // Get rid of duplicates from different nodes.json files. Always use the one with the newest
+            var sortedNodes = _.orderBy(allNodes, [function (node) {
+                return node.lastSeen.unix();
+            }], ['desc']);
+            var uniqueNodes = _.uniqBy(sortedNodes, function (node) {
+                return node.mac;
+            });
             async.eachSeries(
-                nodes,
+                uniqueNodes,
                 function (nodeData, nodeCallback) {
                     Logger.tag('monitoring', 'information-retrieval').debug('Importing: %s', nodeData.mac);
 
@@ -509,7 +517,7 @@ angular.module('ffffng')
                         return callback(err);
                     }
 
-                    markMissingNodesAsOffline(nodes, callback);
+                    markMissingNodesAsOffline(uniqueNodes, callback);
                 }
             );
         });
