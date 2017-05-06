@@ -40,6 +40,8 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
     var admin = nga.application(title);
     document.title = title;
 
+    var pathPrefix = config.rootPath === '/' ? '' : config.rootPath;
+
     admin
         .header(
             '<div class="navbar-header">' +
@@ -59,12 +61,12 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
             '</a>' +
             '</p>' +
             '<p class="navbar-text navbar-right">' +
-            '<a href="/" target="_blank">' +
+            '<a href="' + pathPrefix + '/" target="_blank">' +
             '<i class="fa fa-external-link" aria-hidden="true"></i> Frontend' +
             '</a>' +
             '</p>'
         )
-        .baseApiUrl('/internal/api/')
+        .baseApiUrl(pathPrefix + '/internal/api/')
         .debug(true);
 
     function nodeClasses(node) {
@@ -374,7 +376,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                 .addChild(nga
                     .menu()
                     .template(
-                        '<a href="/internal/admin">' +
+                        '<a href="' + pathPrefix + '/internal/admin">' +
                         '<span class="fa fa-dashboard"></span> Dashboard / Statistics' +
                         '</a>'
                     )
@@ -398,7 +400,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                 .addChild(nga
                     .menu()
                     .template(
-                        '<a href="/internal/logs" target="_blank">' +
+                        '<a href="' + pathPrefix + '/internal/logs" target="_blank">' +
                         '<span class="fa fa-list"></span> Logs' +
                         '</a>'
                     )

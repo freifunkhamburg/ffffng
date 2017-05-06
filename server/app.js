@@ -7,6 +7,7 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
     var compress = require('compression');
 
     var app = express();
+    var router = express.Router();
 
     // urls beneath /internal are protected
     var internalAuth = auth.basic(
@@ -21,10 +22,10 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
             );
         }
     );
-    app.use('/internal', auth.connect(internalAuth));
+    router.use('/internal', auth.connect(internalAuth));
 
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: true }));
+    router.use(bodyParser.json());
+    router.use(bodyParser.urlencoded({ extended: true }));
 
     var adminDir = __dirname + '/../admin';
     var clientDir = __dirname + '/../client';
@@ -34,7 +35,7 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
         '/config.js'
     ];
 
-    app.use(compress());
+    router.use(compress());
 
     function serveTemplate(mimeType, req, res, next) {
         return fs.readFile(templateDir + '/' + req.path, 'utf8', function (err, body) {
@@ -49,15 +50,17 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
         });
     }
 
-    app.use(function (req, res, next) {
+    router.use(function (req, res, next) {
         if (jsTemplateFiles.indexOf(req.path) >= 0) {
             return serveTemplate('application/javascript', req, res, next);
         }
         return next();
     });
 
-    app.use('/internal/admin', express.static(adminDir + '/'));
-    app.use('/', express.static(clientDir + '/'));
+    router.use('/internal/admin', express.static(adminDir + '/'));
+    router.use('/', express.static(clientDir + '/'));
+
+    app.use(config.server.rootPath, router);
 
     return app;
 });

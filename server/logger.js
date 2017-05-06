@@ -38,7 +38,8 @@ angular.module('ffffng').factory('Logger', function (app) {
         app.use(scribe.express.logger());
     }
     if (config.server.internal.active) {
-        app.use('/internal/logs', scribe.webPanel());
+        var prefix = config.server.rootPath === '/' ? '' : config.server.rootPath;
+        app.use(prefix + '/internal/logs', scribe.webPanel());
     }
 
     return process.console;

@@ -140,6 +140,10 @@ var config = deepExtend({}, defaultConfig, configJSON);
 stripTrailingSlash(config.server, 'baseUrl');
 stripTrailingSlash(config.client.map, 'mapUrl');
 
+var url = require('url');
+config.server.rootPath = url.parse(config.server.baseUrl).pathname;
+config.client.rootPath = config.server.rootPath;
+
 module.exports = config;
 
 angular.module('ffffng').constant('config', config);

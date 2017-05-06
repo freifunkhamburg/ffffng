@@ -108,7 +108,7 @@ cp $FFFFNG_HOME/node_modules/ffffng/config.json.example $FFFFNG_HOME/config.json
 Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurations-Optionen:
 
 * **`server.baseUrl`** Basis-URL unter der die Knotenverwaltung erreichbar ist, z. B.:
-  `"https://formular.musterstadt.freifunk.net"` 
+  `"https://formular.musterstadt.freifunk.net"` oder `"https://musterstadt.freifunk.net/formular"` 
 * **`server.port`** Port unter dem der Server lokal läuft, z. B.: `8080`
 
 * **`server.databaseFile`** Pfad zur Datenbank-Datei, z. B.: `"$FFFFNG_HOME/ffffng.sqlite"`

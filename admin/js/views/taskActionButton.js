@@ -1,7 +1,9 @@
 'use strict';
 
 angular.module('ffffngAdmin')
-.directive('faTaskActionButton', function (Restangular, $state, notification) {
+.directive('faTaskActionButton', function (Restangular, $state, notification, config) {
+    var pathPrefix = config.rootPath === '/' ? '' : config.rootPath;
+
     var link = function (scope) {
         scope.label = scope.label || 'ACTION';
         scope.icon = scope.icon || 'play';
@@ -11,7 +13,7 @@ angular.module('ffffngAdmin')
             var task = scope.task();
 
             Restangular
-                .one('/internal/api/tasks/' + scope.action, task.values.id).put()
+                .one(pathPrefix + '/internal/api/tasks/' + scope.action, task.values.id).put()
                 .then(function () { $state.reload() })
                 .then(function () { notification.log('Done', { addnCls: 'humane-flatty-success' }); })
                 .catch(function (e) {
