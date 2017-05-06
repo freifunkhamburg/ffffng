@@ -120,8 +120,8 @@ angular.module('ffffng')
         };
 
         $scope.monitoringInitialConfirmationRequired = function () {
-            return $scope.node.monitoring
-                && ($scope.action === 'create' || $scope.node.email !== initialEmail || !initialMonitoring);
+            return $scope.node.monitoring &&
+                   ($scope.action === 'create' || $scope.node.email !== initialEmail || !initialMonitoring);
         };
 
         $scope.monitoringConfirmationPending = function () {
@@ -137,8 +137,8 @@ angular.module('ffffng')
         var doSubmit = function (node) {
             if ($scope.nodeForm.$invalid) {
                 var firstInvalid = _.filter($element.find('form').find('input'), function (input) {
-                    return (input.type === 'text' || input.type === 'email')
-                        && $scope.nodeForm[input.name].$invalid;
+                    return (input.type === 'text' || input.type === 'email') &&
+                           $scope.nodeForm[input.name].$invalid;
                 })[0];
                 if (firstInvalid) {
                     $window.scrollTo(0, $window.pageYOffset + firstInvalid.getBoundingClientRect().top - 100);

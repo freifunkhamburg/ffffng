@@ -5,7 +5,7 @@ angular.module('ffffng')
     var ctrl = function ($scope) {
         $scope.version = '?';
         $http.get('/api/version')
-            .then(function (result) { $scope.version = result.data.version; })
+            .then(function (result) { $scope.version = result.data.version; });
     };
 
     return {

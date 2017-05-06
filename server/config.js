@@ -126,6 +126,8 @@ if (fs.existsSync(configJSONFile)) {
     process.exit(1);
 }
 
+var _ = require('lodash');
+
 function stripTrailingSlash(obj, field) {
     var url = obj[field];
     if (_.isString(url) && _.last(url) === '/') {

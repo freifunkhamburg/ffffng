@@ -12,7 +12,7 @@ angular.module('ffffng')
     $scope.monitoringInfo = {};
     $scope.monitoringStatus = 'loading';
 
-    MonitoringService.disable($routeParams['token'])
+    MonitoringService.disable($routeParams.token)
         .then(
             function (response) {
                 // success

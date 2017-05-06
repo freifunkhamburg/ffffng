@@ -65,7 +65,9 @@ angular.module('ffffng')
             .tag('monitoring', 'information-retrieval')
             .debug('Node is known in monitoring: %s', nodeData.mac);
 
+        // jshint -W106
         if (!moment(row.import_timestamp).isBefore(nodeData.importTimestamp)) {
+        // jshint +W106
             Logger
                 .tag('monitoring', 'information-retrieval')
                 .debug('No new data for node, skipping: %s', nodeData.mac);
@@ -108,7 +110,9 @@ angular.module('ffffng')
                 nodeDataForStoring = {
                     mac: node.mac,
                     state: 'OFFLINE',
+                    // jshint -W106
                     lastSeen: _.isUndefined(row) ? moment() : moment.unix(row.last_seen),
+                    // jshint +W106
                     importTimestamp: moment()
                 };
             } else {
@@ -129,7 +133,7 @@ angular.module('ffffng')
         Logger.tag('monitoring', 'information-retrieval').debug('Parsing nodes.json...');
 
         function parseTimestamp(timestamp) {
-            if (!_.isString(json.timestamp)) {
+            if (!_.isString(timestamp)) {
                 return moment.invalid();
             }
             return moment.utc(timestamp);
@@ -277,7 +281,9 @@ angular.module('ffffng')
                                     mailType,
                                     {
                                         node: node,
+                                        // jshint -W106
                                         lastSeen: nodeState.last_seen,
+                                        // jshint +W106
                                         disableUrl: UrlBuilder.monitoringDisableUrl(nodeSecrets)
 
                                     },
@@ -361,9 +367,7 @@ angular.module('ffffng')
                  * descriptive string that stores, which was the last mail type, stored in the database as last_status_mail_type
                  */
                 var previousType =
-                    mailNumber === 1
-                        ? 'monitoring-online-again'
-                        : ('monitoring-offline-' + (mailNumber - 1));
+                    mailNumber === 1 ? 'monitoring-online-again' : ('monitoring-offline-' + (mailNumber - 1));
 
                 // the first time the first offline mail is send, there was no mail before
                 var allowNull = mailNumber === 1 ? ' OR last_status_mail_type IS NULL' : '';
@@ -773,5 +777,5 @@ angular.module('ffffng')
                 }
             );
         }
-    }
+    };
 });

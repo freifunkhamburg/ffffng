@@ -21,7 +21,9 @@ angular.module('ffffng')
 
         return _.template(fs.readFileSync(snippetFile).toString())(deepExtend(
             {},
+            // jshint -W040
             this, // parent data
+            // jshint +W040
             data,
             templateFunctions
         ));
@@ -30,7 +32,7 @@ angular.module('ffffng')
     function snippet(name) {
         return function (data) {
             return renderSnippet.bind(this)(name, data);
-        }
+        };
     }
 
     function renderLink(href, text) {
@@ -76,7 +78,7 @@ angular.module('ffffng')
         },
 
         render: function (mailOptions, callback) {
-            var templatePathPrefix = templateBasePath + '/' + mailOptions.email
+            var templatePathPrefix = templateBasePath + '/' + mailOptions.email;
 
             async.parallel({
                     subject: _.partial(fs.readFile, templatePathPrefix + '.subject.txt'),

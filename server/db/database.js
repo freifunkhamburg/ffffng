@@ -29,10 +29,10 @@ function applyPatch(db, file, callback) {
                 return callback(null);
             }
 
-            var sql = 'BEGIN TRANSACTION;\n'
-                    + contents.toString() + '\n'
-                    + 'INSERT INTO schema_version (version) VALUES (\'' + version + '\');\n'
-                    + 'END TRANSACTION;';
+            var sql = 'BEGIN TRANSACTION;\n' +
+                      contents.toString() + '\n' +
+                      'INSERT INTO schema_version (version) VALUES (\'' + version + '\');\n' +
+                      'END TRANSACTION;';
 
             db.exec(sql, function (err) {
                 if (err) {
@@ -50,10 +50,10 @@ function applyPatch(db, file, callback) {
 function applyMigrations(db, callback) {
     Logger.tag('database', 'migration').info('Migrating database...');
 
-    var sql = 'BEGIN TRANSACTION; CREATE TABLE IF NOT EXISTS schema_version (\n'
-            + '    version VARCHAR(255) PRIMARY KEY ASC,\n'
-            + '    applied_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\n'
-            + '); END TRANSACTION;';
+    var sql = 'BEGIN TRANSACTION; CREATE TABLE IF NOT EXISTS schema_version (\n' +
+              '    version VARCHAR(255) PRIMARY KEY ASC,\n' +
+              '    applied_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\n' +
+              '); END TRANSACTION;';
     db.exec(sql, function (err) {
         if (err) {
             return callback(err);

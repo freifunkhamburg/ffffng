@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ffffng').factory('Resources', function (_, Constraints, Validator, ErrorTypes) {
+angular.module('ffffng').factory('Resources', function (_, Constraints, Validator, ErrorTypes, Logger) {
     function respond(res, httpCode, data, type) {
         switch (type) {
             case 'html':
@@ -24,7 +24,7 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
         return {
             query: 'ORDER BY ' + sortField + ' ' + (restParams._sortDir === 'ASC' ? 'ASC' : 'DESC'),
             params: []
-        }
+        };
     }
 
     function limitOffsetClause(restParams) {
@@ -41,7 +41,7 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
         return str
             .replace(/\\/g, '\\\\')
             .replace(/%/g, '\\%')
-            .replace(/_/g, '\\_')
+            .replace(/_/g, '\\_');
     }
 
     function filterCondition(restParams, filterFields) {
@@ -49,7 +49,7 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
             return {
                 query: '1 = 1',
                 params: []
-            }
+            };
         }
 
         var query = _.join(
@@ -74,9 +74,8 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
         var values = {};
         _.each(_.keys(constraints), function (key) {
             var value = data[key];
-            values[key] = _.isUndefined(value) && !_.isUndefined(constraints[key].default)
-                ? constraints[key].default
-                : value;
+            values[key] =
+                _.isUndefined(value) && !_.isUndefined(constraints[key].default) ? constraints[key].default : value;
         });
         return values;
     }
@@ -207,7 +206,7 @@ angular.module('ffffng').factory('Resources', function (_, Constraints, Validato
             return {
                 query: filter.query + ' ' + orderBy.query + ' ' + limitOffset.query,
                 params: _.concat(filter.params, orderBy.params, limitOffset.params)
-            }
+            };
         },
 
         success: function (res, data) {

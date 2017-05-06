@@ -11,7 +11,7 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
     // urls beneath /internal are protected
     var internalAuth = auth.basic(
         {
-            realm: "Knotenformular - Intern"
+            realm: 'Knotenformular - Intern'
         },
         function (username, password, callback) {
             callback(

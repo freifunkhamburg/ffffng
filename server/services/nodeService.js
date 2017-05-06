@@ -206,7 +206,7 @@ angular.module('ffffng')
     function deleteNodeFile(token, callback) {
         findNodeFiles({ token: token }, function (err, files) {
             if (err) {
-                Logger.tag('node', 'delete').error('Could not find node file: ' + file, error);
+                Logger.tag('node', 'delete').error('Could not find node file: ' + files, err);
                 return callback({data: 'Could not delete node.', type: ErrorTypes.internalError});
             }
 
@@ -218,7 +218,7 @@ angular.module('ffffng')
                 fs.unlinkSync(files[0]);
             }
             catch (error) {
-                Logger.tag('node', 'delete').error('Could not delete node file: ' + file, error);
+                Logger.tag('node', 'delete').error('Could not delete node file: ' + files, error);
                 return callback({data: 'Could not delete node.', type: ErrorTypes.internalError});
             }
 
@@ -256,8 +256,8 @@ angular.module('ffffng')
 
                 _.each(entries, function (value, key) {
                     if (key === 'mac') {
-                        node['mac'] = value;
-                        node['mapId'] = _.toLower(value).replace(/:/g, '')
+                        node.mac = value;
+                        node.mapId = _.toLower(value).replace(/:/g, '');
                     } else if (key === 'monitoring') {
                         var active = value === 'aktiv';
                         var pending = value === 'pending';
@@ -320,7 +320,7 @@ angular.module('ffffng')
             },
             function (err) {
                 if (err) {
-                    Logger.tag('monitoring', 'confirmation').error('Could not enqueue confirmation mail.', error);
+                    Logger.tag('monitoring', 'confirmation').error('Could not enqueue confirmation mail.', err);
                     return callback({data: 'Internal error.', type: ErrorTypes.internalError});
                 }
 
@@ -377,7 +377,7 @@ angular.module('ffffng')
                     } else {
                         // monitoring is still enabled
 
-                        if (currentNode.email != node.email) {
+                        if (currentNode.email !== node.email) {
                             // new email so we need a new token and a reconfirmation
                             monitoringConfirmed = false;
                             monitoringToken = generateToken();
@@ -528,7 +528,7 @@ angular.module('ffffng')
                 });
 
                 callback(null, nodeStatistics);
-            })
+            });
         }
     };
 });
