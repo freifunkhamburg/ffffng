@@ -126,7 +126,17 @@ if (fs.existsSync(configJSONFile)) {
     process.exit(1);
 }
 
+function stripTrailingSlash(obj, field) {
+    var url = obj[field];
+    if (_.isString(url) && _.last(url) === '/') {
+        obj[field] = url.substr(0, url.length - 1);
+    }
+}
+
 var config = deepExtend({}, defaultConfig, configJSON);
+
+stripTrailingSlash(config.server, 'baseUrl');
+stripTrailingSlash(config.client.map, 'mapUrl');
 
 module.exports = config;
 
