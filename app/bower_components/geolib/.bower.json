@@ -1,7 +1,7 @@
 {
   "name": "Geolib",
   "main": "dist/geolib.js",
-  "version": "2.0.21",
+  "version": "2.0.22",
   "homepage": "https://github.com/manuelbieh/Geolib",
   "authors": [
     "Manuel Bieh <github@manuelbieh.de>"
@@ -20,13 +20,13 @@
     "test",
     "tests"
   ],
-  "_release": "2.0.21",
+  "_release": "2.0.22",
   "_resolution": {
     "type": "version",
-    "tag": "2.0.21",
-    "commit": "0406fbd120cb371a89a1676e47e9de5f0e51a4a5"
+    "tag": "v2.0.22",
+    "commit": "cfa4d4f1a887a3327507f7dde452953c7497db33"
   },
   "_source": "https://github.com/manuelbieh/Geolib.git",
-  "_target": "2.0.21",
+  "_target": "2.0.22",
   "_originalSource": "geolib"
 }

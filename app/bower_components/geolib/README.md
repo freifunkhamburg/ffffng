@@ -13,7 +13,7 @@ Calculates the distance between two geo coordinates
 
 Takes 2 or 4 arguments. First 2 arguments must be objects that each have latitude and longitude properties (e.g. `{latitude: 52.518611, longitude: 13.408056}`)Works with:. Coordinates can be in sexagesimal or decimal format. 3rd argument is accuracy (in meters). So a calculated distaWorks with:nce of 1248 meters with an accuracy of 100 is returned as `1200` (accuracy 10 = `1250` etc.). 4th argument is precision in sub-meters (1 is meter presicion, 2 is decimeters, 3 is centimeters, etc).
 
-Return value is always an float and represents the distance in meters.
+Return value is always float and represents the distance in meters.
 
 <h4>Examples</h4>
 
@@ -42,6 +42,21 @@ navigator.geolocation.getCurrentPosition(
     }
 );
 </pre>
+
+<h3>geolib.getDistanceSimple(object start, object end[, int accuracy])</h3>
+
+Calculates the distance between two geo coordinates but this method is far more inaccurate as compared to getDistance.
+
+It can take up 2 to 3 arguments. start, end and accuracy can be defined in the same as in getDistance.
+
+Return value is always float that represents the distance in meters.
+
+<h4>Examples</h4>
+
+<pre>geolib.getDistanceSimple(
+    {latitude: 51.5103, longitude: 7.49347},
+    {latitude: "51° 31' N", longitude: "7° 28' E"}
+);</pre>
 
 <h3>geolib.getCenter(array coords)</h3>
 
@@ -88,6 +103,28 @@ point, because the southern border contains a lot more nodes, than the others.
 
 Returns an object: `{"latitude": centerLat, "longitude": centerLng}`
 
+<h3>geolib.getBounds(array coords)</h3>
+
+Calculates the bounds of geo coordinates.
+
+It returns maximum and minimum, latitude, longitude, and elevation (if provided) in form of an object of form:
+<pre>{
+    "minLat": minimumLatitude,
+    "maxLat": maximumLatitude,
+    "minLng": minimumLongitude,
+    "maxLng": maximumLongitude,
+    "minElev": minimumElevation,
+    "maxElev": maximumElevation
+}</pre>
+
+<h4>Example</h4>
+
+<pre>geolib.getCenter([
+         {latitude: 52.516272, longitude: 13.377722},
+         {latitude: 51.515, longitude: 7.453619},
+         {latitude: 51.503333, longitude: -0.119722}
+]);</pre>
+
 <h3>geolib.isPointInside(object latlng, array polygon)</h3>
 
 Checks whether a point is inside of a polygon or not.
@@ -122,6 +159,55 @@ geolib.isPointInCircle(
     {latitude: 51.5175, longitude: 7.4678},
     5000
 );</pre>
+
+<h3>geolib.getRhumbLineBearing(object originLL, object destLL)</h3>
+
+Gets rhumb line bearing of two points. Find out about the difference between rhumb line and
+great circle bearing on Wikipedia. Rhumb line should be fine in most cases:
+
+http://en.wikipedia.org/wiki/Rhumb_line#General_and_mathematical_description
+
+Function is heavily based on Doug Vanderweide's great PHP version (licensed under GPL 3.0)
+http://www.dougv.com/2009/07/13/calculating-the-bearing-and-compass-rose-direction-between-two-latitude-longitude-coordinates-in-php/
+
+Returns calculated bearing as integer.
+
+<h4>Example</h4>
+
+<pre>geolib.getRhumbLineBearing(
+    {latitude: 52.518611, longitude: 13.408056}, 
+    {latitude: 51.519475, longitude: 7.46694444}
+);</pre>
+
+<h3>geolib.getBearing(object originLL, object destLL)</h3>
+
+Gets great circle bearing of two points. See description of getRhumbLineBearing for more information.
+Returns calculated bearing as integer.
+
+<h4>Example</h4>
+
+<pre>geolib.getBearing(
+    {latitude: 52.518611, longitude: 13.408056}, 
+    {latitude: 51.519475, longitude: 7.46694444}
+);</pre>
+
+<h3>geolib.getCompassDirection(object originLL, object destLL, string bearingMode (optional))</h3>
+
+Gets the compass direction from an origin coordinate (originLL) to a destination coordinate (destLL).
+Bearing mode. Can be either circle or rhumbline (default).
+Returns an object with a rough (NESW) and an exact direction (NNE, NE, ENE, E, ESE, etc).
+
+<h4>Example</h4>
+
+<pre>geolib.getCompassDirection(
+    {latitude: 52.518611, longitude: 13.408056}, 
+    {latitude: 51.519475, longitude: 7.46694444}
+);
+//Output
+{
+    rough: 'W',
+    exact: 'WSW'
+}</pre>
 
 <h3>geolib.orderByDistance(object latlng, mixed coords)</h3>
 
@@ -300,7 +386,7 @@ Returns an object: `{"latitude": destLat, "longitude": destLng}`
 var dist = 1234;
 var bearing = 45;
 
-geolib.computeDestinationPoint(initialPoint.lat, initialPoint.lon, dist, bearing);
+geolib.computeDestinationPoint(initialPoint, dist, bearing);
 // -> {"latitude":51.52411853234181,"longitude":0.4668623365950795}
 </pre>
 

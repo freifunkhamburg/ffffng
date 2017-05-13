@@ -355,7 +355,7 @@
                 distance = Math.sqrt(distance * distance + climb * climb);
             }
 
-            return this.distance = parseFloat((Math.round(distance / accuracy) * accuracy).toFixed(precision));
+            return this.distance = Math.round(distance * Math.pow(10, precision) / accuracy) * accuracy / Math.pow(10, precision);
 
             /*
             // note: to return initial/final bearings in addition to distance, use something like:
@@ -937,7 +937,7 @@
             for(var coord in coords) {
 
                 var distance = this.getDistance(latlng, coords[coord]);
-                var augmentedCoord = Object(coords[coord]);
+                var augmentedCoord = Object.create(coords[coord]);
                 augmentedCoord.distance = distance;
                 augmentedCoord.key = coord;
 
@@ -961,7 +961,7 @@
         */
         isPointInLine: function(point, start, end) {
 
-            return this.getDistance(start, point, 1, 3)+this.getDistance(point, end, 1, 3)==this.getDistance(start, end, 1, 3);
+            return (this.getDistance(start, point, 1, 3)+this.getDistance(point, end, 1, 3)).toFixed(3)==this.getDistance(start, end, 1, 3);
         },
 
                 /**
@@ -1008,7 +1008,7 @@
             // otherwise the minimum distance is achieved through a line perpendular to the start-end line,
             // which goes from the start-end line to the point //
             else {
-                distance = Math.sin(alpha)/d1;
+                distance = Math.sin(alpha) * d1;
             }
 
             return distance;
