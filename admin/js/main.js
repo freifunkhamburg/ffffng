@@ -173,7 +173,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
         .listActions(
             '<ma-edit-button entry="entry" entity="entity" size="sm"></ma-edit-button> ' +
             '<ma-delete-button entry="entry" entity="entity" size="sm"></ma-delete-button> ' +
-            '<form style="display: inline-block" action="/#/update" method="POST" target="_blank">' +
+            '<form style="display: inline-block" action="' + pathPrefix + '/#/update" method="POST" target="_blank">' +
             '<input type="hidden" name="token" value="{{entry.values.token}}"/>' +
             '<button class="btn btn-primary btn-sm" type="submit"><i class="fa fa-external-link"></i> Open</button>' +
             '</form> ' +
