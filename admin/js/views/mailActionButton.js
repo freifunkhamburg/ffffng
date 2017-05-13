@@ -1,9 +1,7 @@
 'use strict';
 
 angular.module('ffffngAdmin')
-.directive('faMailActionButton', function (Restangular, $state, notification, config) {
-    var pathPrefix = config.rootPath === '/' ? '' : config.rootPath;
-
+.directive('faMailActionButton', function (Restangular, $state, notification) {
     var link = function (scope) {
         scope.label = scope.label || 'ACTION';
         scope.icon = scope.icon || 'envelope';
@@ -13,7 +11,7 @@ angular.module('ffffngAdmin')
             var mail = scope.mail();
 
             Restangular
-                .one(pathPrefix + '/internal/api/mails/' + scope.action, mail.values.id).put()
+                .one('mails/' + scope.action, mail.values.id).put()
                 .then(function () { $state.reload() })
                 .then(function () { notification.log('Done', { addnCls: 'humane-flatty-success' }); })
                 .catch(function (e) {
