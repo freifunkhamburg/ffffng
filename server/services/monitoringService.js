@@ -665,7 +665,9 @@ angular.module('ffffng')
         retrieveNodeInformation: function (callback) {
             var urls = config.server.map.nodesJsonUrl;
             if (_.isEmpty(urls)) {
-                return callback(null);
+                return callback(
+                    new Error('No nodes.json-URLs set. Please adjust config.json: server.map.nodesJsonUrl')
+                );
             }
             if (_.isString(urls)) {
                 urls = [urls];
