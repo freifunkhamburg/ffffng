@@ -1,0 +1,14 @@
+# systemd init script: /etc/systemd/system/ffffng.service
+
+[Service]
+ExecStart=/home/fastdform/node_modules/.bin/ffffng -c /home/fastdform/config.json
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=ffffng
+User=fastdform
+Group=fastdform
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

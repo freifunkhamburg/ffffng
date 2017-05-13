@@ -265,6 +265,8 @@ als root laufen. Generell lässt sich der Server wie folgt starten:
 ```
 $FFFFNG_HOME/node_modules/.bin/ffffng -c $FFFFNG_HOME/config.json
 ```
+Ein Beispiel für eine systemd-Unit liegt unter `assets/ffffng.service`. In dem Beispiel läuft der Server unter dem 
+User `fastdform`.
 
 Der Server ist dann via HTTP unter dem in der `config.json` konfigurierten Port erreichbar. Für vhost-Konfiguration und
 HTTPs biete es sich an, nginx o.ä. als Proxy zu verwenden.
