@@ -99,6 +99,11 @@ cd $FFFFNG_HOME
 npm install ffffng
 ```
 
+Auf Debian symlink anlegen
+```
+ln -s /usr/bin/nodejs /usr/bin/node
+```
+
 ### Konfiguration
 
 ```
@@ -246,6 +251,11 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 }
 ```
 
+### Datenbank Ordner anlegen
+
+```
+mkdir $FFFFNG_HOME/db/
+```
 
 ### Starten des Servers
 
