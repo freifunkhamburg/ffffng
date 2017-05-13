@@ -38,6 +38,7 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
             job: job,
             runningSince: false,
             lastRunStarted: false,
+            lastRunDuration: null,
             state: 'idle',
             enabled: true
         };
@@ -54,8 +55,11 @@ angular.module('ffffng').factory('Scheduler', function ($injector, Logger, confi
 
             job.run(function () {
                 var now = moment();
-                Logger.tag('jobs').profile('[%sms]\t%s', now.diff(task.runningSince), task.name);
+                var duration = now.diff(task.runningSince);
+                Logger.tag('jobs').profile('[%sms]\t%s', duration, task.name);
+
                 task.runningSince = false;
+                task.lastRunDuration = duration;
                 task.state = 'idle';
             });
         };

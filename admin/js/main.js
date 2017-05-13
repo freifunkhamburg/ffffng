@@ -23,6 +23,10 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
         return unix ? moment.unix(unix).fromNow() : 'N/A';
     }
 
+    function formatDuration(duration) {
+        return typeof duration === 'number' ? moment.duration(duration).humanize() : 'N/A';
+    }
+
     function nodeConstraint(field) {
         var constraint = Constraints.node[field];
         var result = {
@@ -351,7 +355,8 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
             nga.field('schedule').cssClasses(taskClasses('schedule')),
             nga.field('state').cssClasses(taskClasses('state')),
             nga.field('runningSince').map(formatMoment).cssClasses(taskClasses('runningSince')),
-            nga.field('lastRunStarted').map(formatMoment).cssClasses(taskClasses('lastRunStarted'))
+            nga.field('lastRunStarted').map(formatMoment).cssClasses(taskClasses('lastRunStarted')),
+            nga.field('lastRunDuration').map(formatDuration).cssClasses(taskClasses('lastRunDuration'))
         ])
         .filters([
             nga.field('q')
