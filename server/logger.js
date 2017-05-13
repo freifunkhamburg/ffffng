@@ -42,6 +42,20 @@ angular.module('ffffng').factory('Logger', function (app) {
         app.use(prefix + '/internal/logs', scribe.webPanel());
     }
 
+    // Hack to allow correct logging of node.js Error objects.
+    // See: https://github.com/bluejamesbond/Scribe.js/issues/70
+    Object.defineProperty(Error.prototype, 'toJSON', {
+        configurable: true,
+        value: function () {
+            var alt = {};
+            var storeKey = function (key) {
+                alt[key] = this[key];
+            };
+            Object.getOwnPropertyNames(this).forEach(storeKey, this);
+            return alt;
+        }
+    });
+
     return process.console;
 });
 
