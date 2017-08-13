@@ -515,6 +515,10 @@ angular.module('ffffng')
                         return callback(err);
                     }
 
+                    Logger
+                        .tag('monitoring', 'information-retrieval')
+                        .debug('Marking missing nodes as offline.');
+
                     // Mark nodes as offline that haven't been imported in this run.
                     Database.run(
                         'UPDATE node_state ' +
