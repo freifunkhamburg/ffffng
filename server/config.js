@@ -96,7 +96,8 @@ var defaultConfig = {
         community: {
             name: 'Freifunk Musterstadt',
             domain: 'musterstadt.freifunk.net',
-            contactEmail: 'kontakt@musterstadt.freifunk.net'
+            contactEmail: 'kontakt@musterstadt.freifunk.net',
+            sites: []
         },
         map: {
             mapUrl: 'http://map.musterstadt.freifunk.net'

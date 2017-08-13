@@ -41,7 +41,8 @@
         "community": {
             "name": "Freifunk Musterstadt",
             "domain": "musterstadt.freifunk.net",
-            "contactEmail": "kontakt@musterstadt.freifunk.net"
+            "contactEmail": "kontakt@musterstadt.freifunk.net",
+            "sites": ["ffms-domain1", "ffms-domain2"]
         },
         "map": {
             "mapUrl": "http://map.musterstadt.freifunk.net"

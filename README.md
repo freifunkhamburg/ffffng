@@ -158,6 +158,7 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 * **`client.community.name`** Name der Freifunk-Community, z. B.: `"Freifunk Musterstadt"`
 * **`client.community.domain`** Domain der Freifunk-Community, z. B.: `"musterstadt.freifunk.net"`
 * **`client.community.contactEmail`** Kontakt-E-Mail-Adresse der Freifunk-Community, z. B.: `"kontakt@musterstadt.freifunk.net"`
+* **`client.community.sites`** Liste der gültige Site-Codes in der `nodes.json`, z. B.: `["ffms-domain1", "ffms-domain2"]`
 
 * **`client.map.mapUrl`** URL der Knotenkarte, z. B.: `"http://map.musterstadt.freifunk.net"`
 

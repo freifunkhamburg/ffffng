@@ -46,6 +46,15 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
 
     var pathPrefix = config.rootPath === '/' ? '' : config.rootPath;
 
+    var siteChoices = [];
+    for (var i = 0; i < config.community.sites.length; i++) {
+        var site = config.community.sites[i];
+        siteChoices.push({
+            label: site,
+            value: site
+        });
+    }
+
     admin
         .header(
             '<div class="navbar-header">' +
@@ -89,7 +98,6 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                 return;
         }
     }
-
 
     var nodes = nga.entity('nodes').label('Nodes').identifier(nga.field('token'));
     nodes
@@ -140,6 +148,10 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                     '<div class="input-group">' +
                     '<input type="text" ng-model="value" placeholder="Search" class="form-control"></input>' +
                     '<span class="input-group-addon"><i class="fa fa-search"></i></span></div>'),
+            nga.field('site', 'choice')
+                .label('Site')
+                .pinned(false)
+                .choices(siteChoices),
             nga.field('hasKey', 'choice')
                 .label('VPN key')
                 .pinned(false)

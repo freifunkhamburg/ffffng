@@ -143,6 +143,7 @@ angular.module('ffffng').factory('NodeResource', function (
                                 'email',
                                 'token',
                                 'mac',
+                                'site',
                                 'key',
                                 'onlineState'
                             ],
@@ -159,6 +160,7 @@ angular.module('ffffng').factory('NodeResource', function (
                                 'token',
                                 'mac',
                                 'key',
+                                'site',
                                 'coords',
                                 'onlineState',
                                 'monitoringState'
