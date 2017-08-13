@@ -92,7 +92,7 @@ angular.module('ffffng')
             'WHERE id = ? AND mac = ?',
             [
                 node.hostname,
-                nodeData.site,
+                nodeData.site || row.site,
                 node.monitoringState,
                 nodeData.state,
                 nodeData.lastSeen.unix(),
