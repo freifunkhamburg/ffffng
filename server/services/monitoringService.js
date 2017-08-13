@@ -44,11 +44,12 @@ angular.module('ffffng')
 
         return Database.run(
             'INSERT INTO node_state ' +
-            '(hostname, mac, monitoring_state, state, last_seen, import_timestamp, last_status_mail_sent, last_status_mail_type) ' +
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            '(hostname, mac, site, monitoring_state, state, last_seen, import_timestamp, last_status_mail_sent, last_status_mail_type) ' +
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 node.hostname,
                 node.mac,
+                node.site,
                 node.monitoringState,
                 nodeData.state,
                 nodeData.lastSeen.unix(),
@@ -80,10 +81,18 @@ angular.module('ffffng')
 
         return Database.run(
             'UPDATE node_state ' +
-            'SET hostname = ?, monitoring_state = ?, state = ?, last_seen = ?, import_timestamp = ?, modified_at = ?' +
+            'SET ' +
+            'hostname = ?, ' +
+            'site = ?, ' +
+            'monitoring_state = ?, ' +
+            'state = ?, ' +
+            'last_seen = ?, ' +
+            'import_timestamp = ?, ' +
+            'modified_at = ? ' +
             'WHERE id = ? AND mac = ?',
             [
                 node.hostname,
+                node.site,
                 node.monitoringState,
                 nodeData.state,
                 nodeData.lastSeen.unix(),
@@ -201,11 +210,17 @@ angular.module('ffffng')
                     );
                 }
 
+                var site = null;
+                if (_.isPlainObject(nodeData.nodeinfo.system) && _.isString(nodeData.nodeinfo.system.site_code)) {
+                    site = nodeData.nodeinfo.system.site_code;
+                }
+
                 return {
                     mac: mac,
                     importTimestamp: data.importTimestamp,
                     state: isOnline ? 'ONLINE' : 'OFFLINE',
-                    lastSeen: lastSeen
+                    lastSeen: lastSeen,
+                    site: site
                 };
             }));
         }
@@ -533,6 +548,7 @@ angular.module('ffffng')
                 'id',
                 'hostname',
                 'mac',
+                'site',
                 'monitoring_state',
                 'state',
                 'last_seen',

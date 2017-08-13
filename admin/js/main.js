@@ -112,6 +112,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                     ? '<i class="fa fa-lock vpn-key-set" aria-hidden="true" title="VPN key set"></i>'
                     : '<i class="fa fa-times vpn-key-unset" aria-hidden="true" title="no VPN key"></i>';
             }),
+            nga.field('site').map(nullable).cssClasses(nodeClasses),
             nga.field('coords').label('GPS').cssClasses(nodeClasses).template(function (node) {
                 return node.values.coords
                     ? '<i class="fa fa-map-marker coords-set" aria-hidden="true" title="coordinates set"></i>'
@@ -238,6 +239,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
             nga.field('id').cssClasses(monitoringStateClasses),
             nga.field('hostname').cssClasses(monitoringStateClasses),
             nga.field('mac').cssClasses(monitoringStateClasses),
+            nga.field('site').map(nullable).cssClasses(monitoringStateClasses),
             nga.field('monitoring_state').cssClasses(monitoringStateClasses).template(function (monitoringState) {
                 switch (monitoringState.values.monitoring_state) {
                     case 'active':

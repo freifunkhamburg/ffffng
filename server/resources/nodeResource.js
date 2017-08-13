@@ -127,6 +127,7 @@ angular.module('ffffng').factory('NodeResource', function (
                             var nodeState = nodeStateByMac[node.mac];
                             if (nodeState) {
                                 return deepExtend({}, node, {
+                                    site: nodeState.site,
                                     onlineState: nodeState.state
                                 });
                             }
