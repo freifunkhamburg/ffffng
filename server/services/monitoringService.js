@@ -526,7 +526,7 @@ angular.module('ffffng')
                         'WHERE import_timestamp < ?',
                         [
                             'OFFLINE', moment().unix(),
-                            minTimestamp
+                            minTimestamp.unix()
                         ],
                         callback
                     );
