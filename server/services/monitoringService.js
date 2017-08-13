@@ -412,32 +412,6 @@ angular.module('ffffng')
         );
     }
 
-    function markMissingNodesAsOffline(nodes, callback) {
-        var knownNodes = {};
-        _.each(nodes, function (node) {
-            knownNodes[Strings.normalizeMac(node.mac)] = 1;
-        });
-
-        NodeService.getAllNodes(function (err, nodes) {
-            if (err) {
-                return callback(err);
-            }
-
-            async.eachSeries(
-                nodes,
-                function (node, nodeCallback) {
-                    if (knownNodes[Strings.normalizeMac(node.mac)]) {
-                        // node is known in nodes.json so it has already been handled
-                        return nodeCallback(null);
-                    }
-
-                    storeNodeInformation('missing', node, nodeCallback);
-                },
-                callback
-            );
-        });
-    }
-
     function withUrlsData(urls, callback) {
         async.map(urls, function (url, urlCallback) {
             Logger.tag('monitoring', 'information-retrieval').debug('Retrieving nodes.json: %s', url);
@@ -465,9 +439,13 @@ angular.module('ffffng')
             }
 
             var maxTimestamp = datas[0].importTimestamp;
+            var minTimestamp = maxTimestamp;
             _.each(datas, function (data) {
                 if (data.importTimestamp.isAfter(maxTimestamp)) {
                     maxTimestamp = data.importTimestamp;
+                }
+                if (data.importTimestamp.isBefore(minTimestamp)) {
+                    minTimestamp = data.importTimestamp;
                 }
             });
 
@@ -537,7 +515,17 @@ angular.module('ffffng')
                         return callback(err);
                     }
 
-                    markMissingNodesAsOffline(uniqueNodes, callback);
+                    // Mark nodes as offline that haven't been imported in this run.
+                    Database.run(
+                        'UPDATE node_state ' +
+                        'SET state = ?, modified_at = ?' +
+                        'WHERE import_timestamp < ?',
+                        [
+                            'OFFLINE', moment().unix(),
+                            minTimestamp
+                        ],
+                        callback
+                    );
                 }
             );
         });
