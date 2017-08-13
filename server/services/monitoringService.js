@@ -769,7 +769,9 @@ angular.module('ffffng')
 
                                 async.seq(
                                     function (callback) {
-                                        if (node) {
+                                        if (node && node.token) {
+                                            // If the node has no token it is a special node (e.g. a gateway)
+                                            // we need to skip.
                                             return NodeService.deleteNode(node.token, callback);
                                         }
                                         return callback(null);
