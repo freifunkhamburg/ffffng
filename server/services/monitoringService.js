@@ -484,7 +484,7 @@ angular.module('ffffng')
             previousImportTimestamp = maxTimestamp;
 
             // We do not parallelize here as the sqlite will start slowing down and blocking with too many
-            // parallel queries. This has resulted in blocking other requests too and thus in a major slowdonw.
+            // parallel queries. This has resulted in blocking other requests too and thus in a major slowdown.
             var allNodes = _.flatMap(datas, function (data) {
                 return data.nodes;
             });
