@@ -65,6 +65,11 @@ angular.module('ffffng').constant('Constraints',  {
             type: 'string',
             regex: /^(disabled|active|pending)$/,
             optional: true
+        },
+        site: {
+            type: 'string',
+            regex: /^[a-z0-9_-]{1,32}$/,
+            optional: true
         }
     },
     rest: {
