@@ -118,7 +118,7 @@ angular.module('ffffng')
             if (nodeData === 'missing') {
                 nodeDataForStoring = {
                     mac: node.mac,
-                    site: nodeData.site,
+                    site: _.isUndefined(row) ? null : row.site,
                     state: 'OFFLINE',
                     // jshint -W106
                     lastSeen: _.isUndefined(row) ? moment() : moment.unix(row.last_seen),
