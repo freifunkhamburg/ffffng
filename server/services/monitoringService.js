@@ -139,25 +139,86 @@ angular.module('ffffng')
 
     var isValidMac = Validator.forConstraint(Constraints.node.mac);
 
-    function parseNodesJson(body, callback) {
-        Logger.tag('monitoring', 'information-retrieval').debug('Parsing nodes.json...');
+    function parseTimestamp (timestamp) {
+        if (!_.isString(timestamp)) {
+            return moment.invalid();
+        }
+        return moment.utc(timestamp);
+    }
 
-        function parseTimestamp(timestamp) {
-            if (!_.isString(timestamp)) {
-                return moment.invalid();
-            }
-            return moment.utc(timestamp);
+    function parseNode (importTimestamp, nodeData, nodeId) {
+        if (!_.isPlainObject(nodeData)) {
+            throw new Error(
+                'Node ' + nodeId + ': Unexpected node type: ' + (typeof nodeData)
+            );
         }
 
+        if (!_.isPlainObject(nodeData.nodeinfo)) {
+            throw new Error(
+                'Node ' + nodeId + ': Unexpected nodeinfo type: ' + (typeof nodeData.nodeinfo)
+            );
+        }
+        if (!_.isPlainObject(nodeData.nodeinfo.network)) {
+            throw new Error(
+                'Node ' + nodeId + ': Unexpected nodeinfo.network type: ' + (typeof nodeData.nodeinfo.network)
+            );
+        }
+
+        if (!isValidMac(nodeData.nodeinfo.network.mac)) {
+            throw new Error(
+                'Node ' + nodeId + ': Invalid MAC: ' + nodeData.nodeinfo.network.mac
+            );
+        }
+        var mac = Strings.normalizeMac(nodeData.nodeinfo.network.mac);
+
+        if (!_.isPlainObject(nodeData.flags)) {
+            throw new Error(
+                'Node ' + nodeId + ': Unexpected flags type: ' + (typeof nodeData.flags)
+            );
+        }
+        if (!_.isBoolean(nodeData.flags.online)) {
+            throw new Error(
+                'Node ' + nodeId + ': Unexpected flags.online type: ' + (typeof nodeData.flags.online)
+            );
+        }
+        var isOnline = nodeData.flags.online;
+
+        var lastSeen = parseTimestamp(nodeData.lastseen);
+        if (!lastSeen.isValid()) {
+            throw new Error(
+                'Node ' + nodeId + ': Invalid lastseen timestamp: ' + nodeData.lastseen
+            );
+        }
+
+        var site = null;
+        // jshint -W106
+        if (_.isPlainObject(nodeData.nodeinfo.system) && _.isString(nodeData.nodeinfo.system.site_code)) {
+            site = nodeData.nodeinfo.system.site_code;
+        }
+        // jshint +W106
+
+        return {
+            mac: mac,
+            importTimestamp: importTimestamp,
+            state: isOnline ? 'ONLINE' : 'OFFLINE',
+            lastSeen: lastSeen,
+            site: site
+        };
+    }
+
+    function parseNodesJson (body, callback) {
+        Logger.tag('monitoring', 'information-retrieval').debug('Parsing nodes.json...');
+
         var data = {};
+
         try {
             var json = JSON.parse(body);
 
             if (json.version !== 1) {
                 return callback(new Error('Unexpected nodes.json version: ' + json.version));
             }
-
             data.importTimestamp = parseTimestamp(json.timestamp);
+
             if (!data.importTimestamp.isValid()) {
                 return callback(new Error('Invalid timestamp: ' + json.timestamp));
             }
@@ -166,64 +227,25 @@ angular.module('ffffng')
                 return callback(new Error('Invalid nodes object type: ' + (typeof json.nodes)));
             }
 
-            data.nodes = _.values(_.map(json.nodes, function (nodeData, nodeId) {
-                if (!_.isPlainObject(nodeData)) {
-                    throw new Error(
-                        'Node ' + nodeId + ': Unexpected node type: ' + (typeof nodeData)
-                    );
+            data.nodes = _.filter(
+                _.values(
+                    _.map(
+                        json.nodes,
+                        function (nodeData, nodeId) {
+                            try {
+                                return parseNode(data.importTimestamp, nodeData, nodeId);
+                            }
+                            catch (error) {
+                                Logger.tag('monitoring', 'information-retrieval').error(error);
+                                return null;
+                            }
+                        }
+                    )
+                ),
+                function (node) {
+                    return node !== null;
                 }
-
-                if (!_.isPlainObject(nodeData.nodeinfo)) {
-                    throw new Error(
-                        'Node ' + nodeId + ': Unexpected nodeinfo type: ' + (typeof nodeData.nodeinfo)
-                    );
-                }
-                if (!_.isPlainObject(nodeData.nodeinfo.network)) {
-                    throw new Error(
-                        'Node ' + nodeId + ': Unexpected nodeinfo.network type: ' +
-                        (typeof nodeData.nodeinfo.network)
-                    );
-                }
-
-                if (!isValidMac(nodeData.nodeinfo.network.mac)) {
-                    throw new Error(
-                        'Node ' + nodeId + ': Invalid MAC: ' + nodeData.nodeinfo.network.mac
-                    );
-                }
-                var mac = Strings.normalizeMac(nodeData.nodeinfo.network.mac);
-
-                if (!_.isPlainObject(nodeData.flags)) {
-                    throw new Error(
-                        'Node ' + nodeId + ': Unexpected flags type: ' + (typeof nodeData.flags)
-                    );
-                }
-                if (!_.isBoolean(nodeData.flags.online)) {
-                    throw new Error(
-                        'Node ' + nodeId + ': Unexpected flags.online type: ' + (typeof nodeData.flags.online)
-                    );
-                }
-                var isOnline = nodeData.flags.online;
-
-                var lastSeen = parseTimestamp(nodeData.lastseen);
-                if (!lastSeen.isValid()) {
-                    throw new Error(
-                        'Node ' + nodeId + ': Invalid lastseen timestamp: ' + nodeData.lastseen
-                    );
-                }
-
-                var site = null;
-                if (_.isPlainObject(nodeData.nodeinfo.system) && _.isString(nodeData.nodeinfo.system.site_code)) {
-                    site = nodeData.nodeinfo.system.site_code;
-                }
-
-                return {
-                    mac: mac,
-                    importTimestamp: data.importTimestamp,
-                    state: isOnline ? 'ONLINE' : 'OFFLINE',
-                    lastSeen: lastSeen,
-                    site: site
-                };
-            }));
+            );
         }
         catch (error) {
             return callback(error);
