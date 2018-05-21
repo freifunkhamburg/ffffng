@@ -44,6 +44,10 @@
             "contactEmail": "kontakt@musterstadt.freifunk.net",
             "sites": ["ffms-domain1", "ffms-domain2"]
         },
+        "legal": {
+            "privacyUrl": "http://map.musterstadt.freifunk.net/datenschutz",
+            "imprintUrl": "http://map.musterstadt.freifunk.net/impressum"
+        },
         "map": {
             "mapUrl": "http://map.musterstadt.freifunk.net"
         },

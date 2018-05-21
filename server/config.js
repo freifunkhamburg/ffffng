@@ -99,6 +99,10 @@ var defaultConfig = {
             contactEmail: 'kontakt@musterstadt.freifunk.net',
             sites: []
         },
+        legal: {
+            privacyUrl: null,
+            imprintUrl: null
+        },
         map: {
             mapUrl: 'http://map.musterstadt.freifunk.net'
         },

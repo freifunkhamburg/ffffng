@@ -55,30 +55,48 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
         });
     }
 
+    var header =
+        '<div class="navbar-header">' +
+        '<a class="navbar-brand" href="#" ng-click="appController.displayHome()">' +
+        title + ' ' +
+        '<small style="font-size: 0.7em;">(<fa-version></fa-version>)</small>' +
+        '</a>' +
+        '</div>';
+    if (config.legal.imprintUrl) {
+        header +=
+            '<p class="navbar-text navbar-right">' +
+            '<a href="' + config.legal.imprintUrl + '" target="_blank">' +
+            'Imprint' +
+            '</a>' +
+            '</p>';
+    }
+    if (config.legal.privacyUrl) {
+        header +=
+            '<p class="navbar-text navbar-right">' +
+            '<a href="' + config.legal.privacyUrl + '" target="_blank">' +
+            'Privacy' +
+            '</a>' +
+            '</p>';
+    }
+    header +=
+        '<p class="navbar-text navbar-right">' +
+        '<a href="https://github.com/freifunkhamburg/ffffng/issues" target="_blank">' +
+        '<i class="fa fa-bug" aria-hidden="true"></i> Report Error' +
+        '</a>' +
+        '</p>' +
+        '<p class="navbar-text navbar-right">' +
+        '<a href="https://github.com/freifunkhamburg/ffffng" target="_blank">' +
+        '<i class="fa fa-code" aria-hidden="true"></i> Source Code' +
+        '</a>' +
+        '</p>' +
+        '<p class="navbar-text navbar-right">' +
+        '<a href="' + pathPrefix + '/" target="_blank">' +
+        '<i class="fa fa-external-link" aria-hidden="true"></i> Frontend' +
+        '</a>' +
+        '</p>';
+
     admin
-        .header(
-            '<div class="navbar-header">' +
-            '<a class="navbar-brand" href="#" ng-click="appController.displayHome()">' +
-            title + ' ' +
-            '<small style="font-size: 0.7em;">(<fa-version></fa-version>)</small>' +
-            '</a>' +
-            '</div>' +
-            '<p class="navbar-text navbar-right">' +
-            '<a href="https://github.com/freifunkhamburg/ffffng/issues" target="_blank">' +
-            '<i class="fa fa-bug" aria-hidden="true"></i> Report Error' +
-            '</a>' +
-            '</p>' +
-            '<p class="navbar-text navbar-right">' +
-            '<a href="https://github.com/freifunkhamburg/ffffng" target="_blank">' +
-            '<i class="fa fa-code" aria-hidden="true"></i> Source Code' +
-            '</a>' +
-            '</p>' +
-            '<p class="navbar-text navbar-right">' +
-            '<a href="' + pathPrefix + '/" target="_blank">' +
-            '<i class="fa fa-external-link" aria-hidden="true"></i> Frontend' +
-            '</a>' +
-            '</p>'
-        )
+        .header(header)
         .baseApiUrl(pathPrefix + '/internal/api/')
         .debug(true);
 

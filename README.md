@@ -160,6 +160,9 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 * **`client.community.contactEmail`** Kontakt-E-Mail-Adresse der Freifunk-Community, z. B.: `"kontakt@musterstadt.freifunk.net"`
 * **`client.community.sites`** Liste der gültige Site-Codes in der `nodes.json`, z. B.: `["ffms-domain1", "ffms-domain2"]`
 
+* **`client.legal.privacyUrl`** optional: URL zum Impressum, z. B.: `"http://map.musterstadt.freifunk.net/impressum"`
+* **`client.legal.imprintUrl`** optional: URL zur Datenschutzerklärung, z. B.: `"http://map.musterstadt.freifunk.net/datenschutz"`
+
 * **`client.map.mapUrl`** URL der Knotenkarte, z. B.: `"http://map.musterstadt.freifunk.net"`
 
 * **`client.monitoring.enabled`** Gibt an, ob die Nutzer Monitoring für ihre Knoten aktivieren können sollen, z. B.: `true`

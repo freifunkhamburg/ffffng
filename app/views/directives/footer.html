@@ -13,5 +13,15 @@
                 <i class="fa fa-bug" aria-hidden="true"></i> Fehler melden
             </a>
         </li>
+        <li ng-if="config.legal.privacyUrl">
+            <a href="{{config.legal.privacyUrl}}" target="_blank">
+                Datenschutz
+            </a>
+        </li>
+        <li ng-if="config.legal.imprintUrl">
+            <a href="{{config.legal.imprintUrl}}" target="_blank">
+                Impressum
+            </a>
+        </li>
     </ul>
 </footer>
