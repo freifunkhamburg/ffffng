@@ -1,16 +1,21 @@
 'use strict';
 
-angular.module('ffffng').factory('app', function (fs, config, _) {
-    var express = require('express');
-    var auth = require('http-auth');
-    var bodyParser = require('body-parser');
-    var compress = require('compression');
+const _ = require('lodash')
+const auth = require('http-auth');
+const bodyParser = require('body-parser');
+const compress = require('compression');
+const express = require('express');
+const fs = require('graceful-fs')
 
-    var app = express();
-    var router = express.Router();
+const config = require('./config').config
+
+const app = express();
+
+module.exports = (() => {
+    const router = express.Router();
 
     // urls beneath /internal are protected
-    var internalAuth = auth.basic(
+    const internalAuth = auth.basic(
         {
             realm: 'Knotenformular - Intern'
         },
@@ -27,24 +32,24 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
     router.use(bodyParser.json());
     router.use(bodyParser.urlencoded({ extended: true }));
 
-    var adminDir = __dirname + '/../admin';
-    var clientDir = __dirname + '/../client';
-    var templateDir = __dirname + '/templates';
+    const adminDir = __dirname + '/../admin';
+    const clientDir = __dirname + '/../client';
+    const templateDir = __dirname + '/templates';
 
-    var jsTemplateFiles = [
+    const jsTemplateFiles = [
         '/config.js'
     ];
 
     router.use(compress());
 
-    function serveTemplate(mimeType, req, res, next) {
+    function serveTemplate (mimeType, req, res, next) {
         return fs.readFile(templateDir + '/' + req.path, 'utf8', function (err, body) {
             if (err) {
                 return next(err);
             }
 
-            res.writeHead(200, {'Content-Type': mimeType});
-            res.end(_.template(body)( { config: config.client }));
+            res.writeHead(200, { 'Content-Type': mimeType });
+            res.end(_.template(body)({ config: config.client }));
 
             return null; // to suppress warning
         });
@@ -63,4 +68,4 @@ angular.module('ffffng').factory('app', function (fs, config, _) {
     app.use(config.server.rootPath, router);
 
     return app;
-});
+})()

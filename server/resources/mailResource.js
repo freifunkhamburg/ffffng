@@ -1,101 +1,99 @@
 'use strict';
 
-angular.module('ffffng').factory('MailResource', function (
-    Constraints,
-    Validator,
-    MailService,
-    Resources,
-    Logger,
-    ErrorTypes,
-    Strings
-) {
-    var isValidId = Validator.forConstraint(Constraints.id);
+const Constraints = require('../../shared/validation/constraints')
+const ErrorTypes = require('../utils/errorTypes')
+const Logger = require('../logger')
+const MailService = require('../services/mailService')
+const Resources = require('../utils/resources')
+const Strings = require('../utils/strings')
+const Validator = require('../validation/validator')
 
-    function withValidMailId(req, res, callback) {
-        var id = Strings.normalizeString(Resources.getData(req).id);
+const isValidId = Validator.forConstraint(Constraints.id);
 
-        if (!isValidId(id)) {
-            return callback({data: 'Invalid mail id.', type: ErrorTypes.badRequest});
-        }
+function withValidMailId(req, res, callback) {
+    const id = Strings.normalizeString(Resources.getData(req).id);
 
-        callback(null, id);
+    if (!isValidId(id)) {
+        return callback({data: 'Invalid mail id.', type: ErrorTypes.badRequest});
     }
 
-    return {
-        get: function (req, res) {
-            withValidMailId(req, res, function (err, id) {
+    callback(null, id);
+}
+
+module.exports = {
+    get (req, res) {
+        withValidMailId(req, res, function (err, id) {
+            if (err) {
+                return Resources.error(res, err);
+            }
+
+            MailService.getMail(id, function (err, mail) {
                 if (err) {
-                    return Resources.error(res, err);
+                    Logger.tag('mails', 'admin').error('Error getting mail:', err);
+                    return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
                 }
 
-                MailService.getMail(id, function (err, mail) {
+                if (!mail) {
+                    return Resources.error(res, {data: 'Mail not found.', type: ErrorTypes.notFound});
+                }
+
+                return Resources.success(res, mail);
+            });
+        });
+    },
+
+    getAll (req, res) {
+        Resources.getValidRestParams('list', null, req, function (err, restParams) {
+            if (err) {
+                return Resources.error(res, err);
+            }
+
+            return MailService.getPendingMails(
+                restParams,
+                function (err, mails, total) {
                     if (err) {
-                        Logger.tag('mails', 'admin').error('Error getting mail:', err);
+                        Logger.tag('mails', 'admin').error('Could not get pending mails:', err);
                         return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
                     }
 
-                    if (!mail) {
-                        return Resources.error(res, {data: 'Mail not found.', type: ErrorTypes.notFound});
-                    }
+                    res.set('X-Total-Count', total);
+                    return Resources.success(res, mails);
+                }
+            );
+        });
+    },
 
-                    return Resources.success(res, mail);
-                });
-            });
-        },
+    delete (req, res) {
+        withValidMailId(req, res, function (err, id) {
+            if (err) {
+                return Resources.error(res, err);
+            }
 
-        getAll: function (req, res) {
-            Resources.getValidRestParams('list', null, req, function (err, restParams) {
+            MailService.deleteMail(id, function (err) {
                 if (err) {
-                    return Resources.error(res, err);
+                    Logger.tag('mails', 'admin').error('Error deleting mail:', err);
+                    return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
                 }
 
-                return MailService.getPendingMails(
-                    restParams,
-                    function (err, mails, total) {
-                        if (err) {
-                            Logger.tag('mails', 'admin').error('Could not get pending mails:', err);
-                            return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
-                        }
-
-                        res.set('X-Total-Count', total);
-                        return Resources.success(res, mails);
-                    }
-                );
+                return Resources.success(res);
             });
-        },
+        });
+    },
 
-        delete: function (req, res) {
-            withValidMailId(req, res, function (err, id) {
+    resetFailures (req, res) {
+        withValidMailId(req, res, function (err, id) {
+            if (err) {
+                return Resources.error(res, err);
+            }
+
+            MailService.resetFailures(id, function (err, mail) {
                 if (err) {
-                    return Resources.error(res, err);
+                    Logger.tag('mails', 'admin').error('Error resetting failure count:', err);
+                    return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
                 }
 
-                MailService.deleteMail(id, function (err) {
-                    if (err) {
-                        Logger.tag('mails', 'admin').error('Error deleting mail:', err);
-                        return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
-                    }
-
-                    return Resources.success(res);
-                });
+                return Resources.success(res, mail);
             });
-        },
-
-        resetFailures: function (req, res) {
-            withValidMailId(req, res, function (err, id) {
-                if (err) {
-                    return Resources.error(res, err);
-                }
-
-                MailService.resetFailures(id, function (err, mail) {
-                    if (err) {
-                        Logger.tag('mails', 'admin').error('Error resetting failure count:', err);
-                        return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
-                    }
-
-                    return Resources.success(res, mail);
-                });
-            });
-        }
-    };
-});
+        });
+    }
+}

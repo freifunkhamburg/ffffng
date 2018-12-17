@@ -1,17 +1,15 @@
 'use strict';
 
-angular.module('ffffng').factory('VersionResource', function (
-    version,
-    Resources
-) {
-    return {
-        get: function (req, res) {
-            return Resources.success(
-                res,
-                {
-                    version: version
-                }
-            );
-        }
-    };
-});
+const Resources = require('../utils/resources')
+const version = require('../config').version
+
+module.exports = {
+    get (req, res) {
+        return Resources.success(
+            res,
+            {
+                version
+            }
+        );
+    }
+}

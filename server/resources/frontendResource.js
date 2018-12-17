@@ -1,31 +1,30 @@
 'use strict';
 
-angular.module('ffffng').factory('FrontendResource', function (
-    Logger,
-    Resources,
-    ErrorTypes,
-    fs
-) {
-    var indexHtml = __dirname + '/../../client/index.html';
+const fs = require('graceful-fs')
 
-    return {
-        render: function (req, res) {
-            var data = Resources.getData(req);
+const ErrorTypes = require('../utils/errorTypes')
+const Logger = require('../logger')
+const Resources = require('../utils/resources')
 
-            fs.readFile(indexHtml, 'utf8', function (err, body) {
-                if (err) {
-                    Logger.tag('frontend').error('Could not read file: ', indexHtml, err);
-                    return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
-                }
+const indexHtml = __dirname + '/../../client/index.html';
 
-                return Resources.successHtml(
-                    res,
-                    body.replace(
-                        /<body/,
-                        '<script>window.__nodeToken = \''+ data.token + '\';</script><body'
-                    )
-                );
-            });
-        }
-    };
-});
+module.exports = {
+    render (req, res) {
+        const data = Resources.getData(req);
+
+        fs.readFile(indexHtml, 'utf8', function (err, body) {
+            if (err) {
+                Logger.tag('frontend').error('Could not read file: ', indexHtml, err);
+                return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
+            }
+
+            return Resources.successHtml(
+                res,
+                body.replace(
+                    /<body/,
+                    '<script>window.__nodeToken = \''+ data.token + '\';</script><body'
+                )
+            );
+        });
+    }
+}

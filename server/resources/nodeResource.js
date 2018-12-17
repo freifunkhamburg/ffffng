@@ -1,182 +1,181 @@
 'use strict';
 
-angular.module('ffffng').factory('NodeResource', function (
-    Constraints,
-    Validator,
-    Logger,
-    MonitoringService,
-    NodeService,
-    _,
-    deepExtend,
-    Strings,
-    Resources,
-    ErrorTypes
-) {
-    var nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords', 'monitoring'];
+const _ = require('lodash')
+const deepExtend = require('deep-extend')
 
-    function getNormalizedNodeData(reqData) {
-        var node = {};
-        _.each(nodeFields, function (field) {
-            var value = Strings.normalizeString(reqData[field]);
-            if (field === 'mac') {
-                value = Strings.normalizeMac(value);
+const Constraints = require('../../shared/validation/constraints')
+const ErrorTypes = require('../utils/errorTypes')
+const Logger = require('../logger')
+const MonitoringService = require('../services/monitoringService')
+const NodeService = require('../services/nodeService')
+const Strings = require('../utils/strings')
+const Validator = require('../validation/validator')
+const Resources = require('../utils/resources')
+
+const nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords', 'monitoring'];
+
+function getNormalizedNodeData(reqData) {
+    const node = {};
+    _.each(nodeFields, function (field) {
+        let value = Strings.normalizeString(reqData[field]);
+        if (field === 'mac') {
+            value = Strings.normalizeMac(value);
+        }
+        node[field] = value;
+    });
+    return node;
+}
+
+const isValidNode = Validator.forConstraints(Constraints.node);
+const isValidToken = Validator.forConstraint(Constraints.token);
+
+module.exports =  {
+    create: function (req, res) {
+        const data = Resources.getData(req);
+
+        const node = getNormalizedNodeData(data);
+        if (!isValidNode(node)) {
+            return Resources.error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
+        }
+
+        return NodeService.createNode(node, function (err, token, node) {
+            if (err) {
+                return Resources.error(res, err);
             }
-            node[field] = value;
+            return Resources.success(res, {token: token, node: node});
         });
-        return node;
-    }
+    },
 
-    var isValidNode = Validator.forConstraints(Constraints.node);
-    var isValidToken = Validator.forConstraint(Constraints.token);
+    update: function (req, res) {
+        const data = Resources.getData(req);
 
-    return {
-        create: function (req, res) {
-            var data = Resources.getData(req);
+        const token = Strings.normalizeString(data.token);
+        if (!isValidToken(token)) {
+            return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
+        }
 
-            var node = getNormalizedNodeData(data);
-            if (!isValidNode(node)) {
-                return Resources.error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
+        const node = getNormalizedNodeData(data);
+        if (!isValidNode(node)) {
+            return Resources.error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
+        }
+
+        return NodeService.updateNode(token, node, function (err, token, node) {
+            if (err) {
+                return Resources.error(res, err);
+            }
+            return Resources.success(res, {token: token, node: node});
+        });
+    },
+
+    delete: function (req, res) {
+        const data = Resources.getData(req);
+
+        const token = Strings.normalizeString(data.token);
+        if (!isValidToken(token)) {
+            return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
+        }
+
+        return NodeService.deleteNode(token, function (err) {
+            if (err) {
+                return Resources.error(res, err);
+            }
+            return Resources.success(res, {});
+        });
+    },
+
+    get: function (req, res) {
+        const token = Strings.normalizeString(Resources.getData(req).token);
+        if (!isValidToken(token)) {
+            return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
+        }
+
+        return NodeService.getNodeDataByToken(token, function (err, node) {
+            if (err) {
+                return Resources.error(res, err);
+            }
+            return Resources.success(res, node);
+        });
+    },
+
+    getAll: function (req, res) {
+        Resources.getValidRestParams('list', 'node', req, function (err, restParams) {
+            if (err) {
+                return Resources.error(res, err);
             }
 
-            return NodeService.createNode(node, function (err, token, node) {
-                if (err) {
-                    return Resources.error(res, err);
-                }
-                return Resources.success(res, {token: token, node: node});
-            });
-        },
-
-        update: function (req, res) {
-            var data = Resources.getData(req);
-
-            var token = Strings.normalizeString(data.token);
-            if (!isValidToken(token)) {
-                return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
-            }
-
-            var node = getNormalizedNodeData(data);
-            if (!isValidNode(node)) {
-                return Resources.error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
-            }
-
-            return NodeService.updateNode(token, node, function (err, token, node) {
-                if (err) {
-                    return Resources.error(res, err);
-                }
-                return Resources.success(res, {token: token, node: node});
-            });
-        },
-
-        delete: function (req, res) {
-            var data = Resources.getData(req);
-
-            var token = Strings.normalizeString(data.token);
-            if (!isValidToken(token)) {
-                return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
-            }
-
-            return NodeService.deleteNode(token, function (err) {
-                if (err) {
-                    return Resources.error(res, err);
-                }
-                return Resources.success(res, {});
-            });
-        },
-
-        get: function (req, res) {
-            var token = Strings.normalizeString(Resources.getData(req).token);
-            if (!isValidToken(token)) {
-                return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
-            }
-
-            return NodeService.getNodeDataByToken(token, function (err, node) {
-                if (err) {
-                    return Resources.error(res, err);
-                }
-                return Resources.success(res, node);
-            });
-        },
-
-        getAll: function (req, res) {
-            Resources.getValidRestParams('list', 'node', req, function (err, restParams) {
+            return NodeService.getAllNodes(function (err, nodes) {
                 if (err) {
                     return Resources.error(res, err);
                 }
 
-                return NodeService.getAllNodes(function (err, nodes) {
+                const realNodes = _.filter(nodes, function (node) {
+                    // We ignore nodes without tokens as those are only manually added ones like gateways.
+                    return node.token;
+                });
+
+                const macs = _.map(realNodes, function (node) {
+                    return node.mac;
+                });
+
+                MonitoringService.getByMacs(macs, function (err, nodeStateByMac) {
                     if (err) {
-                        return Resources.error(res, err);
+                        Logger.tag('nodes', 'admin').error('Error getting nodes by MACs:', err);
+                        return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
                     }
 
-                    var realNodes = _.filter(nodes, function (node) {
-                        // We ignore nodes without tokens as those are only manually added ones like gateways.
-                        return node.token;
-                    });
-
-                    var macs = _.map(realNodes, function (node) {
-                        return node.mac;
-                    });
-
-                    MonitoringService.getByMacs(macs, function (err, nodeStateByMac) {
-                        if (err) {
-                            Logger.tag('nodes', 'admin').error('Error getting nodes by MACs:', err);
-                            return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
+                    const enhancedNodes = _.map(realNodes, function (node) {
+                        const nodeState = nodeStateByMac[node.mac];
+                        if (nodeState) {
+                            return deepExtend({}, node, {
+                                site: nodeState.site,
+                                domain: nodeState.domain,
+                                onlineState: nodeState.state
+                            });
                         }
 
-                        var enhancedNodes = _.map(realNodes, function (node) {
-                            var nodeState = nodeStateByMac[node.mac];
-                            if (nodeState) {
-                                return deepExtend({}, node, {
-                                    site: nodeState.site,
-                                    domain: nodeState.domain,
-                                    onlineState: nodeState.state
-                                });
-                            }
-
-                            return node;
-                        });
-
-                        var filteredNodes = Resources.filter(
-                            enhancedNodes,
-                            [
-                                'hostname',
-                                'nickname',
-                                'email',
-                                'token',
-                                'mac',
-                                'site',
-                                'domain',
-                                'key',
-                                'onlineState'
-                            ],
-                            restParams
-                        );
-                        var total = filteredNodes.length;
-
-                        var sortedNodes = Resources.sort(
-                            filteredNodes,
-                            [
-                                'hostname',
-                                'nickname',
-                                'email',
-                                'token',
-                                'mac',
-                                'key',
-                                'site',
-                                'domain',
-                                'coords',
-                                'onlineState',
-                                'monitoringState'
-                            ],
-                            restParams
-                        );
-                        var pageNodes = Resources.getPageEntities(sortedNodes, restParams);
-
-                        res.set('X-Total-Count', total);
-                        return Resources.success(res, pageNodes);
+                        return node;
                     });
+
+                    const filteredNodes = Resources.filter(
+                        enhancedNodes,
+                        [
+                            'hostname',
+                            'nickname',
+                            'email',
+                            'token',
+                            'mac',
+                            'site',
+                            'domain',
+                            'key',
+                            'onlineState'
+                        ],
+                        restParams
+                    );
+                    const total = filteredNodes.length;
+
+                    const sortedNodes = Resources.sort(
+                        filteredNodes,
+                        [
+                            'hostname',
+                            'nickname',
+                            'email',
+                            'token',
+                            'mac',
+                            'key',
+                            'site',
+                            'domain',
+                            'coords',
+                            'onlineState',
+                            'monitoringState'
+                        ],
+                        restParams
+                    );
+                    const pageNodes = Resources.getPageEntities(sortedNodes, restParams);
+
+                    res.set('X-Total-Count', total);
+                    return Resources.success(res, pageNodes);
                 });
             });
-        }
-    };
-});
+        });
+    }
+}

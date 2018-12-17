@@ -1,7 +1,7 @@
 'use strict';
 
-var config = require('./config');
-
+const app = require('./app');
+const config = require('./config').config;
 
 // Hack to allow proper logging of Error.
 Object.defineProperty(Error.prototype, 'message', {
@@ -14,7 +14,7 @@ Object.defineProperty(Error.prototype, 'stack', {
 });
 
 
-var scribe = require('scribe-js')({
+const scribe = require('scribe-js')({
     rootPath: config.server.logging.directory,
 });
 
@@ -33,30 +33,26 @@ function addLogger(name, color, active) {
 addLogger('debug', 'grey', config.server.logging.debug);
 addLogger('profile', 'blue', config.server.logging.profile);
 
-angular.module('ffffng').factory('Logger', function (app) {
-    if (config.server.logging.logRequests) {
-        app.use(scribe.express.logger());
-    }
-    if (config.server.internal.active) {
-        var prefix = config.server.rootPath === '/' ? '' : config.server.rootPath;
-        app.use(prefix + '/internal/logs', scribe.webPanel());
-    }
+if (config.server.logging.logRequests) {
+    app.use(scribe.express.logger());
+}
+if (config.server.internal.active) {
+    const prefix = config.server.rootPath === '/' ? '' : config.server.rootPath;
+    app.use(prefix + '/internal/logs', scribe.webPanel());
+}
 
-    // Hack to allow correct logging of node.js Error objects.
-    // See: https://github.com/bluejamesbond/Scribe.js/issues/70
-    Object.defineProperty(Error.prototype, 'toJSON', {
-        configurable: true,
-        value: function () {
-            var alt = {};
-            var storeKey = function (key) {
-                alt[key] = this[key];
-            };
-            Object.getOwnPropertyNames(this).forEach(storeKey, this);
-            return alt;
-        }
-    });
-
-    return process.console;
+// Hack to allow correct logging of node.js Error objects.
+// See: https://github.com/bluejamesbond/Scribe.js/issues/70
+Object.defineProperty(Error.prototype, 'toJSON', {
+    configurable: true,
+    value: function () {
+        const alt = {};
+        const storeKey = function (key) {
+            alt[key] = this[key];
+        };
+        Object.getOwnPropertyNames(this).forEach(storeKey, this);
+        return alt;
+    }
 });
 
 module.exports = process.console;

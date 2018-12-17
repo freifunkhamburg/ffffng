@@ -1,27 +1,27 @@
 'use strict';
 
-angular.module('ffffng').factory('Strings', function (_) {
-    return {
-        normalizeString: function (str) {
-            return _.isString(str) ? str.trim().replace(/\s+/g, ' ') : str;
-        },
+const _ = require('lodash')
 
-        normalizeMac: function (mac) {
-            // parts only contains values at odd indexes
-            var parts = mac.toUpperCase().replace(/:/g, '').split(/([A-F0-9]{2})/);
+module.exports = {
+    normalizeString (str) {
+        return _.isString(str) ? str.trim().replace(/\s+/g, ' ') : str;
+    },
 
-            var macParts = [];
+    normalizeMac (mac) {
+        // parts only contains values at odd indexes
+        const parts = mac.toUpperCase().replace(/:/g, '').split(/([A-F0-9]{2})/);
 
-            for (var i = 1; i < parts.length; i += 2) {
-                macParts.push(parts[i]);
-            }
+        const macParts = [];
 
-            return macParts.join(':');
-        },
-
-        parseInt: function (str) {
-            var parsed = _.parseInt(str, 10);
-            return parsed.toString() === str ? parsed : undefined;
+        for (let i = 1; i < parts.length; i += 2) {
+            macParts.push(parts[i]);
         }
-    };
-});
+
+        return macParts.join(':');
+    },
+
+    parseInt (str) {
+        const parsed = _.parseInt(str, 10);
+        return parsed.toString() === str ? parsed : undefined;
+    }
+}

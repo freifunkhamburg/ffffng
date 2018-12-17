@@ -5,7 +5,7 @@ const fs = require('graceful-fs');
 const glob = util.promisify(require('glob'));
 const path = require('path');
 
-const config = require('../config');
+const config = require('../config').config;
 const Logger = require('../logger');
 
 async function applyPatch(db, file) {
@@ -72,10 +72,7 @@ async function init() {
         throw error;
     }
 
-    // WARNING: We have to use funtion() syntax here, to satisfy ng-di. m(
-    return angular.module('ffffng').factory('Database', function () {
-        return db;
-    });
+    module.exports.db = db;
 }
 
 module.exports = {
