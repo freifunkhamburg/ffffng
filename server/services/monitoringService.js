@@ -44,12 +44,13 @@ angular.module('ffffng')
 
         return Database.run(
             'INSERT INTO node_state ' +
-            '(hostname, mac, site, monitoring_state, state, last_seen, import_timestamp, last_status_mail_sent, last_status_mail_type) ' +
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            '(hostname, mac, site, domain, monitoring_state, state, last_seen, import_timestamp, last_status_mail_sent, last_status_mail_type) ' +
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 node.hostname,
                 node.mac,
                 nodeData.site,
+                nodeData.domain,
                 node.monitoringState,
                 nodeData.state,
                 nodeData.lastSeen.unix(),
@@ -84,6 +85,7 @@ angular.module('ffffng')
             'SET ' +
             'hostname = ?, ' +
             'site = ?, ' +
+            'domain = ?, ' +
             'monitoring_state = ?, ' +
             'state = ?, ' +
             'last_seen = ?, ' +
@@ -93,6 +95,7 @@ angular.module('ffffng')
             [
                 node.hostname,
                 nodeData.site || row.site,
+                nodeData.domain || row.domain,
                 node.monitoringState,
                 nodeData.state,
                 nodeData.lastSeen.unix(),
@@ -119,6 +122,7 @@ angular.module('ffffng')
                 nodeDataForStoring = {
                     mac: node.mac,
                     site: _.isUndefined(row) ? null : row.site,
+                    domain: _.isUndefined(row) ? null : row.domain,
                     state: 'OFFLINE',
                     // jshint -W106
                     lastSeen: _.isUndefined(row) ? moment() : moment.unix(row.last_seen),
@@ -197,12 +201,20 @@ angular.module('ffffng')
         }
         // jshint +W106
 
+        var domain = null;
+        // jshint -W106
+        if (_.isPlainObject(nodeData.nodeinfo.system) && _.isString(nodeData.nodeinfo.system.domain_code)) {
+            domain = nodeData.nodeinfo.system.domain_code;
+        }
+        // jshint +W106
+
         return {
             mac: mac,
             importTimestamp: importTimestamp,
             state: isOnline ? 'ONLINE' : 'OFFLINE',
             lastSeen: lastSeen,
-            site: site
+            site: site,
+            domain: domain
         };
     }
 
@@ -564,6 +576,7 @@ angular.module('ffffng')
                 'hostname',
                 'mac',
                 'site',
+                'domain',
                 'monitoring_state',
                 'state',
                 'last_seen',

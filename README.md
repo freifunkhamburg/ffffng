@@ -158,7 +158,8 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 * **`client.community.name`** Name der Freifunk-Community, z. B.: `"Freifunk Musterstadt"`
 * **`client.community.domain`** Domain der Freifunk-Community, z. B.: `"musterstadt.freifunk.net"`
 * **`client.community.contactEmail`** Kontakt-E-Mail-Adresse der Freifunk-Community, z. B.: `"kontakt@musterstadt.freifunk.net"`
-* **`client.community.sites`** Liste der gültige Site-Codes in der `nodes.json`, z. B.: `["ffms-domain1", "ffms-domain2"]`
+* **`client.community.sites`** Liste der gültige Site-Codes in der `nodes.json`, z. B.: `["ffms-site1", "ffms-site2"]`
+* **`client.community.domains`** Liste der gültige Domänen-Codes in der `nodes.json`, z. B.: `["ffms-domain1", "ffms-domain2"]`
 
 * **`client.legal.privacyUrl`** optional: URL zum Impressum, z. B.: `"http://map.musterstadt.freifunk.net/impressum"`
 * **`client.legal.imprintUrl`** optional: URL zur Datenschutzerklärung, z. B.: `"http://map.musterstadt.freifunk.net/datenschutz"`

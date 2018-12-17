@@ -70,6 +70,11 @@ angular.module('ffffng').constant('Constraints',  {
             type: 'string',
             regex: /^[a-z0-9_-]{1,32}$/,
             optional: true
+        },
+        domain: {
+            type: 'string',
+            regex: /^[a-z0-9_-]{1,32}$/,
+            optional: true
         }
     },
     rest: {

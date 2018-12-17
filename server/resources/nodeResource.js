@@ -128,6 +128,7 @@ angular.module('ffffng').factory('NodeResource', function (
                             if (nodeState) {
                                 return deepExtend({}, node, {
                                     site: nodeState.site,
+                                    domain: nodeState.domain,
                                     onlineState: nodeState.state
                                 });
                             }
@@ -144,6 +145,7 @@ angular.module('ffffng').factory('NodeResource', function (
                                 'token',
                                 'mac',
                                 'site',
+                                'domain',
                                 'key',
                                 'onlineState'
                             ],
@@ -161,6 +163,7 @@ angular.module('ffffng').factory('NodeResource', function (
                                 'mac',
                                 'key',
                                 'site',
+                                'domain',
                                 'coords',
                                 'onlineState',
                                 'monitoringState'

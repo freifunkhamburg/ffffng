@@ -97,7 +97,8 @@ var defaultConfig = {
             name: 'Freifunk Musterstadt',
             domain: 'musterstadt.freifunk.net',
             contactEmail: 'kontakt@musterstadt.freifunk.net',
-            sites: []
+            sites: [],
+            domains: []
         },
         legal: {
             privacyUrl: null,

@@ -55,6 +55,15 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
         });
     }
 
+    var domainChoices = [];
+    for (var i = 0; i < config.community.domains.length; i++) {
+        var domain = config.community.domains[i];
+        domainChoices.push({
+            label: domain,
+            value: domain
+        });
+    }
+
     var header =
         '<div class="navbar-header">' +
         '<a class="navbar-brand" href="#" ng-click="appController.displayHome()">' +
@@ -139,6 +148,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                     : '<i class="fa fa-times vpn-key-unset" aria-hidden="true" title="no VPN key"></i>';
             }),
             nga.field('site').map(nullable).cssClasses(nodeClasses),
+            nga.field('domain').map(nullable).cssClasses(nodeClasses),
             nga.field('coords').label('GPS').cssClasses(nodeClasses).template(function (node) {
                 return node.values.coords
                     ? '<i class="fa fa-map-marker coords-set" aria-hidden="true" title="coordinates set"></i>'
@@ -170,6 +180,10 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                 .label('Site')
                 .pinned(false)
                 .choices(siteChoices),
+            nga.field('domain', 'choice')
+                .label('Domäne')
+                .pinned(false)
+                .choices(domainChoices),
             nga.field('hasKey', 'choice')
                 .label('VPN key')
                 .pinned(false)
@@ -270,6 +284,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
             nga.field('hostname').cssClasses(monitoringStateClasses),
             nga.field('mac').cssClasses(monitoringStateClasses),
             nga.field('site').map(nullable).cssClasses(monitoringStateClasses),
+            nga.field('domain').map(nullable).cssClasses(monitoringStateClasses),
             nga.field('monitoring_state').cssClasses(monitoringStateClasses).template(function (monitoringState) {
                 switch (monitoringState.values.monitoring_state) {
                     case 'active':
