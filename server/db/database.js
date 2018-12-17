@@ -1,111 +1,83 @@
 'use strict';
 
-var async = require('async');
-var fs = require('graceful-fs');
-var glob = require('glob');
-var path = require('path');
+const util = require('util');
+const fs = require('graceful-fs');
+const glob = util.promisify(require('glob'));
+const path = require('path');
 
-var config = require('../config');
-var Logger = require('../logger');
+const config = require('../config');
+const Logger = require('../logger');
 
-function applyPatch(db, file, callback) {
+async function applyPatch(db, file) {
     Logger.tag('database', 'migration').info('Checking if patch need to be applied: %s', file);
 
-    fs.readFile(file, function (err, contents) {
-        if (err) {
-            return callback(err);
-        }
+    const contents = await util.promisify(fs.readFile)(file);
+    const version = path.basename(file, '.sql');
 
-        var version = path.basename(file, '.sql');
+    const row = await db.get('SELECT * FROM schema_version WHERE version = ?', version);
+    if (row) {
+        // patch is already applied. skip!
+        Logger.tag('database', 'migration').info('Patch already applied, skipping: %s', file);
+        return
+    }
 
-        db.get('SELECT * FROM schema_version WHERE version = ?', version, function (err, row) {
-            if (err) {
-                return callback(err);
-            }
+    const sql = 'BEGIN TRANSACTION;\n' +
+              contents.toString() + '\n' +
+              'INSERT INTO schema_version (version) VALUES (\'' + version + '\');\n' +
+              'END TRANSACTION;';
 
-            if (row) {
-                // patch is already applied. skip!
-                Logger.tag('database', 'migration').info('Patch already applied, skipping: %s', file);
-                return callback(null);
-            }
+    await db.exec(sql);
 
-            var sql = 'BEGIN TRANSACTION;\n' +
-                      contents.toString() + '\n' +
-                      'INSERT INTO schema_version (version) VALUES (\'' + version + '\');\n' +
-                      'END TRANSACTION;';
-
-            db.exec(sql, function (err) {
-                if (err) {
-                    return callback(err);
-                }
-
-                Logger.tag('database', 'migration').info('Patch successfully applied: %s', file);
-
-                callback(null);
-            });
-        });
-    });
+    Logger.tag('database', 'migration').info('Patch successfully applied: %s', file);
 }
 
-function applyMigrations(db, callback) {
+async function applyMigrations(db) {
     Logger.tag('database', 'migration').info('Migrating database...');
 
-    var sql = 'BEGIN TRANSACTION; CREATE TABLE IF NOT EXISTS schema_version (\n' +
+    const sql = 'BEGIN TRANSACTION; CREATE TABLE IF NOT EXISTS schema_version (\n' +
               '    version VARCHAR(255) PRIMARY KEY ASC,\n' +
               '    applied_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\n' +
               '); END TRANSACTION;';
-    db.exec(sql, function (err) {
-        if (err) {
-            return callback(err);
-        }
 
-        glob(__dirname + '/patches/*.sql', function (err, files) {
-            if (err) {
-                return callback(err);
-            }
+    await db.exec(sql);
 
-            async.eachSeries(
-                files,
-                function (file, fileCallback) {
-                    applyPatch(db, file, fileCallback);
-                },
-                callback
-            );
-        });
+    const files = await glob(__dirname + '/patches/*.sql');
+    for (const file of files) {
+        await applyPatch(db, file)
+    }
+}
+
+async function init() {
+    const SQLite3 = require('sqlite3');
+
+    const file = config.server.databaseFile;
+    Logger.tag('database').info('Setting up database: %s', file);
+
+    let db;
+    try {
+        db = new SQLite3.Database(file);
+    }
+    catch (error) {
+        Logger.tag('database').error('Error initialzing database:', error);
+        throw error;
+    }
+
+    db.on('profile', (sql, time) => Logger.tag('database').profile('[%sms]\t%s', time, sql));
+
+    try {
+        await applyMigrations(db);
+    }
+    catch (error) {
+        Logger.tag('database').error('Error migrating database:', error);
+        throw error;
+    }
+
+    // WARNING: We have to use funtion() syntax here, to satisfy ng-di. m(
+    return angular.module('ffffng').factory('Database', function () {
+        return db;
     });
 }
 
 module.exports = {
-    init: function (callback) {
-        var SQLite3 = require('sqlite3');
-
-        var file = config.server.databaseFile;
-        Logger.tag('database').info('Setting up database: %s', file);
-
-        var db;
-        try {
-            db = new SQLite3.Database(file);
-        }
-        catch (error) {
-            Logger.tag('database').error('Error initialzing database:', error);
-            throw error;
-        }
-
-        db.on('profile', function (sql, time) {
-            Logger.tag('database').profile('[%sms]\t%s', time, sql);
-        });
-
-        applyMigrations(db, function (err) {
-            if (err) {
-                Logger.tag('database').error('Error migrating database:', err);
-                throw err;
-            }
-
-            angular.module('ffffng').factory('Database', function () {
-                return db;
-            });
-
-            callback();
-        });
-    }
+    init
 };

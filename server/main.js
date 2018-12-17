@@ -9,8 +9,8 @@ angular.module('ffffng', []);
 
 (function () {
     // Use graceful-fs instead of fs also in all libraries to have more robust fs handling.
-    var realFs = require('fs');
-    var gracefulFs = require('graceful-fs');
+    const realFs = require('fs');
+    const gracefulFs = require('graceful-fs');
     gracefulFs.gracefulify(realFs);
 })();
 
@@ -46,9 +46,10 @@ require('./validation/validator');
 
 require('./jobs/scheduler');
 
-var db = require('./db/database');
+const db = require('./db/database');
 
-db.init(function () {
+db.init().then(() => {
+    // WARNING: We have to use funtion() syntax here, to satisfy ng-di. m(
     angular.injector(['ffffng']).invoke(function (config, app, Logger, Scheduler, Router) {
         Logger.tag('main').info('Initializing...');
 
@@ -58,4 +59,7 @@ db.init(function () {
         app.listen(config.server.port, '::');
         module.exports = app;
     });
+}).catch(error => {
+    console.error('Could not init database: ', error);
+    process.exit(1);
 });
