@@ -39,6 +39,7 @@
         "request": "^2.88.0",
         "scribe-js": "^2.0.4",
         "serve-static": "^1.13.2",
+        "sqlite": "^3.0.3",
         "sqlite3": "^4.0.2"
     },
     "devDependencies": {

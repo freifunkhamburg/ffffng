@@ -48,6 +48,7 @@ async function applyMigrations(db) {
 }
 
 async function init() {
+    const sqlite = require('sqlite');
     const SQLite3 = require('sqlite3');
 
     const file = config.server.databaseFile;
@@ -55,7 +56,7 @@ async function init() {
 
     let db;
     try {
-        db = new SQLite3.Database(file);
+        db = await sqlite.open(file);
     }
     catch (error) {
         Logger.tag('database').error('Error initialzing database:', error);
@@ -72,7 +73,16 @@ async function init() {
         throw error;
     }
 
-    module.exports.db = db;
+    let legacyDB;
+    try {
+        legacyDB = new SQLite3.Database(file);
+    }
+    catch (error) {
+        Logger.tag('database').error('Error initialzing legacy database lib:', error);
+        throw error;
+    }
+
+    module.exports.db = legacyDB;
 }
 
 module.exports = {
