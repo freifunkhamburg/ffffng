@@ -113,7 +113,7 @@
         }
     }
 
-    let _angular = null
+    var _angular = null
     try {
         _angular = angular
     }
@@ -121,7 +121,7 @@
         // ReferenceError, as angular is not defined.
     }
 
-    let _module = null
+    var _module = null
     try {
         _module = module
     }
