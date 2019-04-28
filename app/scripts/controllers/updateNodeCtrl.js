@@ -14,8 +14,8 @@ angular.module('ffffng')
     $scope.onSubmitToken = function (token) {
         $scope.token = token;
         return NodeService.getNode(token)
-            .success(function (node) {
-                $scope.node = node;
+            .then(function (response) {
+                $scope.node = response.data;
             });
     };
 
