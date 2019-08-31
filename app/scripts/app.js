@@ -8,8 +8,10 @@ angular.module('ffffng', [
     'templates-main',
     'ui.bootstrap'
 ])
-.config(function ($logProvider, $routeProvider) {
+.config(function ($logProvider, $locationProvider, $routeProvider) {
     $logProvider.debugEnabled(false);
+    $locationProvider.hashPrefix('');
+    $locationProvider.html5Mode(false);
     $routeProvider
         .when('/', {
             templateUrl: 'views/main.html',
@@ -42,7 +44,13 @@ angular.module('ffffng', [
             title: 'Versand von Status-E-Mails deaktivieren'
         })
         .otherwise({
-            redirectTo: '/'
+            resolveRedirectTo: function ($location) {
+                var url = $location.url();
+                if (url.startsWith('/!/')) {
+                    return url.substring(3);
+                }
+                return '/';
+            }
         });
 })
 .service('Navigator', function ($location) {
