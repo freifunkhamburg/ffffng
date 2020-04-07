@@ -6,7 +6,7 @@ const moment = require('moment')
 const request = require('request')
 
 const config = require('../config').config
-const Constraints = require('../../shared/validation/constraints')
+const Constraints = require('../validation/constraints')
 const Database = require('../db/database').db
 const DatabaseUtil = require('../utils/databaseUtil')
 const ErrorTypes = require('../utils/errorTypes')

@@ -115,7 +115,7 @@ module.exports = function (grunt) {
                 '<%= yeoman.app %>/scripts/{,**/}*.js',
                 'shared/{,**/}*.js',
                 'server/{,**/}*.js',
-                '!server/templates/{,**/}*.js'
+                '!server/templates/{,**/}*.template'
             ]
         },
 
@@ -356,10 +356,11 @@ module.exports = function (grunt) {
                     },
                     {
                         expand: true,
-                        cwd: 'server',
+                        cwd: 'server-build',
                         dest: '<%= yeoman.dist %>/server',
                         src: [
                             '{,**/}*.html',
+                            '{,**/}*.template',
                             '{,**/}*.js',
                             '{,**/}*.sql',
                             '{,**/}*.txt'

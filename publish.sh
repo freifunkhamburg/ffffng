@@ -41,7 +41,8 @@ fi
 echo
 
 if confirm "Continue publishing?"; then
-    ./node_modules/.bin/grunt clean build
+    npm run clean
+    npm run build
 
     cd dist
     npm publish

@@ -2,7 +2,7 @@
 
 const _ = require('lodash')
 
-const Constraints = require('../../shared/validation/constraints')
+const Constraints = require('../validation/constraints')
 const ErrorTypes = require('../utils/errorTypes')
 const Resources = require('../utils/resources')
 const Scheduler = require('../jobs/scheduler')

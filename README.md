@@ -333,7 +333,7 @@ fastd-Key und die MAC-Adresse angeben.
 
 ### Build
 
-`grunt clean build`
+`npm run clean && npm run build`
 
 Der Output landet dann unter `dist/`.
 
@@ -341,14 +341,14 @@ Der Output landet dann unter `dist/`.
 ### Server starten
 
 1. Zunächst eine `config.json` anlegen wie oben unter "Installation / Konfiguration" beschrieben.
-2. `node server/main.js -c config.json`
+2. `npm run server:run -- -c config.json`
 
 Der Server ist dann erreichbar unter [http://localhost:8080](http://localhost:8080).
 
 
 ### Life-Reload vom Client
 
-`grunt serve`
+`npm client:serve`
 
 Der Client ist dann erreichbar via [http://localhost:9000](http://localhost:9000), erwartet aber, dass der Server für
 die REST-API auch läuft (s. o.) und auf Port `8080` erreichbar ist.

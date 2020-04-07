@@ -43,7 +43,7 @@ module.exports = (() => {
     router.use(compress());
 
     function serveTemplate (mimeType, req, res, next) {
-        return fs.readFile(templateDir + '/' + req.path, 'utf8', function (err, body) {
+        return fs.readFile(templateDir + '/' + req.path + '.template', 'utf8', function (err, body) {
             if (err) {
                 return next(err);
             }
