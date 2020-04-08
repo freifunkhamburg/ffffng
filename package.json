@@ -22,7 +22,7 @@
         "build": "npm run server:build && grunt build",
         "clean": "rm -rf server-build/ && grunt clean",
         "client:serve": "grunt serve",
-        "server:build": "tsc -b server && ln -sfv ../server/db/patches ./server-build/db/ && ln -sfv ../server/templates ./server-build/",
+        "server:build": "tsc -b server && ln -sfv ../server/db/patches ./server-build/db/ && ln -sfv ../server/templates ./server-build/ && ln -sfv ../server/mailTemplates ./server-build/",
         "server:run": "npm run server:build && node server-build/main.js"
     },
     "dependencies": {
