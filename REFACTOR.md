@@ -4,6 +4,7 @@
 
 * Integrate typescript in the build and start migrating the server code.
 * Find a nice way to integrate typescript with grunt.
+* Replace logging framework.
 
 ## Mid term
 
