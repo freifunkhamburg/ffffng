@@ -1,6 +1,6 @@
 'use strict';
 
-const app = require('./app');
+const app = require('./app').default;
 const config = require('./config').config;
 
 // Hack to allow proper logging of Error.
