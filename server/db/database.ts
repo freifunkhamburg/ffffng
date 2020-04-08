@@ -1,17 +1,21 @@
-'use strict';
+import util from "util";
+import fs from "graceful-fs";
+import glob from "glob";
+import path from "path";
 
-const util = require('util');
-const fs = require('graceful-fs');
-const glob = util.promisify(require('glob'));
-const path = require('path');
+import sqlite from "sqlite";
+import sqlite3 from "sqlite3";
 
-const config = require('../config').config;
-const Logger = require('../logger');
+import {config} from "../config";
+import Logger from "../logger";
 
-async function applyPatch(db, file) {
+const pglob = util.promisify(glob);
+const pReadFile = util.promisify(fs.readFile);
+
+async function applyPatch(db: sqlite.Database, file: string): Promise<void> {
     Logger.tag('database', 'migration').info('Checking if patch need to be applied: %s', file);
 
-    const contents = await util.promisify(fs.readFile)(file);
+    const contents = await pReadFile(file);
     const version = path.basename(file, '.sql');
 
     const row = await db.get('SELECT * FROM schema_version WHERE version = ?', version);
@@ -31,7 +35,7 @@ async function applyPatch(db, file) {
     Logger.tag('database', 'migration').info('Patch successfully applied: %s', file);
 }
 
-async function applyMigrations(db) {
+async function applyMigrations(db: sqlite.Database): Promise<void> {
     Logger.tag('database', 'migration').info('Migrating database...');
 
     const sql = 'BEGIN TRANSACTION; CREATE TABLE IF NOT EXISTS schema_version (\n' +
@@ -41,20 +45,17 @@ async function applyMigrations(db) {
 
     await db.exec(sql);
 
-    const files = await glob(__dirname + '/patches/*.sql');
+    const files = await pglob(__dirname + '/patches/*.sql');
     for (const file of files) {
         await applyPatch(db, file)
     }
 }
 
-async function init() {
-    const sqlite = require('sqlite');
-    const SQLite3 = require('sqlite3');
-
+export async function init(): Promise<void> {
     const file = config.server.databaseFile;
     Logger.tag('database').info('Setting up database: %s', file);
 
-    let db;
+    let db: sqlite.Database;
     try {
         db = await sqlite.open(file);
     }
@@ -73,18 +74,18 @@ async function init() {
         throw error;
     }
 
-    let legacyDB;
-    try {
-        legacyDB = new SQLite3.Database(file);
-    }
-    catch (error) {
-        Logger.tag('database').error('Error initialzing legacy database lib:', error);
-        throw error;
-    }
-
-    module.exports.db = legacyDB;
+    await db.close()
 }
 
-module.exports = {
-    init
-};
+Logger.tag('database').info('Setting up legacy database: %s', config.server.databaseFile);
+
+let legacyDB: sqlite3.Database;
+try {
+    legacyDB = new sqlite3.Database(config.server.databaseFile);
+}
+catch (error) {
+    Logger.tag('database').error('Error initialzing legacy database lib:', error);
+    throw error;
+}
+
+export const db = legacyDB;
