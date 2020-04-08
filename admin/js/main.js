@@ -381,7 +381,9 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
             if (!task) {
                 return;
             }
-            return 'task-' + field + ' ' + (task.values.enabled ? 'task-enabled' : 'task-disabled');
+            return 'task-' + field + ' ' +
+                (task.values.enabled ? 'task-enabled' : 'task-disabled') + ' '
+                + 'task-state-' + task.values.state;
         };
     }
 
