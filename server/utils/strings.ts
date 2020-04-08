@@ -17,7 +17,7 @@ export function normalizeMac (mac: string): string {
     return macParts.join(':');
 }
 
-export function parseInt (str: string): number | undefined {
+export function parseInteger (str: string): number | undefined {
     const parsed = _.parseInt(str, 10);
     return parsed.toString() === str ? parsed : undefined;
 }
