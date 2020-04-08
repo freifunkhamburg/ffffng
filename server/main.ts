@@ -2,8 +2,8 @@ import "./init"
 import { config } from "./config"
 import Logger from "./logger"
 import * as db from "./db/database"
-import scheduler from "./jobs/scheduler"
-import { init as initRouter } from "./router"
+import * as scheduler from "./jobs/scheduler"
+import * as router from "./router"
 import app from "./app"
 
 Logger.tag('main', 'startup').info('Server starting up...');
@@ -13,7 +13,7 @@ db.init()
     Logger.tag('main').info('Initializing...');
 
     scheduler.init();
-    initRouter();
+    router.init();
 
     app.listen(config.server.port, '::');
 })
