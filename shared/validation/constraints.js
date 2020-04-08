@@ -1,5 +1,8 @@
 'use strict';
 
+// ATTENTION: Those constraints are no longer the same file as for the server.
+//            Make sure changes are also reflected in /server/validation/constraints.ts.
+
 (function () {
     var constraints = {
         id:{

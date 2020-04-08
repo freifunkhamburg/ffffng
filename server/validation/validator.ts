@@ -3,8 +3,10 @@ import _ from "lodash";
 import {parseInteger} from "../utils/strings";
 import Logger from "../logger";
 
-interface Constraint {
+export interface Constraint {
     type: string,
+
+    default?: any,
 
     optional?: boolean,
 
@@ -16,8 +18,68 @@ interface Constraint {
     regex?: RegExp,
 }
 
-type Constraints = {[key: string]: Constraint};
-type Values = {[key: string]: any};
+export type Constraints = {[key: string]: Constraint};
+export type Values = {[key: string]: any};
+
+function isStringArray(arr: any): arr is string[] {
+    return _.isArray(arr) && _.every(arr, (val: any) => _.isString(val));
+}
+
+export function isConstraint(val: any): val is Constraint {
+    if (!_.isObject(val)) {
+        return false;
+    }
+
+    const constraint = val as {[key: string]: any};
+
+    if (!("type" in constraint) || !_.isString(constraint.type)) {
+        return false;
+    }
+
+    if ("optional" in constraint
+        && !_.isUndefined(constraint.optional)
+        && !_.isBoolean(constraint.optional)) {
+        return false;
+    }
+
+    if ("allowed" in constraint
+        && !_.isUndefined(constraint.allowed)
+        && !isStringArray(constraint.allowed)) {
+        return false;
+    }
+
+    if ("min" in constraint
+        && !_.isUndefined(constraint.min)
+        && !_.isNumber(constraint.min)) {
+        return false;
+    }
+
+    if ("max" in constraint
+        && !_.isUndefined(constraint.max)
+        && !_.isNumber(constraint.max)) {
+        return false;
+    }
+
+    // noinspection RedundantIfStatementJS
+    if ("regex" in constraint
+        && !_.isUndefined(constraint.regex)
+        && !_.isRegExp(constraint.regex)) {
+        return false;
+    }
+
+    return true;
+}
+
+export function isConstraints(constraints: any): constraints is Constraints {
+    if (!_.isObject(constraints)) {
+        return false;
+    }
+
+    return _.every(
+        constraints,
+        (constraint: any, key: any) => _.isString(key) && isConstraint(constraint)
+    );
+}
 
 // TODO: sanitize input for further processing as specified by constraints (correct types, trimming, etc.)
 
