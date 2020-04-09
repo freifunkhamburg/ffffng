@@ -3,12 +3,12 @@ import express from "express"
 import app from "./app"
 import {config} from "./config"
 
-import VersionResource from "./resources/versionResource"
+import * as VersionResource from "./resources/versionResource"
 import StatisticsResource from "./resources/statisticsResource"
-import FrontendResource from "./resources/frontendResource"
+import * as FrontendResource from "./resources/frontendResource"
 import NodeResource from "./resources/nodeResource"
 import MonitoringResource from "./resources/monitoringResource"
-import TaskResource from "./resources/taskResource"
+import * as TaskResource from "./resources/taskResource"
 import MailResource from "./resources/mailResource"
 
 export function init (): void {

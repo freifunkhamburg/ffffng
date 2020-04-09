@@ -116,7 +116,7 @@ export function getData (req: Request): any {
 // TODO: Promisify.
 export function getValidRestParams(
     type: string,
-    subtype: string,
+    subtype: string | null,
     req: Request,
     callback: (err: {data: any, type: {code: number}} | null, restParams?: RestParams) => void
 ) {
@@ -155,7 +155,7 @@ export function getValidRestParams(
     callback(null, restParams as RestParams);
 }
 
-export function filter (entities: {[key: string]: Entity}, allowedFilterFields: string[], restParams: RestParams) {
+export function filter (entities: ArrayLike<Entity>, allowedFilterFields: string[], restParams: RestParams) {
     let query = restParams.q;
     if (query) {
         query = _.toLower(query.trim());
@@ -225,11 +225,11 @@ export function sort<T>(entities: ArrayLike<T>, allowedSortFields: string[], res
     }
 }
 
-export function getPageEntities (entities: Entity[], restParams: RestParams) {
+export function getPageEntities (entities: ArrayLike<Entity>, restParams: RestParams) {
     const page = restParams._page;
     const perPage = restParams._perPage;
 
-    return entities.slice((page - 1) * perPage, page * perPage);
+    return _.slice(entities, (page - 1) * perPage, page * perPage);
 }
 
 export {filterCondition as whereCondition};

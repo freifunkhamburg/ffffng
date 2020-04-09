@@ -34,7 +34,7 @@ export class Task {
         public lastRunStarted: moment.Moment | null,
         public lastRunDuration: number | null,
         public state: TaskState,
-        public enabled: true,
+        public enabled: boolean,
     ) {}
 
     run(): void {

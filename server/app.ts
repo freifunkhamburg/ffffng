@@ -3,9 +3,9 @@ import auth, {BasicAuthCheckerCallback} from "http-auth"
 import bodyParser from "body-parser"
 import compress from "compression"
 import express, {Express, NextFunction, Request, Response} from "express"
-import fs from "graceful-fs"
+import {promises as fs} from "graceful-fs"
 
-const config = require('./config').config
+import {config} from "./config";
 
 const app: Express = express();
 
@@ -37,26 +37,25 @@ const jsTemplateFiles = [
     '/config.js'
 ];
 
-router.use(compress());
-
-function serveTemplate (mimeType: string, req: Request, res: Response, next: NextFunction): void {
-    return fs.readFile(templateDir + '/' + req.path + '.template', 'utf8', function (err, body) {
-        if (err) {
-            return next(err);
-        }
-
-        res.writeHead(200, { 'Content-Type': mimeType });
-        res.end(_.template(body)({ config: config.client }));
-
-        return null; // to suppress warning
+function usePromise(f: (req: Request, res: Response) => Promise<void>): void {
+    router.use((req: Request, res: Response, next: NextFunction): void => {
+        f(req, res).then(next).catch(next)
     });
 }
 
-router.use(function (req: Request, res: Response, next: NextFunction): void {
+router.use(compress());
+
+async function serveTemplate (mimeType: string, req: Request, res: Response): Promise<void> {
+    const body = await fs.readFile(templateDir + '/' + req.path + '.template', 'utf8');
+
+    res.writeHead(200, { 'Content-Type': mimeType });
+    res.end(_.template(body)({ config: config.client }));
+}
+
+usePromise(async (req: Request, res: Response): Promise<void> => {
     if (jsTemplateFiles.indexOf(req.path) >= 0) {
-        return serveTemplate('application/javascript', req, res, next);
+        await serveTemplate('application/javascript', req, res);
     }
-    return next();
 });
 
 router.use('/internal/admin', express.static(adminDir + '/'));
