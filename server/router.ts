@@ -4,12 +4,12 @@ import app from "./app"
 import {config} from "./config"
 
 import * as VersionResource from "./resources/versionResource"
-import StatisticsResource from "./resources/statisticsResource"
+import * as StatisticsResource from "./resources/statisticsResource"
 import * as FrontendResource from "./resources/frontendResource"
-import NodeResource from "./resources/nodeResource"
-import MonitoringResource from "./resources/monitoringResource"
+import * as NodeResource from "./resources/nodeResource"
+import * as MonitoringResource from "./resources/monitoringResource"
 import * as TaskResource from "./resources/taskResource"
-import MailResource from "./resources/mailResource"
+import * as MailResource from "./resources/mailResource"
 
 export function init (): void {
     const router = express.Router();
@@ -20,7 +20,7 @@ export function init (): void {
 
     router.post('/api/node', NodeResource.create);
     router.put('/api/node/:token', NodeResource.update);
-    router.delete('/api/node/:token', NodeResource.delete);
+    router.delete('/api/node/:token', NodeResource.remove);
     router.get('/api/node/:token', NodeResource.get);
 
     router.put('/api/monitoring/confirm/:token', MonitoringResource.confirm);
@@ -37,11 +37,11 @@ export function init (): void {
 
     router.get('/internal/api/mails', MailResource.getAll);
     router.get('/internal/api/mails/:id', MailResource.get);
-    router.delete('/internal/api/mails/:id', MailResource.delete);
+    router.delete('/internal/api/mails/:id', MailResource.remove);
     router.put('/internal/api/mails/reset/:id', MailResource.resetFailures);
 
     router.put('/internal/api/nodes/:token', NodeResource.update);
-    router.delete('/internal/api/nodes/:token', NodeResource.delete);
+    router.delete('/internal/api/nodes/:token', NodeResource.remove);
     router.get('/internal/api/nodes', NodeResource.getAll);
     router.get('/internal/api/nodes/:token', NodeResource.get);
 

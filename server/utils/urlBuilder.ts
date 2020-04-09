@@ -1,6 +1,6 @@
 import _ from "lodash"
 import {config} from "../config"
-import {NodeSecrets} from "../types"
+import {MonitoringToken} from "../types"
 
 // TODO: Typed URLs
 
@@ -31,10 +31,10 @@ export function editNodeUrl (): string {
     return formUrl('update');
 }
 
-export function monitoringConfirmUrl (nodeSecrets: NodeSecrets): string {
-    return formUrl('monitoring/confirm', { token: nodeSecrets.monitoringToken });
+export function monitoringConfirmUrl (monitoringToken: MonitoringToken): string {
+    return formUrl('monitoring/confirm', { token: monitoringToken });
 }
 
-export function monitoringDisableUrl (nodeSecrets: NodeSecrets): string {
-    return formUrl('monitoring/disable', { token: nodeSecrets.monitoringToken });
+export function monitoringDisableUrl (monitoringToken: MonitoringToken): string {
+    return formUrl('monitoring/disable', { token: monitoringToken });
 }

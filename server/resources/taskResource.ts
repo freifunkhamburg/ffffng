@@ -7,6 +7,7 @@ import {getTasks, Task} from "../jobs/scheduler";
 import {normalizeString} from "../utils/strings";
 import {forConstraint} from "../validation/validator";
 import {Request, Response} from "express";
+import {Entity} from "../utils/resources";
 
 const isValidId = forConstraint(CONSTRAINTS.id, false);
 
@@ -71,39 +72,36 @@ function setTaskEnabled(req: Request, res: Response, enable: boolean) {
         .catch(err => Resources.error(res, err))
 }
 
+async function doGetAll(req: Request): Promise<{total: number, pageTasks: Entity[]}> {
+    const restParams = await Resources.getValidRestParams('list', null, req);
+
+    const tasks = Resources.sort(
+        _.values(getTasks()),
+        ['id', 'name', 'schedule', 'state', 'runningSince', 'lastRunStarted'],
+        restParams
+    );
+    const filteredTasks = Resources.filter(
+        tasks,
+        ['id', 'name', 'schedule', 'state'],
+        restParams
+    );
+
+    const total = filteredTasks.length;
+    const pageTasks = Resources.getPageEntities(filteredTasks, restParams);
+
+    return {
+        total,
+        pageTasks,
+    };
+}
+
 export function getAll (req: Request, res: Response): void {
-    Resources.getValidRestParams('list', null, req, function (err, restParams) {
-        if (err) {
-            return Resources.error(res, err);
-        }
-
-        if (!restParams) {
-            return Resources.error(
-                res,
-                {
-                    data: "Unexpected state: restParams is not set.",
-                    type: ErrorTypes.internalError
-                }
-            );
-        }
-
-        const tasks = Resources.sort(
-            _.values(getTasks()),
-            ['id', 'name', 'schedule', 'state', 'runningSince', 'lastRunStarted'],
-            restParams
-        );
-        const filteredTasks = Resources.filter(
-            tasks,
-            ['id', 'name', 'schedule', 'state'],
-            restParams
-        );
-        const total = filteredTasks.length;
-
-        const pageTasks = Resources.getPageEntities(filteredTasks, restParams);
-
-        res.set('X-Total-Count', total.toString(10));
-        return Resources.success(res, _.map(pageTasks, toExternalTask));
-    });
+    doGetAll(req)
+        .then(({total, pageTasks}) => {
+            res.set('X-Total-Count', total.toString(10));
+            Resources.success(res, _.map(pageTasks, toExternalTask));
+        })
+        .catch(err => Resources.error(res, err));
 }
 
 export function run (req: Request, res: Response): void {

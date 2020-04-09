@@ -113,18 +113,16 @@ export function getData (req: Request): any {
     return _.extend({}, req.body, req.params, req.query);
 }
 
-// TODO: Promisify.
-export function getValidRestParams(
+export async function getValidRestParams(
     type: string,
     subtype: string | null,
     req: Request,
-    callback: (err: {data: any, type: {code: number}} | null, restParams?: RestParams) => void
-) {
+): Promise<RestParams> {
     const restConstraints = CONSTRAINTS.rest as {[key: string]: any};
     let constraints: Constraints;
     if (!(type in restConstraints) || !isConstraints(restConstraints[type])) {
         Logger.tag('validation', 'rest').error('Unknown REST resource type: {}', type);
-        return callback({data: 'Internal error.', type: ErrorTypes.internalError});
+        throw {data: 'Internal error.', type: ErrorTypes.internalError};
     }
     constraints = restConstraints[type];
 
@@ -134,7 +132,7 @@ export function getValidRestParams(
         const constraintsObj = CONSTRAINTS as {[key: string]: any};
         if (!(subtypeFilters in constraintsObj) || !isConstraints(constraintsObj[subtypeFilters])) {
             Logger.tag('validation', 'rest').error('Unknown REST resource subtype: {}', subtype);
-            return callback({data: 'Internal error.', type: ErrorTypes.internalError});
+            throw {data: 'Internal error.', type: ErrorTypes.internalError};
         }
         filterConstraints = constraintsObj[subtypeFilters];
     }
@@ -147,12 +145,11 @@ export function getValidRestParams(
     const areValidParams = forConstraints(constraints, false);
     const areValidFilters = forConstraints(filterConstraints, false);
     if (!areValidParams(restParams) || !areValidFilters(filterParams)) {
-        return callback({data: 'Invalid REST parameters.', type: ErrorTypes.badRequest});
+        throw {data: 'Invalid REST parameters.', type: ErrorTypes.badRequest};
     }
 
     restParams.filters = filterParams;
-
-    callback(null, restParams as RestParams);
+    return restParams as RestParams;
 }
 
 export function filter (entities: ArrayLike<Entity>, allowedFilterFields: string[], restParams: RestParams) {

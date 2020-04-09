@@ -2,12 +2,9 @@ import util from "util";
 import fs from "graceful-fs";
 import glob from "glob";
 import path from "path";
-
-import sqlite from "sqlite";
-import sqlite3 from "sqlite3";
-
 import {config} from "../config";
 import Logger from "../logger";
+import sqlite, {Database, Statement} from "sqlite";
 
 const pglob = util.promisify(glob);
 const pReadFile = util.promisify(fs.readFile);
@@ -51,13 +48,15 @@ async function applyMigrations(db: sqlite.Database): Promise<void> {
     }
 }
 
+const file = config.server.databaseFile;
+const dbPromise = sqlite.open(file);
+
 export async function init(): Promise<void> {
-    const file = config.server.databaseFile;
     Logger.tag('database').info('Setting up database: %s', file);
 
-    let db: sqlite.Database;
+    let db: Database;
     try {
-        db = await sqlite.open(file);
+        db = await dbPromise;
     }
     catch (error) {
         Logger.tag('database').error('Error initialzing database:', error);
@@ -73,19 +72,74 @@ export async function init(): Promise<void> {
         Logger.tag('database').error('Error migrating database:', error);
         throw error;
     }
-
-    await db.close()
 }
 
-Logger.tag('database').info('Setting up legacy database: %s', config.server.databaseFile);
+/**
+ * Wrapper around a Promise<Database> providing the same interface as the Database itself.
+ */
+class DatabasePromiseWrapper implements Database {
+    constructor(private db: Promise<Database>) {}
 
-let legacyDB: sqlite3.Database;
-try {
-    legacyDB = new sqlite3.Database(config.server.databaseFile);
-}
-catch (error) {
-    Logger.tag('database').error('Error initialzing legacy database lib:', error);
-    throw error;
+    async close() {
+        const db = await this.db;
+        // @ts-ignore
+        return await db.close.apply(db, arguments);
+    }
+
+    async run() {
+        const db = await this.db;
+        // @ts-ignore
+        return await db.run.apply(db, arguments);
+    }
+
+    async get() {
+        const db = await this.db;
+        // @ts-ignore
+        return await db.get.apply(db, arguments);
+    }
+
+    async all() {
+        const db = await this.db;
+        // @ts-ignore
+        return await db.all.apply(db, arguments);
+    }
+
+    async exec() {
+        const db = await this.db;
+        // @ts-ignore
+        return await db.exec.apply(db, arguments);
+    }
+
+    async each() {
+        const db = await this.db;
+        // @ts-ignore
+        return await db.each.apply(db, arguments);
+    }
+
+    async prepare() {
+        const db = await this.db;
+        // @ts-ignore
+        return await db.prepare.apply(db, arguments);
+    }
+
+    async configure() {
+        const db = await this.db;
+        // @ts-ignore
+        return await db.configure.apply(db, arguments);
+    }
+
+    async migrate() {
+        const db = await this.db;
+        // @ts-ignore
+        return await db.migrate.apply(db, arguments);
+    }
+
+    async on() {
+        const db = await this.db;
+        // @ts-ignore
+        return await db.on.apply(db, arguments);
+    }
 }
 
-export const db = legacyDB;
+export const db: Database = new DatabasePromiseWrapper(dbPromise);
+export {Database, Statement};
