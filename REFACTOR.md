@@ -3,6 +3,7 @@
 ## TODO
 
 * Test email rendering!
+* Get rid of unhandled promise rejection warnings in tests.
 
 ## Short term
 

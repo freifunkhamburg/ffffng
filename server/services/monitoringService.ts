@@ -33,7 +33,7 @@ const DELETE_OFFLINE_NODES_AFTER_DURATION: {amount: number, unit: unitOfTime.Dur
     unit: 'days'
 };
 
-type ParsedNode = {
+export type ParsedNode = {
     mac: string,
     importTimestamp: Moment,
     state: NodeState,
@@ -42,7 +42,7 @@ type ParsedNode = {
     domain: string,
 };
 
-type NodesParsingResult = {
+export type NodesParsingResult = {
     importTimestamp: Moment,
     nodes: ParsedNode[],
 }
@@ -131,25 +131,34 @@ async function storeNodeInformation(nodeData: ParsedNode, node: Node): Promise<v
 
 const isValidMac = forConstraint(CONSTRAINTS.node.mac, false);
 
-function parseTimestamp(timestamp: any): Moment {
+export function parseTimestamp(timestamp: any): Moment {
     if (!_.isString(timestamp)) {
         return moment.invalid();
     }
     return moment.utc(timestamp);
 }
 
-function parseNode(importTimestamp: Moment, nodeData: any, nodeId: NodeId): ParsedNode {
+// TODO: Use sparkson for JSON parsing.
+export function parseNode(importTimestamp: Moment, nodeData: any): ParsedNode {
     if (!_.isPlainObject(nodeData)) {
         throw new Error(
-            'Node ' + nodeId + ': Unexpected node type: ' + (typeof nodeData)
+            'Unexpected node type: ' + (typeof nodeData)
         );
     }
 
     if (!_.isPlainObject(nodeData.nodeinfo)) {
         throw new Error(
-            'Node ' + nodeId + ': Unexpected nodeinfo type: ' + (typeof nodeData.nodeinfo)
+            'Unexpected nodeinfo type: ' + (typeof nodeData.nodeinfo)
         );
     }
+
+    const nodeId = nodeData.nodeinfo.node_id;
+    if (!nodeId || !_.isString(nodeId)) {
+        throw new Error(
+            `Invalid node id of type "${typeof nodeId}": ${nodeId}`
+        );
+    }
+
     if (!_.isPlainObject(nodeData.nodeinfo.network)) {
         throw new Error(
             'Node ' + nodeId + ': Unexpected nodeinfo.network type: ' + (typeof nodeData.nodeinfo.network)
@@ -197,52 +206,51 @@ function parseNode(importTimestamp: Moment, nodeData: any, nodeId: NodeId): Pars
         importTimestamp: importTimestamp,
         state: isOnline ? NodeState.ONLINE : NodeState.OFFLINE,
         lastSeen: lastSeen,
-        site: site,
-        domain: domain
+        site: site || '<unknown-site>',
+        domain: domain || '<unknown-domain>'
     };
 }
 
-function parseNodesJson (body: string): NodesParsingResult {
+// TODO: Use sparkson for JSON parsing.
+export function parseNodesJson (body: string): NodesParsingResult {
     Logger.tag('monitoring', 'information-retrieval').debug('Parsing nodes.json...');
-
-    const data: {[key: string]: any} = {};
 
     const json = JSON.parse(body);
 
-    if (json.version !== 1) {
-        throw new Error('Unexpected nodes.json version: ' + json.version);
+    if (!_.isPlainObject(json)) {
+        throw new Error(`Expecting a JSON object as the nodes.json root, but got: ${typeof json}`);
     }
-    data.importTimestamp = parseTimestamp(json.timestamp);
 
-    if (!data.importTimestamp.isValid()) {
+    const expectedVersion = 2;
+    if (json.version !== expectedVersion) {
+        throw new Error(`Unexpected nodes.json version "${json.version}". Expected: "${expectedVersion}"`);
+    }
+
+    const result: NodesParsingResult = {
+        importTimestamp: parseTimestamp(json.timestamp),
+        nodes: []
+    };
+
+    if (!result.importTimestamp.isValid()) {
         throw new Error('Invalid timestamp: ' + json.timestamp);
     }
 
-    if (!_.isPlainObject(json.nodes)) {
-        throw new Error('Invalid nodes object type: ' + (typeof json.nodes));
+    if (!_.isArray(json.nodes)) {
+        throw new Error('Invalid nodes array type: ' + (typeof json.nodes));
     }
 
-    data.nodes = _.filter(
-        _.values(
-            _.map(
-                json.nodes,
-                function (nodeData, nodeId) {
-                    try {
-                        return parseNode(data.importTimestamp, nodeData, nodeId);
-                    }
-                    catch (error) {
-                        Logger.tag('monitoring', 'information-retrieval').error(error);
-                        return null;
-                    }
-                }
-            )
-        ),
-        function (node) {
-            return node !== null;
+    for (const nodeData of json.nodes) {
+        try {
+            const parsedNode = parseNode(result.importTimestamp, nodeData);
+            Logger.tag('monitoring', 'parsing-nodes-json').debug(`Parsing node successful: ${parsedNode.mac}`);
+            result.nodes.push(parsedNode);
         }
-    );
+        catch (error) {
+            Logger.tag('monitoring', 'parsing-nodes-json').error("Could not parse node.", error, nodeData);
+        }
+    }
 
-    return data as NodesParsingResult;
+    return result;
 }
 
 async function updateSkippedNode(id: NodeId, node?: Node): Promise<Statement> {

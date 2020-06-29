@@ -1,3 +1,6 @@
+export * from "./config";
+export * from "./logger";
+
 // TODO: Token type.
 export type Token = string;
 export type FastdKey = string;

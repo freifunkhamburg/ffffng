@@ -1,10 +1,10 @@
 import _ from "lodash";
 import deepExtend from "deep-extend";
 import moment, {Moment} from "moment";
-import {createTransport} from "nodemailer";
+import {createTransport, Transporter} from "nodemailer";
 
 import {config} from "../config";
-import {db, Statement} from "../db/database";
+import {db} from "../db/database";
 import Logger from "../logger";
 import * as MailTemplateService from "./mailTemplateService";
 import * as Resources from "../utils/resources";
@@ -13,16 +13,25 @@ import {Mail, MailData, MailId, MailType} from "../types";
 
 const MAIL_QUEUE_DB_BATCH_SIZE = 50;
 
-const transporter = createTransport(deepExtend(
-    {},
-    config.server.email.smtp,
-    {
-        transport: 'smtp',
-        pool: true
-    }
-));
+// TODO: Extract transporter into own module and initialize during main().
+let transporterSingleton: Transporter | null = null;
 
-MailTemplateService.configureTransporter(transporter);
+function transporter() {
+    if (!transporterSingleton) {
+        transporterSingleton = createTransport(deepExtend(
+            {},
+            config.server.email.smtp,
+            {
+                transport: 'smtp',
+                pool: true
+            }
+        ));
+
+        MailTemplateService.configureTransporter(transporterSingleton);
+    }
+
+    return transporterSingleton;
+}
 
 async function sendMail(options: Mail): Promise<void> {
     Logger
@@ -42,7 +51,7 @@ async function sendMail(options: Mail): Promise<void> {
         html: renderedTemplate.body
     };
 
-    await transporter.sendMail(mailOptions);
+    await transporter().sendMail(mailOptions);
 
     Logger.tag('mail', 'queue').info('Mail[%d] has been send.', options.id);
 }

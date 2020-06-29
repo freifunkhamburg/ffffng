@@ -48,11 +48,14 @@ async function applyMigrations(db: sqlite.Database): Promise<void> {
     }
 }
 
-const file = config.server.databaseFile;
-const dbPromise = sqlite.open(file);
+const dbPromise = new Promise<Database>((resolve, reject) => {
+    sqlite.open(config.server.databaseFile)
+        .then(resolve)
+        .catch(reject);
+});
 
 export async function init(): Promise<void> {
-    Logger.tag('database').info('Setting up database: %s', file);
+    Logger.tag('database').info('Setting up database: %s', config.server.databaseFile);
 
     let db: Database;
     try {
@@ -78,7 +81,12 @@ export async function init(): Promise<void> {
  * Wrapper around a Promise<Database> providing the same interface as the Database itself.
  */
 class DatabasePromiseWrapper implements Database {
-    constructor(private db: Promise<Database>) {}
+    constructor(private db: Promise<Database>) {
+        db.catch(err => {
+            Logger.tag('database', 'init').error('Error initializing database: ', err);
+            process.exit(1);
+        });
+    }
 
     async close() {
         const db = await this.db;

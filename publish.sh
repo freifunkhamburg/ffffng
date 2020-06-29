@@ -41,8 +41,7 @@ fi
 echo
 
 if confirm "Continue publishing?"; then
-    npm run clean
-    npm run build
+    npm run dist
 
     cd dist
     npm publish
