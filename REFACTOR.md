@@ -1,6 +1,6 @@
 # Refactoring ideas
 
-## TODO:
+## TODO
 
 * Test email rendering!
 
@@ -10,6 +10,7 @@
 * Find a nice way to integrate typescript with grunt.
 * Replace logging framework.
 * Bluebird for promises?
+* Yarn instead of NPM?
 
 ## Mid term
 
