@@ -1,5 +1,6 @@
 import _ from "lodash"
 import auth, {BasicAuthCheckerCallback} from "http-auth"
+import authConnect from "http-auth-connect"
 import bodyParser from "body-parser"
 import compress from "compression"
 import express, {Express, NextFunction, Request, Response} from "express"
@@ -25,7 +26,7 @@ export function init(): void {
             );
         }
     );
-    router.use('/internal', auth.connect(internalAuth));
+    router.use('/internal', authConnect(internalAuth));
 
     router.use(bodyParser.json());
     router.use(bodyParser.urlencoded({ extended: true }));

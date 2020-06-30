@@ -1,6 +1,4 @@
 declare module "http-auth" {
-    import {RequestHandler} from "express"
-
     class Auth {}
 
     class BasicAuth extends Auth {}
@@ -11,5 +9,4 @@ declare module "http-auth" {
     type BasicAuthCheckerCallback = (result: boolean | Error, customUser?: string) => void
 
     function basic(options: BasicAuthOptions, checker: BasicAuthChecker): BasicAuth
-    function connect(auth: Auth): RequestHandler
 }
