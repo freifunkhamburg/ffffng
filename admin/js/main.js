@@ -383,7 +383,8 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
             }
             return 'task-' + field + ' ' +
                 (task.values.enabled ? 'task-enabled' : 'task-disabled') + ' '
-                + 'task-state-' + task.values.state;
+                + 'task-state-' + task.values.state + ' '
+                + 'task-result-' + (task.values.result ? task.values.result : 'none');
         };
     }
 
@@ -403,6 +404,7 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
             nga.field('description').cssClasses(taskClasses('description')),
             nga.field('schedule').cssClasses(taskClasses('schedule')),
             nga.field('state').cssClasses(taskClasses('state')),
+            nga.field('message').cssClasses(taskClasses('message')),
             nga.field('runningSince').map(formatMoment).cssClasses(taskClasses('runningSince')),
             nga.field('lastRunStarted').map(formatMoment).cssClasses(taskClasses('lastRunStarted')),
             nga.field('lastRunDuration').map(formatDuration).cssClasses(taskClasses('lastRunDuration'))

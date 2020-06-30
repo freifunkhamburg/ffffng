@@ -46,4 +46,3 @@ if confirm "Continue publishing?"; then
     cd dist
     npm publish
 fi
-

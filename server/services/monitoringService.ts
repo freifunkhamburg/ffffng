@@ -45,7 +45,14 @@ export type ParsedNode = {
 export type NodesParsingResult = {
     importTimestamp: Moment,
     nodes: ParsedNode[],
+    failedNodesCount: number,
+    totalNodesCount: number,
 }
+
+export type RetrieveNodeInformationResult = {
+    failedParsingNodesCount: number,
+    totalNodesCount: number,
+};
 
 let previousImportTimestamp: Moment | null = null;
 
@@ -228,7 +235,9 @@ export function parseNodesJson (body: string): NodesParsingResult {
 
     const result: NodesParsingResult = {
         importTimestamp: parseTimestamp(json.timestamp),
-        nodes: []
+        nodes: [],
+        failedNodesCount: 0,
+        totalNodesCount: 0,
     };
 
     if (!result.importTimestamp.isValid()) {
@@ -240,12 +249,14 @@ export function parseNodesJson (body: string): NodesParsingResult {
     }
 
     for (const nodeData of json.nodes) {
+        result.totalNodesCount += 1;
         try {
             const parsedNode = parseNode(result.importTimestamp, nodeData);
             Logger.tag('monitoring', 'parsing-nodes-json').debug(`Parsing node successful: ${parsedNode.mac}`);
             result.nodes.push(parsedNode);
         }
         catch (error) {
+            result.failedNodesCount += 1;
             Logger.tag('monitoring', 'parsing-nodes-json').error("Could not parse node.", error, nodeData);
         }
     }
@@ -434,11 +445,15 @@ async function withUrlsData(urls: string[]): Promise<NodesParsingResult[]> {
     return results;
 }
 
-async function retrieveNodeInformationForUrls(urls: string[]): Promise<void> {
+async function retrieveNodeInformationForUrls(urls: string[]): Promise<RetrieveNodeInformationResult> {
     const datas = await withUrlsData(urls);
 
     let maxTimestamp = datas[0].importTimestamp;
     let minTimestamp = maxTimestamp;
+
+    let failedParsingNodesCount = 0;
+    let totalNodesCount = 0;
+
     for (const data of datas) {
         if (data.importTimestamp.isAfter(maxTimestamp)) {
             maxTimestamp = data.importTimestamp;
@@ -446,6 +461,9 @@ async function retrieveNodeInformationForUrls(urls: string[]): Promise<void> {
         if (data.importTimestamp.isBefore(minTimestamp)) {
             minTimestamp = data.importTimestamp;
         }
+
+        failedParsingNodesCount += data.failedNodesCount;
+        totalNodesCount += data.totalNodesCount;
     }
 
     if (previousImportTimestamp !== null && !maxTimestamp.isAfter(previousImportTimestamp)) {
@@ -456,7 +474,10 @@ async function retrieveNodeInformationForUrls(urls: string[]): Promise<void> {
                 maxTimestamp.format(),
                 previousImportTimestamp.format()
             );
-        return;
+        return {
+            failedParsingNodesCount,
+            totalNodesCount,
+        };
     }
     previousImportTimestamp = maxTimestamp;
 
@@ -502,6 +523,11 @@ async function retrieveNodeInformationForUrls(urls: string[]): Promise<void> {
             minTimestamp.unix()
         ]
     );
+
+    return {
+        failedParsingNodesCount,
+        totalNodesCount,
+    }
 }
 
 export async function getAll(restParams: RestParams): Promise<{total: number, monitoringStates: any[]}> {
@@ -605,7 +631,7 @@ export async function disable(token: string): Promise<Node> {
     return newNode;
 }
 
-export async function retrieveNodeInformation(): Promise<void> {
+export async function retrieveNodeInformation(): Promise<RetrieveNodeInformationResult> {
     const urls = config.server.map.nodesJsonUrl;
     if (_.isEmpty(urls)) {
         throw new Error('No nodes.json-URLs set. Please adjust config.json: server.map.nodesJsonUrl')

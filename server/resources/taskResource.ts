@@ -3,11 +3,11 @@ import _ from "lodash";
 import CONSTRAINTS from "../validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
 import * as Resources from "../utils/resources";
-import {getTasks, Task} from "../jobs/scheduler";
+import {Entity} from "../utils/resources";
+import {getTasks, Task, TaskState} from "../jobs/scheduler";
 import {normalizeString} from "../utils/strings";
 import {forConstraint} from "../validation/validator";
 import {Request, Response} from "express";
-import {Entity} from "../utils/resources";
 
 const isValidId = forConstraint(CONSTRAINTS.id, false);
 
@@ -20,6 +20,8 @@ interface ExternalTask {
     lastRunStarted: number | null,
     lastRunDuration: number | null,
     state: string,
+    result: string | null,
+    message: string | null,
     enabled: boolean,
 }
 
@@ -33,6 +35,8 @@ function toExternalTask(task: Task): ExternalTask {
         lastRunStarted: task.lastRunStarted && task.lastRunStarted.unix(),
         lastRunDuration: task.lastRunDuration || null,
         state: task.state,
+        result: task.state !== TaskState.RUNNING && task.result ? task.result.state : null,
+        message:task.state !== TaskState.RUNNING &&  task.result ? task.result.message || null : null,
         enabled: task.enabled
     };
 }

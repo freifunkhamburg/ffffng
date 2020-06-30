@@ -389,6 +389,8 @@ test('parseNodesJson() should succeed parsing no nodes', () => {
     // then
     expect(result.importTimestamp.isValid()).toBe(true);
     expect(result.nodes).toEqual([]);
+    expect(result.failedNodesCount).toEqual(0);
+    expect(result.totalNodesCount).toEqual(0);
 });
 
 test('parseNodesJson() should skip parsing invalid nodes', () => {
@@ -423,6 +425,8 @@ test('parseNodesJson() should skip parsing invalid nodes', () => {
     // then
     expect(result.importTimestamp.isValid()).toBe(true);
     expect(result.nodes).toEqual([]);
+    expect(result.failedNodesCount).toEqual(2);
+    expect(result.totalNodesCount).toEqual(2);
     expect(mockedLogger.getMessages('error', 'monitoring', 'parsing-nodes-json').length).toEqual(2);
 });
 
@@ -467,5 +471,7 @@ test('parseNodesJson() should parse valid nodes', () => {
 
     expect(result.importTimestamp.isValid()).toBe(true);
     expect(result.nodes).toEqual([expectedParsedNode]);
+    expect(result.failedNodesCount).toEqual(1);
+    expect(result.totalNodesCount).toEqual(2);
     expect(mockedLogger.getMessages('error', 'monitoring', 'parsing-nodes-json').length).toEqual(1);
 });

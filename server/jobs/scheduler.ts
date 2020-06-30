@@ -10,11 +10,35 @@ import NodeInformationRetrievalJob from "./NodeInformationRetrievalJob";
 import MonitoringMailsSendingJob from "./MonitoringMailsSendingJob";
 import OfflineNodesDeletionJob from "./OfflineNodesDeletionJob";
 
+export enum JobResultState {
+    OKAY = "okay",
+    WARNING = "warning",
+}
+
+export type JobResult = {
+    state: JobResultState,
+    message?: string,
+};
+
+export function jobResultOkay(message?: string): JobResult {
+    return {
+        state: JobResultState.OKAY,
+        message
+    }
+}
+
+export function jobResultWarning(message?: string): JobResult {
+    return {
+        state: JobResultState.WARNING,
+        message
+    }
+}
+
 export interface Job {
     name: string,
     description: string,
 
-    run(): Promise<void>,
+    run(): Promise<JobResult>,
 }
 
 export enum TaskState {
@@ -34,6 +58,7 @@ export class Task {
         public lastRunStarted: moment.Moment | null,
         public lastRunDuration: number | null,
         public state: TaskState,
+        public result: JobResult | null,
         public enabled: boolean,
     ) {}
 
@@ -47,7 +72,7 @@ export class Task {
         this.lastRunStarted = this.runningSince;
         this.state = TaskState.RUNNING;
 
-        const done = (state: TaskState):void => {
+        const done = (state: TaskState, result: JobResult | null): void => {
             const now = moment();
             const duration = now.diff(this.runningSince || now);
             Logger.tag('jobs').profile('[%sms]\t%s', duration, this.name);
@@ -55,13 +80,14 @@ export class Task {
             this.runningSince = null;
             this.lastRunDuration = duration;
             this.state = state;
+            this.result = result;
         };
 
-        this.job.run().then(() => {
-            done(TaskState.IDLE);
+        this.job.run().then(result => {
+            done(TaskState.IDLE, result);
         }).catch((err: any) => {
             Logger.tag('jobs').error("Job %s failed: %s", this.name, err);
-            done(TaskState.FAILED);
+            done(TaskState.FAILED, null);
         });
     }
 }
@@ -92,7 +118,8 @@ function schedule(expr: string, job: Job): void {
         null,
         null,
         TaskState.IDLE,
-        true
+        null,
+        true,
     );
 
     cron.schedule(expr, task.run);
