@@ -296,7 +296,7 @@ async function sendMonitoringMailsBatched(
             const mac = nodeState.mac;
             Logger.tag('monitoring', 'mail-sending').debug('Loading node data for: %s', mac);
 
-            const result = await NodeService.getNodeDataByMac(mac);
+            const result = await NodeService.getNodeDataWithSecretsByMac(mac);
             if (!result) {
                 Logger
                     .tag('monitoring', 'mail-sending')
@@ -502,7 +502,7 @@ async function retrieveNodeInformationForUrls(urls: string[]): Promise<RetrieveN
             continue;
         }
 
-        await storeNodeInformation(nodeData, result.node);
+        await storeNodeInformation(nodeData, result);
 
         Logger
             .tag('monitoring', 'information-retrieval')
@@ -602,7 +602,7 @@ export async function getByMacs(macs: string[]): Promise<{[key: string]: NodeSta
 }
 
 export async function confirm(token: string): Promise<Node> {
-    const {node, nodeSecrets} = await NodeService.getNodeDataByMonitoringToken(token);
+    const {node, nodeSecrets} = await NodeService.getNodeDataWithSecretsByMonitoringToken(token);
     if (!node.monitoring || !nodeSecrets.monitoringToken || nodeSecrets.monitoringToken !== token) {
         throw {data: 'Invalid token.', type: ErrorTypes.badRequest};
     }
@@ -618,7 +618,7 @@ export async function confirm(token: string): Promise<Node> {
 }
 
 export async function disable(token: string): Promise<Node> {
-    const {node, nodeSecrets} = await NodeService.getNodeDataByMonitoringToken(token);
+    const {node, nodeSecrets} = await NodeService.getNodeDataWithSecretsByMonitoringToken(token);
     if (!node.monitoring || !nodeSecrets.monitoringToken || nodeSecrets.monitoringToken !== token) {
         throw {data: 'Invalid token.', type: ErrorTypes.badRequest};
     }
@@ -695,8 +695,7 @@ export async function deleteOfflineNodes(): Promise<void> {
         let node;
 
         try {
-            const result = await NodeService.getNodeDataByMac(mac);
-            node = result && result.node;
+            node = await NodeService.getNodeDataByMac(mac);
         }
         catch (error) {
             // Only log error. We try to delete the nodes state anyways.

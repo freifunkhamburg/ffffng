@@ -352,7 +352,7 @@ export async function createNode (node: Node): Promise<{token: Token, node: Node
 }
 
 export async function updateNode (token: Token, node: Node): Promise<{token: Token, node: Node}> {
-    const {node: currentNode, nodeSecrets} = await getNodeDataByToken(token);
+    const {node: currentNode, nodeSecrets} = await getNodeDataWithSecretsByToken(token);
 
     let monitoringConfirmed = false;
     let monitoringToken = '';
@@ -424,18 +424,35 @@ export async function getAllNodes(): Promise<Node[]> {
     return nodes;
 }
 
-export async function getNodeDataByMac (mac: string): Promise<{node: Node, nodeSecrets: NodeSecrets} | null> {
+export async function getNodeDataWithSecretsByMac (mac: string): Promise<{node: Node, nodeSecrets: NodeSecrets} | null> {
     return await findNodeDataByFilePattern({ mac: mac });
 }
 
-export async function getNodeDataByToken (token: Token): Promise<{node: Node, nodeSecrets: NodeSecrets}> {
+export async function getNodeDataByMac (mac: string): Promise<Node | null> {
+    const result = await findNodeDataByFilePattern({ mac: mac });
+    return result ? result.node : null;
+}
+
+export async function getNodeDataWithSecretsByToken (token: Token): Promise<{node: Node, nodeSecrets: NodeSecrets}> {
     return await getNodeDataByFilePattern({ token: token });
+}
+
+export async function getNodeDataByToken (token: Token): Promise<Node> {
+    const {node} = await getNodeDataByFilePattern({ token: token });
+    return node;
+}
+
+export async function getNodeDataWithSecretsByMonitoringToken (
+    monitoringToken: MonitoringToken
+): Promise<{node: Node, nodeSecrets: NodeSecrets}> {
+    return await getNodeDataByFilePattern({ monitoringToken: monitoringToken });
 }
 
 export async function getNodeDataByMonitoringToken (
     monitoringToken: MonitoringToken
-): Promise<{node: Node, nodeSecrets: NodeSecrets}> {
-    return await getNodeDataByFilePattern({ monitoringToken: monitoringToken });
+): Promise<Node> {
+    const {node} = await getNodeDataByFilePattern({ monitoringToken: monitoringToken });
+    return node;
 }
 
 export async function fixNodeFilenames(): Promise<void> {
