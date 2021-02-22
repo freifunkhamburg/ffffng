@@ -10,7 +10,7 @@ import Logger from "../logger";
 import * as MailService from "../services/mailService";
 import {normalizeString} from "../utils/strings";
 import {monitoringConfirmUrl, monitoringDisableUrl} from "../utils/urlBuilder";
-import {MonitoringState, MonitoringToken, Node, NodeSecrets, NodeStatistics, Token} from "../types";
+import {FastdKey, MonitoringState, MonitoringToken, Node, NodeSecrets, NodeStatistics, Token} from "../types";
 import util from "util";
 
 const pglob = util.promisify(glob);
@@ -283,8 +283,21 @@ async function parseNodeFile(file: string): Promise<{node: Node, nodeSecrets: No
     });
 
     return {
-        node: node as Node,
-        nodeSecrets: nodeSecrets as NodeSecrets,
+        node: {
+            token: node.token as Token || '',
+            nickname: node.nickname as string || '',
+            email: node.email as string || '',
+            hostname: node.hostname as string || '',
+            coords: node.coords as string || undefined,
+            key: node.coords as FastdKey || undefined,
+            mac: node.mac as string || '',
+            monitoring: !!node.monitoring,
+            monitoringConfirmed: !!node.monitoringConfirmed,
+            monitoringState: node.monitoringState as MonitoringState || MonitoringState.DISABLED,
+        },
+        nodeSecrets: {
+            monitoringToken: nodeSecrets.monitoringToken as MonitoringToken || undefined,
+        },
     };
 }
 
