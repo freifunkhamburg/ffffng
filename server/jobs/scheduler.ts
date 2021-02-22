@@ -122,7 +122,7 @@ function schedule(expr: string, job: Job): void {
         true,
     );
 
-    cron.schedule(expr, task.run);
+    cron.schedule(expr, () => task.run());
 
     tasks['' + id] = task;
 }
