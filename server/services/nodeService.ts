@@ -289,7 +289,7 @@ async function parseNodeFile(file: string): Promise<{node: Node, nodeSecrets: No
             email: node.email as string || '',
             hostname: node.hostname as string || '',
             coords: node.coords as string || undefined,
-            key: node.coords as FastdKey || undefined,
+            key: node.key as FastdKey || undefined,
             mac: node.mac as string || '',
             monitoring: !!node.monitoring,
             monitoringConfirmed: !!node.monitoringConfirmed,
