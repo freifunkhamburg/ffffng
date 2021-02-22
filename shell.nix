@@ -10,6 +10,7 @@ stdenv.mkDerivation rec {
     git
     nasm
     nodejs-10_x
+    rsync
     sqlite
     zlib
   ];

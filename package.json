@@ -20,12 +20,12 @@
     },
     "scripts": {
         "test": "npm run server:test",
-        "build": "npm run server:build && grunt build",
+        "build": "npm run server:build && grunt build && rsync -avzL --exclude='*/__mocks__/' --exclude='*.test.*' server-build/ dist/server/",
         "clean": "rm -rf server-build/ && grunt clean",
         "dist": "npm run clean && npm run build && npm run test",
         "client:serve": "grunt serve",
         "server:test": "jest --config=jest.server.config.js",
-        "server:build": "tsc -b server && ln -sfv ../server/db/patches ./server-build/db/ && ln -sfv ../server/templates ./server-build/ && ln -sfv ../server/mailTemplates ./server-build/",
+        "server:build": "tsc -b server && ln -sfv ../../server/db/patches ./server-build/db/ && ln -sfv ../server/templates ./server-build/ && ln -sfv ../server/mailTemplates ./server-build/",
         "server:run": "npm run server:build && node server-build/main.js"
     },
     "dependencies": {
