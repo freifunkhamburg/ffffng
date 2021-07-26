@@ -16,9 +16,10 @@ import {normalizeMac} from "../utils/strings";
 import {monitoringDisableUrl} from "../utils/urlBuilder";
 import CONSTRAINTS from "../validation/constraints";
 import {forConstraint} from "../validation/validator";
-import {MailType, Node, NodeId, NodeState, NodeStateData} from "../types";
+import {MAC, MailType, Node, NodeId, NodeState, NodeStateData, UnixTimestamp} from "../types";
 
 const MONITORING_STATE_MACS_CHUNK_SIZE = 100;
+const NEVER_ONLINE_NODES_DELETION_CHUNK_SIZE = 20;
 const MONITORING_MAILS_DB_BATCH_SIZE = 50;
 /**
  * Defines the intervals emails are sent if a node is offline
@@ -578,7 +579,7 @@ export async function getAll(restParams: RestParams): Promise<{total: number, mo
     return {monitoringStates, total};
 }
 
-export async function getByMacs(macs: string[]): Promise<{[key: string]: NodeStateData}> {
+export async function getByMacs(macs: MAC[]): Promise<{[key: string]: NodeStateData}> {
     if (_.isEmpty(macs)) {
         return {};
     }
@@ -677,44 +678,81 @@ export async function deleteOfflineNodes(): Promise<void> {
             DELETE_OFFLINE_NODES_AFTER_DURATION.unit
         );
 
+    const deleteBefore =
+        moment().subtract(
+            DELETE_OFFLINE_NODES_AFTER_DURATION.amount,
+            DELETE_OFFLINE_NODES_AFTER_DURATION.unit
+        ).unix();
+
+    await deleteNeverOnlineNodesBefore(deleteBefore);
+    await deleteNodesOfflineSinceBefore(deleteBefore);
+}
+
+async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestamp): Promise<void> {
+    const deletionCandidates: Node[] = await NodeService.findNodesModifiedBefore(deleteBefore);
+    const deletionCandidateMacs: MAC[] = _.map(deletionCandidates, node => node.mac);
+    const chunks: MAC[][] = _.chunk(deletionCandidateMacs, NEVER_ONLINE_NODES_DELETION_CHUNK_SIZE);
+
+    for (const macs of chunks) {
+        const placeholders = _.join(
+            _.map(macs, () => '?'),
+            ','
+        );
+
+        const rows: {mac: MAC}[] = await db.all(
+            `SELECT * FROM node_state WHERE mac IN (${placeholders})`,
+            macs
+        );
+
+        const seenMacs: MAC[] = _.map(rows, (row: {mac: MAC}) => row.mac as MAC);
+        const neverSeenMacs = _.difference(macs, seenMacs);
+
+        for (const neverSeenMac of neverSeenMacs) {
+            await deleteNodeByMac(neverSeenMac);
+        }
+    }
+}
+
+async function deleteNodesOfflineSinceBefore(deleteBefore: UnixTimestamp): Promise<void> {
     const rows = await db.all(
         'SELECT * FROM node_state WHERE state = ? AND last_seen < ?',
         [
             'OFFLINE',
-            moment().subtract(
-                DELETE_OFFLINE_NODES_AFTER_DURATION.amount,
-                DELETE_OFFLINE_NODES_AFTER_DURATION.unit
-            ).unix()
+            deleteBefore
         ],
     );
 
     for (const row of rows) {
-        const mac = row.mac;
-        Logger.tag('nodes', 'delete-offline').info('Deleting node ' + mac);
-
-        let node;
-
-        try {
-            node = await NodeService.getNodeDataByMac(mac);
-        }
-        catch (error) {
-            // Only log error. We try to delete the nodes state anyways.
-            Logger.tag('nodes', 'delete-offline').error('Could not find node to delete: ' + mac, error);
-        }
-
-        if (node && node.token) {
-            await NodeService.deleteNode(node.token);
-        }
-
-        try {
-            await db.run(
-                'DELETE FROM node_state WHERE mac = ? AND state = ?',
-                [mac, 'OFFLINE'],
-            );
-        }
-        catch (error) {
-            // Only log error and continue with next node.
-            Logger.tag('nodes', 'delete-offline').error('Could not delete node state: ' + mac, error);
-        }
+        await deleteNodeByMac(row.mac);
     }
 }
+
+async function deleteNodeByMac(mac: MAC): Promise<void> {
+    Logger.tag('nodes', 'delete-offline').info('Deleting node ' + mac);
+
+    let node;
+
+    try {
+        node = await NodeService.getNodeDataByMac(mac);
+    }
+    catch (error) {
+        // Only log error. We try to delete the nodes state anyways.
+        Logger.tag('nodes', 'delete-offline').error('Could not find node to delete: ' + mac, error);
+    }
+
+    if (node && node.token) {
+        await NodeService.deleteNode(node.token);
+    }
+
+    try {
+        await db.run(
+            'DELETE FROM node_state WHERE mac = ? AND state = ?',
+            [mac, 'OFFLINE'],
+        );
+    }
+    catch (error) {
+        // Only log error and continue with next node.
+        Logger.tag('nodes', 'delete-offline').error('Could not delete node state: ' + mac, error);
+    }
+}
+

@@ -4,6 +4,9 @@ export * from "./logger";
 // TODO: Token type.
 export type Token = string;
 export type FastdKey = string;
+export type MAC = string;
+
+export type UnixTimestamp = number;
 
 export type MonitoringToken = string;
 export enum MonitoringState {
@@ -32,10 +35,11 @@ export type Node = {
     hostname: string;
     coords?: string; // TODO: Use object with longitude and latitude.
     key?: FastdKey;
-    mac: string;
+    mac: MAC;
     monitoring: boolean;
     monitoringConfirmed: boolean;
     monitoringState: MonitoringState;
+    modifiedAt: UnixTimestamp;
 };
 
 // TODO: Complete interface / class declaration.
