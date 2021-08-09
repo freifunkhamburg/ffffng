@@ -755,7 +755,7 @@ async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestampSeconds):
                 'Of the chunk of ' +
                 macs.length +
                 ' MACs there are ' +
-                neverSeenMacs +
+                neverSeenMacs.length +
                 ' nodes that were never online. Those will be deleted.'
             );
 
