@@ -6,7 +6,8 @@ export type Token = string;
 export type FastdKey = string;
 export type MAC = string;
 
-export type UnixTimestamp = number;
+export type UnixTimestampSeconds = number;
+export type UnixTimestampMilliseconds = number;
 
 export type MonitoringToken = string;
 export enum MonitoringState {
@@ -39,7 +40,7 @@ export type Node = {
     monitoring: boolean;
     monitoringConfirmed: boolean;
     monitoringState: MonitoringState;
-    modifiedAt: UnixTimestamp;
+    modifiedAt: UnixTimestampSeconds;
 };
 
 // TODO: Complete interface / class declaration.

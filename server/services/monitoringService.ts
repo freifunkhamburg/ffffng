@@ -16,7 +16,7 @@ import {normalizeMac} from "../utils/strings";
 import {monitoringDisableUrl} from "../utils/urlBuilder";
 import CONSTRAINTS from "../validation/constraints";
 import {forConstraint} from "../validation/validator";
-import {MAC, MailType, Node, NodeId, NodeState, NodeStateData, UnixTimestamp} from "../types";
+import {MAC, MailType, Node, NodeId, NodeState, NodeStateData, UnixTimestampSeconds} from "../types";
 
 const MONITORING_STATE_MACS_CHUNK_SIZE = 100;
 const NEVER_ONLINE_NODES_DELETION_CHUNK_SIZE = 20;
@@ -688,7 +688,7 @@ export async function deleteOfflineNodes(): Promise<void> {
     await deleteNodesOfflineSinceBefore(deleteBefore);
 }
 
-async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestamp): Promise<void> {
+async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestampSeconds): Promise<void> {
     Logger
         .tag('nodes', 'delete-never-online')
         .info(
@@ -765,7 +765,7 @@ async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestamp): Promis
     }
 }
 
-async function deleteNodesOfflineSinceBefore(deleteBefore: UnixTimestamp): Promise<void> {
+async function deleteNodesOfflineSinceBefore(deleteBefore: UnixTimestampSeconds): Promise<void> {
     const rows = await db.all(
         'SELECT * FROM node_state WHERE state = ? AND last_seen < ?',
         [

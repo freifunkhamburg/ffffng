@@ -10,7 +10,7 @@ import Logger from "../logger";
 import * as MailService from "../services/mailService";
 import {normalizeString} from "../utils/strings";
 import {monitoringConfirmUrl, monitoringDisableUrl} from "../utils/urlBuilder";
-import {FastdKey, MonitoringState, MonitoringToken, Node, NodeSecrets, NodeStatistics, UnixTimestamp, Token} from "../types";
+import {FastdKey, MonitoringState, MonitoringToken, Node, NodeSecrets, NodeStatistics, UnixTimestampSeconds, Token} from "../types";
 import util from "util";
 
 const pglob = util.promisify(glob);
@@ -235,7 +235,7 @@ async function deleteNodeFile(token: Token): Promise<void> {
 async function parseNodeFile(file: string): Promise<{node: Node, nodeSecrets: NodeSecrets}> {
     const contents = await fs.readFile(file);
     const stats = await fs.lstat(file);
-    const modifiedAt = stats.mtimeMs;
+    const modifiedAt = Math.floor(stats.mtimeMs / 1000);
 
     const lines = contents.toString();
 
@@ -491,7 +491,7 @@ export async function fixNodeFilenames(): Promise<void> {
     }
 }
 
-export async function findNodesModifiedBefore(timestamp: UnixTimestamp): Promise<Node[]> {
+export async function findNodesModifiedBefore(timestamp: UnixTimestampSeconds): Promise<Node[]> {
     const nodes = await getAllNodes();
     return _.filter(nodes, node => node.modifiedAt < timestamp);
 }
