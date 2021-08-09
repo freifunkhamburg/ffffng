@@ -689,11 +689,43 @@ export async function deleteOfflineNodes(): Promise<void> {
 }
 
 async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestamp): Promise<void> {
+    Logger
+        .tag('nodes', 'delete-never-online')
+        .info(
+            'Deleting nodes that were never online created befor ' +
+            deleteBefore
+        );
+
     const deletionCandidates: Node[] = await NodeService.findNodesModifiedBefore(deleteBefore);
+
+    Logger
+        .tag('nodes', 'delete-never-online')
+        .info(
+            'Number of nodes created before ' +
+            deleteBefore +
+            ': ' +
+            deletionCandidates.length
+        );
+
     const deletionCandidateMacs: MAC[] = _.map(deletionCandidates, node => node.mac);
     const chunks: MAC[][] = _.chunk(deletionCandidateMacs, NEVER_ONLINE_NODES_DELETION_CHUNK_SIZE);
 
+    Logger
+        .tag('nodes', 'delete-never-online')
+        .info(
+            'Number of chunks to check for deletion: ' +
+            chunks.length
+        );
+
     for (const macs of chunks) {
+        Logger
+            .tag('nodes', 'delete-never-online')
+            .info(
+                'Checking chunk of ' +
+                macs.length +
+                ' MACs for deletion.'
+            );
+
         const placeholders = _.join(
             _.map(macs, () => '?'),
             ','
@@ -704,8 +736,28 @@ async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestamp): Promis
             macs
         );
 
+        Logger
+            .tag('nodes', 'delete-never-online')
+            .info(
+                'Of the chunk of ' +
+                macs.length +
+                ' MACs there were ' +
+                rows.length +
+                ' nodes found in monitoring database. Those should be skipped.'
+            );
+
         const seenMacs: MAC[] = _.map(rows, (row: {mac: MAC}) => row.mac as MAC);
         const neverSeenMacs = _.difference(macs, seenMacs);
+
+        Logger
+            .tag('nodes', 'delete-never-online')
+            .info(
+                'Of the chunk of ' +
+                macs.length +
+                ' MACs there are ' +
+                neverSeenMacs +
+                ' nodes that were never online. Those will be deleted.'
+            );
 
         for (const neverSeenMac of neverSeenMacs) {
             await deleteNodeByMac(neverSeenMac);
@@ -728,7 +780,7 @@ async function deleteNodesOfflineSinceBefore(deleteBefore: UnixTimestamp): Promi
 }
 
 async function deleteNodeByMac(mac: MAC): Promise<void> {
-    Logger.tag('nodes', 'delete-offline').info('Deleting node ' + mac);
+    Logger.tag('nodes', 'delete-offline').debug('Deleting node ' + mac);
 
     let node;
 
