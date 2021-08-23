@@ -114,6 +114,8 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 * **`server.databaseFile`** Pfad zur Datenbank-Datei, z. B.: `"$FFFFNG_HOME/ffffng.sqlite"`
 * **`server.peersPath`** Verzeichnis unter dem die `fastd` Key-Files angelegt werden, z. B.: `"$FFFFNG_HOME/fastdkeys"`
 
+* **`server.logging.enabled`** Ob geloggt werden soll (Achtung: `false` sorgt dafür, dass überhaupt kein Output mehr auf
+  `stdout` oder in den Logs erscheint und überschreibt damit alle anderen Logging-Optionen!), z. B.: `false`
 * **`server.logging.directory`** Verzeichnis unter dem Log-Files abgelegt werden, z. B.: `"$FFFFNG_HOME/logs"`
 * **`server.logging.debug`** Gibt an, ob Debug-Output geloggt werden soll (Achtung, viel!), z. B.: `false`
 * **`server.logging.profile`** Gibt an, ob Profiling-Output geloggt werden soll (Achtung, viel!), z. B.: `false`
