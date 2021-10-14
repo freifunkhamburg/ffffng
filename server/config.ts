@@ -19,8 +19,12 @@ export function parseCommandLine(): void {
     let commandLineOptions;
     try {
         commandLineOptions = commandLineArgs(commandLineDefs);
-    } catch (e) {
-        console.error(e.message);
+    } catch (e: any) {
+        if (e.message) {
+            console.error(e.message);
+        } else {
+            console.error(e);
+        }
         console.error('Try \'--help\' for more information.');
         process.exit(1);
     }
