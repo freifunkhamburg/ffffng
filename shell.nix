@@ -9,7 +9,7 @@ stdenv.mkDerivation rec {
     compass
     git
     nasm
-    nodejs-10_x
+    nodejs-16_x
     rsync
     sqlite
     zlib
