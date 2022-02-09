@@ -3,21 +3,18 @@
 ## TODO
 
 * Test email rendering!
-* Get rid of unhandled promise rejection warnings in tests.
 
 ## Short term
 
-* Integrate typescript in the build and start migrating the server code.
-* Find a nice way to integrate typescript with grunt.
+* Split into seperate packages for server and frontend.
+* Make admin panel part of new frontend package.
+* Get rid of grunt.
 * Bluebird for promises?
 * Yarn instead of NPM?
 
 ## Mid term
 
 * Typesafe db queries.
-* Port complete server to typescript.
-* Port the server code to promises and `async` / `await`.
-* Use ES6 style imports instead of `require`.
 * Store node data in database and export it for gateways.
 * Write tests (especially testing quirky node data).
 * Allow terminating running tasks via bluebirds cancellation.
