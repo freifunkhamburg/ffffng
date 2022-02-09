@@ -1,104 +1,71 @@
-import {Logger, TaggedLogger} from "./types";
+import {Logger, TaggedLogger, LogLevel} from './types';
+import moment from 'moment';
+import _ from 'lodash';
 
-function procConsole() {
-    // @ts-ignore
-    return process.console;
-}
+export type LoggingFunction = (...args: any[]) => void;
 
 const noopTaggedLogger: TaggedLogger = {
-    debug(...args: any): void {},
-    info(...args: any): void {},
-    warn(...args: any): void {},
-    error(...args: any): void {},
-    profile(...args: any): void {},
+    log(level: LogLevel, ...args: any[]): void {},
+    debug(...args: any[]): void {},
+    info(...args: any[]): void {},
+    warn(...args: any[]): void {},
+    error(...args: any[]): void {},
+    profile(...args: any[]): void {},
 };
 
-class ActivatableLogger implements Logger {
+export interface ActivatableLogger extends Logger {
+    init(enabled: boolean, loggingFunction?: LoggingFunction): void;
+}
+
+export class ActivatableLoggerImpl implements ActivatableLogger {
     private enabled: boolean = false;
+    private loggingFunction: LoggingFunction = console.info;
 
-    init(): void {
-        const app = require('./app').app;
+    init(enabled: boolean, loggingFunction?: LoggingFunction): void {
         const config = require('./config').config;
-
-        const enabled = config.server.logging.enabled;
         this.enabled = enabled;
-
-        // Hack to allow proper logging of Error.
-        Object.defineProperty(Error.prototype, 'message', {
-            configurable: true,
-            enumerable: true
-        });
-        Object.defineProperty(Error.prototype, 'stack', {
-            configurable: true,
-            enumerable: true
-        });
-
-        const scribe = require('scribe-js')({
-            rootPath: config.server.logging.directory,
-        });
-
-        function addLogger(name: string, color: string, active: boolean) {
-            if (enabled && active) {
-                procConsole().addLogger(name, color, {
-                    logInConsole: false
-                });
-            } else {
-                // @ts-ignore
-                procConsole()[name] = function () {
-                    this._reset(); // forget tags, etc. for this logging event
-                };
-            }
-        }
-
-        addLogger('debug', 'grey', config.server.logging.debug);
-        addLogger('profile', 'blue', config.server.logging.profile);
-
-        if (enabled && config.server.logging.logRequests) {
-            app.use(scribe.express.logger());
-        }
-        if (config.server.internal.active) {
-            const prefix = config.server.rootPath === '/' ? '' : config.server.rootPath;
-            app.use(prefix + '/internal/logs', scribe.webPanel());
-        }
-
-        // Hack to allow correct logging of node.js Error objects.
-        // See: https://github.com/bluejamesbond/Scribe.js/issues/70
-        Object.defineProperty(Error.prototype, 'toJSON', {
-            configurable: true,
-            value: function () {
-                const alt: {[key: string]: any} = {};
-                const storeKey = (key: string)  => {
-                    alt[key] = this[key];
-                };
-                Object.getOwnPropertyNames(this).forEach(storeKey, this);
-                return alt;
-            }
-        });
-
-        // @ts-ignore
-        for (const key of Object.keys(procConsole())) {
-            // @ts-ignore
-            module.exports[key] = enabled ? procConsole()[key] : (...args: any) => {};
-        }
+        this.loggingFunction = loggingFunction || console.info;
     }
 
-    tag(...tags: any): TaggedLogger {
+    tag(...tags: string[]): TaggedLogger {
         if (this.enabled) {
+            const loggingFunction = this.loggingFunction;
             return {
-                debug(...args: any): void {
-                    procConsole().tag(...tags).debug(...args);
+                log(level: LogLevel, ...args: any[]): void {
+                    const timeStr = moment().format('YYYY-MM-DD HH:mm:ss');
+                    const levelStr = level.toUpperCase();
+                    const tagsStr = tags ? '[' + _.join(tags, ', ') + ']' : '';
+                    const messagePrefix = `${timeStr} ${levelStr} - ${tagsStr}`;
+
+                    // Make sure to only replace %s, etc. in real log message
+                    // but not in tags.
+                    const escapedMessagePrefix = messagePrefix.replace(/%/g, '%%');
+                    
+                    let message = '';
+                    if (args && _.isString(args[0])) {
+                        message = args[0];
+                        args.shift();
+                    }
+
+                    const logStr = message
+                        ? `${escapedMessagePrefix} ${message}`
+                        : escapedMessagePrefix;
+                    loggingFunction(logStr, ...args);
                 },
-                info(...args: any): void {
-                    procConsole().tag(...tags).info(...args);
+                debug(...args: any[]): void {
+                    this.log('debug', ...args);
                 },
-                warn(...args: any): void {
-                    procConsole().tag(...tags).warn(...args);
+                info(...args: any[]): void {
+                    this.log('info', ...args);
                 },
-                error(...args: any): void {
-                    procConsole().tag(...tags).error(...args);
+                warn(...args: any[]): void {
+                    this.log('warn', ...args);
                 },
-                profile(...args: any): void {
-                    procConsole().tag(...tags).profile(...args);
+                error(...args: any[]): void {
+                    this.log('error', ...args);
+                },
+                profile(...args: any[]): void {
+                    this.log('profile', ...args);
                 },
             }
         } else {
@@ -107,4 +74,4 @@ class ActivatableLogger implements Logger {
     }
 }
 
-export default new ActivatableLogger() as Logger;
+export default new ActivatableLoggerImpl() as ActivatableLogger;

@@ -1,6 +1,5 @@
-import {Logger, TaggedLogger} from "../types";
-
-type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'profile';
+import {Logger, TaggedLogger, LogLevel} from '../types';
+import {ActivatableLogger} from '../logger';
 
 export type MockLogMessages = any[][];
 type TaggedLogMessages = {
@@ -8,7 +7,7 @@ type TaggedLogMessages = {
     logs: {[key: string]: MockLogMessages}
 }
 
-export class MockLogger implements Logger {
+export class MockLogger implements ActivatableLogger {
     private taggedLogMessages: TaggedLogMessages = MockLogger.emptyTaggedLogMessages();
 
     constructor() {}
@@ -37,7 +36,7 @@ export class MockLogger implements Logger {
         return taggedLogMessages.logs[level] || [];
     }
 
-    init(): void {}
+    init(...args: any[]): void {}
 
     private doLog(taggedLogMessages: TaggedLogMessages, level: LogLevel, tags: string[], args: any[]): void {
         if (tags.length > 0) {
@@ -55,17 +54,27 @@ export class MockLogger implements Logger {
         }
     }
 
-    private log(level: LogLevel, tags: string[], args: any[]): void {
-        this.doLog(this.taggedLogMessages, level, tags, args);
-    }
-
     tag(...tags: string[]): TaggedLogger {
+        const logger: MockLogger = this;
         return {
-            debug: (...args: any[]): void => this.log('debug', tags, args),
-            info: (...args: any[]): void => this.log('info', tags, args),
-            warn: (...args: any[]): void => this.log('warn', tags, args),
-            error: (...args: any[]): void => this.log('error', tags, args),
-            profile: (...args: any[]): void => this.log('profile', tags, args),
+            log(level: LogLevel, ...args: any[]): void {
+                logger.doLog(logger.taggedLogMessages, level, tags, args);
+            },
+            debug(...args: any[]): void {
+                this.log('debug', ...args);
+            },
+            info(...args: any[]): void {
+                this.log('info', ...args);
+            },
+            warn(...args: any[]): void {
+                this.log('warn', ...args);
+            },
+            error(...args: any[]): void {
+                this.log('error', ...args);
+            },
+            profile(...args: any[]): void {
+                this.log('profile', ...args);
+            },
         }
     }
 }

@@ -104,7 +104,7 @@ test("should get messages for no tag", () => {
 
     // when
     logger.tag().debug("message");
-
+    
     // then
     expect(logger.getMessages("debug")).toEqual([["message"]]);
 });

@@ -453,14 +453,6 @@ angular.module('ffffngAdmin').config(function(NgAdminConfigurationProvider, Rest
                     .menu(tasks)
                     .icon('<span class="fa fa-cog"></span>')
                 )
-                .addChild(nga
-                    .menu()
-                    .template(
-                        '<a href="' + pathPrefix + '/internal/logs" target="_blank">' +
-                        '<span class="fa fa-list"></span> Logs' +
-                        '</a>'
-                    )
-                )
     );
 
     admin.dashboard(nga.dashboard()

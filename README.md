@@ -116,10 +116,8 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 
 * **`server.logging.enabled`** Ob geloggt werden soll (Achtung: `false` sorgt dafür, dass überhaupt kein Output mehr auf
   `stdout` oder in den Logs erscheint und überschreibt damit alle anderen Logging-Optionen!), z. B.: `false`
-* **`server.logging.directory`** Verzeichnis unter dem Log-Files abgelegt werden, z. B.: `"$FFFFNG_HOME/logs"`
 * **`server.logging.debug`** Gibt an, ob Debug-Output geloggt werden soll (Achtung, viel!), z. B.: `false`
 * **`server.logging.profile`** Gibt an, ob Profiling-Output geloggt werden soll (Achtung, viel!), z. B.: `false`
-* **`server.logging.logRequests`** Gib an, ob HTTP-Requests geloggt werden sollen (Achtung, Datenschutz!), z. B.: `false`
 
 * **`server.internal.active`** Gibt an, ob interne URLs, wie Admin-Panel und Logging-Interface, erreichbar sein sollen,
   z. B.: `true`

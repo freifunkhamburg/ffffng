@@ -8,10 +8,8 @@
 
         "logging": {
             "enabled": true,
-            "directory": "/tmp/logs",
             "debug": false,
-            "profile": false,
-            "logRequests": false
+            "profile": false
         },
 
         "internal": {

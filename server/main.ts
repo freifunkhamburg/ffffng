@@ -7,7 +7,7 @@ import * as router from "./router"
 import * as app from "./app"
 
 app.init();
-Logger.init();
+Logger.init(config.server.logging.enabled);
 Logger.tag('main', 'startup').info('Server starting up...');
 
 async function main() {

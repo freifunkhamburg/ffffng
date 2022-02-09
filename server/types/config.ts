@@ -7,10 +7,8 @@ export type Version = string;
 export class LoggingConfig {
     constructor(
         @Field("enabled") public enabled: boolean,
-        @Field("directory") public directory: string,
         @Field("debug") public debug: boolean,
         @Field("profile") public profile: boolean,
-        @Field("logRequests") public logRequests: boolean,
     ) {}
 }
 
