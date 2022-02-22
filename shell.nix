@@ -11,6 +11,7 @@ stdenv.mkDerivation rec {
     nasm
     nodejs-16_x
     rsync
+    sass
     sqlite
     yarn
     zlib

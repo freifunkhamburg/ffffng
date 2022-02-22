@@ -1,7 +1,5 @@
 import {ArrayField, Field, RawJsonField} from "sparkson"
 
-export type Version = string;
-
 // TODO: Replace string types by more specific types like URL, Password, etc.
 
 export class LoggingConfig {
