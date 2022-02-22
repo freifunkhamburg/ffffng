@@ -1,5 +1,6 @@
 export * from "./config";
 export * from "./logger";
+export * from "./shared";
 
 // TODO: Token type.
 export type Token = string;
@@ -46,16 +47,6 @@ export type Node = {
 // TODO: Complete interface / class declaration.
 export type NodeSecrets = {
     monitoringToken?: MonitoringToken,
-};
-
-export type NodeStatistics = {
-    registered: number,
-    withVPN: number,
-    withCoords: number,
-    monitoring: {
-        active: number,
-        pending: number
-    }
 };
 
 export type MailId = string;
