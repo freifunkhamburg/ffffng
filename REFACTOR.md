@@ -10,7 +10,7 @@
 * Make admin panel part of new frontend package.
 * Get rid of grunt.
 * Bluebird for promises?
-* Yarn instead of NPM?
+* Use generated type guards.
 
 ## Mid term
 

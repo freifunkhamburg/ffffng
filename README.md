@@ -325,15 +325,14 @@ fastd-Key und die MAC-Adresse angeben.
 
 ### Abhängigkeiten
 
-* node.js + NPM
+* node.js + yarn
 * compass (Installation z. B. via Ruby's `gem`)
-* grunt (Installation z. B. via `npm install grunt-cli`)
-* ggf. bower (Installation z. B. via `npm install bower`)
+* ggf. bower (Installation z. B. via `yarn install bower`)
 
 
 ### Build
 
-`npm run clean && npm run build`
+`yarn run clean && yarn run build`
 
 Der Output landet dann unter `dist/`.
 
@@ -341,14 +340,14 @@ Der Output landet dann unter `dist/`.
 ### Server starten
 
 1. Zunächst eine `config.json` anlegen wie oben unter "Installation / Konfiguration" beschrieben.
-2. `npm run server:run -- -c config.json`
+2. `yarn run server:run -- -c config.json`
 
 Der Server ist dann erreichbar unter [http://localhost:8080](http://localhost:8080).
 
 
 ### Life-Reload vom Client
 
-`npm client:serve`
+`yarn client:serve`
 
 Der Client ist dann erreichbar via [http://localhost:9000](http://localhost:9000), erwartet aber, dass der Server für
 die REST-API auch läuft (s. o.) und auf Port `8080` erreichbar ist.

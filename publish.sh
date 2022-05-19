@@ -41,8 +41,8 @@ fi
 echo
 
 if confirm "Continue publishing?"; then
-    npm run dist
+    yarn run dist
 
     cd dist
-    npm publish
+    yarn publish
 fi
