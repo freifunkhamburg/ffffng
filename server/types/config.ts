@@ -1,4 +1,5 @@
 import {ArrayField, Field, RawJsonField} from "sparkson"
+import {ClientConfig} from "./shared";
 
 // TODO: Replace string types by more specific types like URL, Password, etc.
 
@@ -50,73 +51,9 @@ export class ServerConfig {
     ) {}
 }
 
-export class CommunityConfig {
-    constructor(
-        @Field("name") public name: string,
-        @Field("domain") public domain: string,
-        @Field("contactEmail") public contactEmail: string,
-        @ArrayField("sites", String) public sites: string[],
-        @ArrayField("domains", String) public domains: string[],
-    ) {}
-}
-
-export class LegalConfig {
-    constructor(
-        @Field("privacyUrl", true) public privacyUrl?: string,
-        @Field("imprintUrl", true) public imprintUrl?: string,
-    ) {}
-}
-
-export class ClientMapConfig {
-    constructor(
-        @Field("mapUrl") public mapUrl: string,
-    ) {}
-}
-export class MonitoringConfig {
-    constructor(
-        @Field("enabled") public enabled: boolean,
-    ) {}
-}
-
-export class Coords {
-    constructor(
-        @Field("lat") public lat: number,
-        @Field("lng") public lng: number,
-    ) {}
-}
-
-export class CoordsSelectorConfig {
-    constructor(
-        @Field("lat") public lat: number,
-        @Field("lng") public lng: number,
-        @Field("defaultZoom") public defaultZoom: number,
-        @RawJsonField("layers") public layers: any, // TODO: Better types!
-    ) {}
-}
-
-export class OtherCommunityInfoConfig {
-    constructor(
-        @Field("showInfo") public showInfo: boolean,
-        @Field("showBorderForDebugging") public showBorderForDebugging: boolean,
-        @ArrayField("localCommunityPolygon", Coords) public localCommunityPolygon: Coords[],
-    ) {}
-}
-
-export class ClientConfig {
-    constructor(
-        @Field("community") public community: CommunityConfig,
-        @Field("legal") public legal: LegalConfig,
-        @Field("map") public map: ClientMapConfig,
-        @Field("monitoring") public monitoring: MonitoringConfig,
-        @Field("coordsSelector") public coordsSelector: CoordsSelectorConfig,
-        @Field("otherCommunityInfo") public otherCommunityInfo: OtherCommunityInfoConfig,
-        @Field("rootPath", true, undefined, "/") public rootPath: string,
-    ) {}
-}
-
 export class Config {
     constructor(
         @Field("server") public server: ServerConfig,
-        @Field("client") public client: ClientConfig
+        @Field("client") public client: ClientConfig,
     ) {}
 }

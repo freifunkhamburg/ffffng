@@ -3,6 +3,7 @@ import express from "express"
 import {app} from "./app"
 import {config} from "./config"
 
+import * as ConfigResource from "./resources/configResource"
 import * as VersionResource from "./resources/versionResource"
 import * as StatisticsResource from "./resources/statisticsResource"
 import * as FrontendResource from "./resources/frontendResource"
@@ -16,6 +17,7 @@ export function init (): void {
 
     router.post('/', FrontendResource.render);
 
+    router.get('/api/config', ConfigResource.get);
     router.get('/api/version', VersionResource.get);
 
     router.post('/api/node', NodeResource.create);
