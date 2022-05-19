@@ -12,6 +12,7 @@ stdenv.mkDerivation rec {
     nodejs-16_x
     rsync
     sqlite
+    yarn
     zlib
   ];
 
