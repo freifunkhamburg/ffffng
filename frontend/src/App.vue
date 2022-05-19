@@ -14,4 +14,15 @@ import PageFooter from "@/components/PageFooter.vue";
     <PageFooter />
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss">
+@import "scss/variables";
+
+body {
+    background-color: $page-background-color;
+    color: $page-text-color;
+}
+
+a {
+    color: $link-color;
+}
+</style>
