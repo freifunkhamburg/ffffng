@@ -35,7 +35,7 @@ refresh();
 
 <style lang="scss" scoped>
 @use "sass:math";
-@import "../scss/variables";
+@import "../../scss/variables";
 
 footer {
     position: absolute;

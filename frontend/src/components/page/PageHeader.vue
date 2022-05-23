@@ -36,7 +36,7 @@ refresh();
 </template>
 
 <style lang="scss" scoped>
-@import "../scss/variables";
+@import "../../scss/variables";
 
 header {
     background-color: $nav-bar-background-color;

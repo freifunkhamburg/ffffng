@@ -1,17 +1,34 @@
 // Grays
+$black: #000000;
 $gray-darkest: #222222;
 $gray-darker: #333333;
 $gray-dark: #444444;
 $gray: #666666;
 $gray-light: #d6d6d6;
 $gray-lighter: #ededed;
+$white: #ffffff;
 
 // Colors
-$color-primary: #e5287a;
-$color-success: #449d44;
-$color-warning: #fdbc41;
-$color-danger: #c9302c;
-$color-info: #009ee0;
+$variant-colors: (
+    primary: #e5287a,
+    success: #4ba74b,
+    warning: #fdbc41,
+    danger: #ef5652,
+    info: #009ee0,
+);
+$variant-text-colors: (
+    // primary: do not use, contrast too low
+    success: $gray-darkest,
+    warning: $gray-darkest,
+    danger: $gray-darkest,
+    info: $gray-darkest,
+);
+
+$variant-color-primary: map-get($variant-colors, primary);
+$variant-color-success: map-get($variant-colors, success);
+$variant-color-warning: map-get($variant-colors, warning);
+$variant-color-danger: map-get($variant-colors, danger);
+$variant-color-info: map-get($variant-colors, info);
 
 // Page
 $page-background-color: $gray-darkest;
@@ -19,7 +36,7 @@ $page-text-color: $gray-lighter;
 $page-padding: 0.5em;
 
 // Links
-$link-color: $color-warning;
+$link-color: $variant-color-warning;
 
 // Navigation
 $nav-bar-background-color: $gray-darker;
@@ -31,3 +48,12 @@ $nav-header-logo-size: 2em;
 $nav-header-logo-margin: 0 0.5em 0 0;
 
 $nav-footer-padding: 0.75em;
+
+// Statistics
+$statistics-card-height: 4.5em;
+$statistics-card-margin: 0.5em;
+$statistics-card-padding: 0.3em 0.5em;
+$statistics-card-border-radius: 0.5em;
+$statistics-card-icon-size: 4em;
+$statistics-card-icon-gap: 0.15em;
+$statistics-card-value-font-size: 2.5em;
