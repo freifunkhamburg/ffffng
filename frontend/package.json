@@ -1,6 +1,12 @@
 {
   "name": "ffffng-frontend",
-  "version": "0.0.0",
+  "version": "0.0.0-SNAPSHOT",
+    "description": "New frontend for ffffng",
+    "license": "AGPL",
+    "author": {
+        "name": "Andreas Baldeau",
+        "email": "andreas@baldeau.net"
+    },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
