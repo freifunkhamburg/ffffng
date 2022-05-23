@@ -15,14 +15,22 @@ import PageFooter from "@/components/PageFooter.vue";
 </template>
 
 <style lang="scss">
+@import "fork-awesome";
 @import "scss/variables";
 
 body {
     background-color: $page-background-color;
     color: $page-text-color;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin: 0;
+}
+
+main {
+    padding: $page-padding;
 }
 
 a {
     color: $link-color;
+    text-decoration: none;
 }
 </style>

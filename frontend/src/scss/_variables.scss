@@ -1,4 +1,5 @@
 // Grays
+$gray-darkest: #222222;
 $gray-darker: #333333;
 $gray-dark: #444444;
 $gray: #666666;
@@ -13,8 +14,20 @@ $color-danger: #c9302c;
 $color-info: #009ee0;
 
 // Page
-$page-background-color: $gray-darker;
+$page-background-color: $gray-darkest;
 $page-text-color: $gray-lighter;
+$page-padding: 0.5em;
 
 // Links
-$link-color: $color-primary;
+$link-color: $color-warning;
+
+// Navigation
+$nav-bar-background-color: $gray-darker;
+$nav-link-color: $page-text-color;
+$nav-link-spacing: 1.5em;
+
+$nav-header-padding: 0.75em;
+$nav-header-logo-size: 2em;
+$nav-header-logo-margin: 0 0.5em 0 0;
+
+$nav-footer-padding: 0.75em;

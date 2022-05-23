@@ -16,6 +16,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "fork-awesome": "^1.2.0",
     "pinia": "^2.0.14",
     "sparkson": "^1.3.6",
     "vue": "^3.2.36",
