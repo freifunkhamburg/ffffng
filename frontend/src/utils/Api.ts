@@ -1,3 +1,5 @@
+import type {TypeGuard} from "@/types/shared";
+
 class Api {
     private baseURL: string = import.meta.env.BASE_URL;
     private apiPrefix = "api/";
@@ -12,7 +14,7 @@ class Api {
         return this.baseURL + this.apiPrefix + path;
     }
 
-    async get<T>(path: string, isT: (arg: unknown) => arg is T): Promise<T> {
+    async get<T>(path: string, isT: TypeGuard<T>): Promise<T> {
         const url = this.toURL(path);
         const result = await fetch(url);
         const json = await result.json();

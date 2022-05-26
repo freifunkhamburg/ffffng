@@ -152,7 +152,7 @@ export async function getValidRestParams(
     return restParams as RestParams;
 }
 
-export function filter (entities: ArrayLike<Entity>, allowedFilterFields: string[], restParams: RestParams) {
+export function filter<E>(entities: ArrayLike<E>, allowedFilterFields: string[], restParams: RestParams): E[] {
     let query = restParams.q;
     if (query) {
         query = _.toLower(query.trim());
