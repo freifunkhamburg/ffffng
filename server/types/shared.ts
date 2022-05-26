@@ -44,6 +44,7 @@ export function isNodeStatistics(arg: unknown): arg is NodeStatistics {
         return false;
     }
     const stats = arg as NodeStatistics;
+    // noinspection SuspiciousTypeOfGuard
     return (
         typeof stats.registered === "number" &&
         typeof stats.withVPN === "number" &&
@@ -77,6 +78,7 @@ export function isCommunityConfig(arg: unknown): arg is CommunityConfig {
         return false;
     }
     const cfg = arg as CommunityConfig;
+    // noinspection SuspiciousTypeOfGuard
     return (
         typeof cfg.name === "string" &&
         typeof cfg.domain === "string" &&
@@ -98,6 +100,7 @@ export function isLegalConfig(arg: unknown): arg is LegalConfig {
         return false;
     }
     const cfg = arg as LegalConfig;
+    // noinspection SuspiciousTypeOfGuard
     return (
         (cfg.privacyUrl === undefined || typeof cfg.privacyUrl === "string") &&
         (cfg.imprintUrl === undefined || typeof cfg.imprintUrl === "string")
@@ -115,6 +118,7 @@ export function isClientMapConfig(arg: unknown): arg is ClientMapConfig {
         return false;
     }
     const cfg = arg as ClientMapConfig;
+    // noinspection SuspiciousTypeOfGuard
     return typeof cfg.mapUrl === "string";
 }
 
@@ -129,6 +133,7 @@ export function isMonitoringConfig(arg: unknown): arg is MonitoringConfig {
         return false;
     }
     const cfg = arg as MonitoringConfig;
+    // noinspection SuspiciousTypeOfGuard
     return typeof cfg.enabled === "boolean";
 }
 
@@ -144,6 +149,7 @@ export function isCoords(arg: unknown): arg is Coords {
         return false;
     }
     const coords = arg as Coords;
+    // noinspection SuspiciousTypeOfGuard
     return (
         typeof coords.lat === "number" &&
         typeof coords.lng === "number"
@@ -164,6 +170,7 @@ export function isCoordsSelectorConfig(arg: unknown): arg is CoordsSelectorConfi
         return false;
     }
     const cfg = arg as CoordsSelectorConfig;
+    // noinspection SuspiciousTypeOfGuard
     return (
         typeof cfg.lat === "number" &&
         typeof cfg.lng === "number" &&
@@ -185,6 +192,7 @@ export function isOtherCommunityInfoConfig(arg: unknown): arg is OtherCommunityI
         return false;
     }
     const cfg = arg as OtherCommunityInfoConfig;
+    // noinspection SuspiciousTypeOfGuard
     return (
         typeof cfg.showInfo === "boolean" &&
         typeof cfg.showBorderForDebugging === "boolean" &&
@@ -210,6 +218,7 @@ export function isClientConfig(arg: unknown): arg is ClientConfig {
         return false;
     }
     const cfg = arg as ClientConfig;
+    // noinspection SuspiciousTypeOfGuard
     return (
         isCommunityConfig(cfg.community) &&
         isLegalConfig(cfg.legal) &&
