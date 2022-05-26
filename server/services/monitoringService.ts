@@ -16,7 +16,7 @@ import {normalizeMac} from "../utils/strings";
 import {monitoringDisableUrl} from "../utils/urlBuilder";
 import CONSTRAINTS from "../validation/constraints";
 import {forConstraint} from "../validation/validator";
-import {MAC, MailType, Node, NodeId, NodeState, NodeStateData, UnixTimestampSeconds} from "../types";
+import {MAC, MailType, Node, NodeId, OnlineState, NodeStateData, UnixTimestampSeconds} from "../types";
 
 const MONITORING_STATE_MACS_CHUNK_SIZE = 100;
 const NEVER_ONLINE_NODES_DELETION_CHUNK_SIZE = 20;
@@ -37,7 +37,7 @@ const DELETE_OFFLINE_NODES_AFTER_DURATION: {amount: number, unit: unitOfTime.Dur
 export type ParsedNode = {
     mac: string,
     importTimestamp: Moment,
-    state: NodeState,
+    state: OnlineState,
     lastSeen: Moment,
     site: string,
     domain: string,
@@ -212,7 +212,7 @@ export function parseNode(importTimestamp: Moment, nodeData: any): ParsedNode {
     return {
         mac: mac,
         importTimestamp: importTimestamp,
-        state: isOnline ? NodeState.ONLINE : NodeState.OFFLINE,
+        state: isOnline ? OnlineState.ONLINE : OnlineState.OFFLINE,
         lastSeen: lastSeen,
         site: site || '<unknown-site>',
         domain: domain || '<unknown-domain>'
@@ -520,7 +520,7 @@ async function retrieveNodeInformationForUrls(urls: string[]): Promise<RetrieveN
         'SET state = ?, modified_at = ?' +
         'WHERE import_timestamp < ?',
         [
-            NodeState.OFFLINE, moment().unix(),
+            OnlineState.OFFLINE, moment().unix(),
             minTimestamp.unix()
         ]
     );

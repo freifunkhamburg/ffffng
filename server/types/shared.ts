@@ -1,12 +1,13 @@
 import {ArrayField, Field, RawJsonField} from "sparkson";
 
 // Types shared with the client.
+export type TypeGuard<T> = (arg: unknown) => arg is T;
 
 export function isObject(arg: unknown): arg is object {
     return arg !== null && typeof arg === "object";
 }
 
-export function isArray<T>(arg: unknown, isT: (arg: unknown) => arg is T): arg is Array<T> {
+export function isArray<T>(arg: unknown, isT: TypeGuard<T>): arg is Array<T> {
     if (!Array.isArray(arg)) {
         return false;
     }
@@ -22,12 +23,18 @@ export function isString(arg: unknown): arg is string {
     return typeof arg === "string"
 }
 
+export function toIsArray<T>(isT: TypeGuard<T>): TypeGuard<T[]> {
+    return (arg): arg is T[] => isArray(arg, isT);
+}
+
+export function toIsEnum<E>(enumDef: E): TypeGuard<E> {
+    return (arg): arg is E => Object.values(enumDef).includes(arg as [keyof E]);
+}
+
 export type Version = string;
 
-export function isVersion(arg: unknown): arg is Version {
-    // Should be good enough for now.
-    return typeof arg === "string";
-}
+// Should be good enough for now.
+export const isVersion = isString;
 
 export type NodeStatistics = {
     registered: number;
@@ -229,3 +236,95 @@ export function isClientConfig(arg: unknown): arg is ClientConfig {
         typeof cfg.rootPath === "string"
     );
 }
+
+// TODO: Token type.
+export type Token = string;
+export const isToken = isString;
+
+export type FastdKey = string;
+export const isFastdKey = isString;
+
+export type MAC = string;
+export const isMAC = isString;
+
+export type UnixTimestampSeconds = number;
+export type UnixTimestampMilliseconds = number;
+
+export type MonitoringToken = string;
+export enum MonitoringState {
+    ACTIVE = "active",
+    PENDING = "pending",
+    DISABLED = "disabled",
+}
+
+export const isMonitoringState = toIsEnum(MonitoringState);
+
+export type NodeId = string;
+export const isNodeId = isString;
+
+export interface Node {
+    token: Token;
+    nickname: string;
+    email: string;
+    hostname: string;
+    coords?: string; // TODO: Use object with longitude and latitude.
+    key?: FastdKey;
+    mac: MAC;
+    monitoring: boolean;
+    monitoringConfirmed: boolean;
+    monitoringState: MonitoringState;
+    modifiedAt: UnixTimestampSeconds;
+}
+
+export function isNode(arg: unknown): arg is Node {
+    if (!isObject(arg)) {
+        return false;
+    }
+    const node = arg as Node;
+    // noinspection SuspiciousTypeOfGuard
+    return (
+        isToken(node.token) &&
+        typeof node.nickname === "string" &&
+        typeof node.email === "string" &&
+        typeof node.hostname === "string" &&
+        (node.coords === undefined || typeof node.coords === "string") &&
+        (node.key === undefined || isFastdKey(node.key)) &&
+        isMAC(node.mac) &&
+        typeof node.monitoring === "boolean" &&
+        typeof node.monitoringConfirmed === "boolean" &&
+        isMonitoringState(node.monitoringState) &&
+        typeof node.modifiedAt === "number"
+    );
+}
+
+export enum OnlineState {
+    ONLINE = "ONLINE",
+    OFFLINE = "OFFLINE",
+}
+export const isOnlineState = toIsEnum(OnlineState);
+
+export type Site = string;
+export const isSite = isString;
+
+export type Domain = string;
+export const isDomain = isString;
+
+export interface EnhancedNode extends Node {
+    site?: Site,
+    domain?: Domain,
+    onlineState?: OnlineState,
+}
+
+export function isEnhancedNode(arg: unknown): arg is EnhancedNode {
+    if (!isNode(arg)) {
+        return false;
+    }
+    const node = arg as EnhancedNode;
+    return (
+        (node.site === undefined || isSite(node.site)) &&
+        (node.domain === undefined || isDomain(node.domain)) &&
+        (node.onlineState === undefined || isOnlineState(node.onlineState))
+    );
+}
+
+export const isEnhancedNodes = toIsArray(isEnhancedNode);

@@ -10,7 +10,7 @@ import {forConstraint, forConstraints} from "../validation/validator";
 import * as Resources from "../utils/resources";
 import {Entity} from "../utils/resources";
 import {Request, Response} from "express";
-import {Node} from "../types";
+import {EnhancedNode, Node} from "../types";
 
 const nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords', 'monitoring'];
 
@@ -97,7 +97,7 @@ async function doGetAll(req: Request): Promise<{ total: number; pageNodes: any }
     const macs = _.map(realNodes, (node: Node): string => node.mac);
     const nodeStateByMac = await MonitoringService.getByMacs(macs);
 
-    const enhancedNodes: Entity[] = _.map(realNodes, (node: Node) => {
+    const enhancedNodes: EnhancedNode[] = _.map(realNodes, (node: Node): EnhancedNode => {
         const nodeState = nodeStateByMac[node.mac];
         if (nodeState) {
             return deepExtend({}, node, {
@@ -107,10 +107,10 @@ async function doGetAll(req: Request): Promise<{ total: number; pageNodes: any }
             });
         }
 
-        return node;
+        return node as EnhancedNode;
     });
 
-    const filteredNodes = Resources.filter(
+    const filteredNodes = Resources.filter<EnhancedNode>(
         enhancedNodes,
         [
             'hostname',

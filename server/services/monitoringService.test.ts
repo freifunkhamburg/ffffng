@@ -1,6 +1,6 @@
 import moment from 'moment';
 import {ParsedNode, parseNode, parseNodesJson, parseTimestamp} from "./monitoringService";
-import {NodeState} from "../types";
+import {OnlineState} from "../types";
 import Logger from '../logger';
 import {MockLogger} from "../__mocks__/logger";
 
@@ -242,7 +242,7 @@ test('parseNode() should succeed parsing node without site and domain', () => {
     const expectedParsedNode: ParsedNode = {
         mac: "12:34:56:78:90:AB",
         importTimestamp: importTimestamp,
-        state: NodeState.ONLINE,
+        state: OnlineState.ONLINE,
         lastSeen: parseTimestamp(TIMESTAMP_VALID_STRING),
         site: '<unknown-site>',
         domain: '<unknown-domain>'
@@ -274,7 +274,7 @@ test('parseNode() should succeed parsing node with site and domain', () => {
     const expectedParsedNode: ParsedNode = {
         mac: "12:34:56:78:90:AB",
         importTimestamp: importTimestamp,
-        state: NodeState.ONLINE,
+        state: OnlineState.ONLINE,
         lastSeen: parseTimestamp(TIMESTAMP_VALID_STRING),
         site: 'test-site',
         domain: 'test-domain'
@@ -463,7 +463,7 @@ test('parseNodesJson() should parse valid nodes', () => {
     const expectedParsedNode: ParsedNode = {
         mac: "12:34:56:78:90:AB",
         importTimestamp: parseTimestamp(TIMESTAMP_VALID_STRING),
-        state: NodeState.ONLINE,
+        state: OnlineState.ONLINE,
         lastSeen: parseTimestamp(TIMESTAMP_VALID_STRING),
         site: 'test-site',
         domain: 'test-domain'
