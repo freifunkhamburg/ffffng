@@ -14,9 +14,8 @@ refresh();
     <header v-if="config.getConfig">
         <nav>
             <RouterLink class="logo" to="/">
-                <!--suppress HtmlUnknownTarget -->
                 <img
-                    src="icon.svg"
+                    src="/icon.svg"
                     alt="Symbol: Gelbes Zahnrad in zwei konzentrischen Kreisen (hellgrau und magenta)"
                     aria-hidden="true"
                 />
