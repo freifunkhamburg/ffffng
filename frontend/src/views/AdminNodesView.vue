@@ -9,19 +9,25 @@ type NodesRedactFieldsMap = Partial<Record<MAC, NodeRedactFieldsMap>>;
 
 const nodes = useNodesStore();
 const page = ref(0);
+const redactFieldsByDefault = ref(true);
 const nodesRedactFieldsMap = ref({} as NodesRedactFieldsMap)
 
 function refresh(): void {
     nodes.refresh();
 }
 
+function redactAllFields(shallRedactFields: boolean): void {
+    redactFieldsByDefault.value = shallRedactFields;
+    nodesRedactFieldsMap.value = {};
+}
+
 function shallRedactField(node: EnhancedNode, field: NodeRedactField): boolean {
     const redactFieldsMap = nodesRedactFieldsMap.value[node.mac];
     if (!redactFieldsMap) {
-        return true;
+        return redactFieldsByDefault.value;
     }
     const redactField = redactFieldsMap[field];
-    return redactField === undefined || redactField;
+    return redactField === undefined ? redactFieldsByDefault.value : redactField;
 }
 
 function setRedactField(node: EnhancedNode, field: NodeRedactField, value: boolean): void {
@@ -45,6 +51,16 @@ refresh();
 
     <div>
         <span>Gesamt: {{nodes.getTotalNodes}}</span>
+        <button
+            v-if="redactFieldsByDefault"
+            @click="redactAllFields(false)">
+            Sensible Daten einblenden
+        </button>
+        <button
+            v-if="!redactFieldsByDefault"
+            @click="redactAllFields(true)">
+            Sensible Daten ausblenden
+        </button>
     </div>
     <table>
         <thead>
