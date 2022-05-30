@@ -1,9 +1,10 @@
 import {defineStore} from "pinia";
-import {isEnhancedNodes, type EnhancedNode} from "@/types";
+import {isEnhancedNode, type EnhancedNode} from "@/types";
 import {internalApi} from "@/utils/Api";
 
 interface NodesStoreState {
     nodes: EnhancedNode[];
+    totalNodes: number;
 }
 
 export const useNodesStore = defineStore({
@@ -11,19 +12,26 @@ export const useNodesStore = defineStore({
     state(): NodesStoreState {
         return {
             nodes: [],
+            totalNodes: 0,
         };
     },
     getters: {
         getNodes(state: NodesStoreState): EnhancedNode[] {
             return state.nodes;
         },
+
+        getTotalNodes(state: NodesStoreState): number {
+            return state.totalNodes;
+        }
     },
     actions: {
         async refresh(): Promise<void> {
-            this.nodes = await internalApi.get<EnhancedNode[]>(
+            const result = await internalApi.getPagedList<EnhancedNode>(
                 "nodes",
-                isEnhancedNodes
+                isEnhancedNode
             );
+            this.nodes = result.entries;
+            this.totalNodes = result.total;
         },
     },
 });

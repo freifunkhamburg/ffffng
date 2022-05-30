@@ -326,5 +326,3 @@ export function isEnhancedNode(arg: unknown): arg is EnhancedNode {
         (node.onlineState === undefined || isOnlineState(node.onlineState))
     );
 }
-
-export const isEnhancedNodes = toIsArray(isEnhancedNode);

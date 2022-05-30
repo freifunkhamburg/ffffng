@@ -33,12 +33,20 @@ function setRedactField(node: EnhancedNode, field: NodeRedactField, value: boole
     redactFieldsMap[field] = value;
 }
 
+function hasOnlineState(node: EnhancedNode): boolean {
+    return node.onlineState !== undefined;
+}
+
 refresh();
 </script>
 
 <template>
     <main>
         <h2>Knoten</h2>
+
+        <div>
+            <span>Gesamt: {{nodes.getTotalNodes}}</span>
+        </div>
         <table>
             <thead>
                 <tr>
@@ -57,7 +65,9 @@ refresh();
             </thead>
 
             <tbody>
-                <tr v-for="node in nodes.getNodes">
+                <tr
+                    v-for="node in nodes.getNodes"
+                    :class="[hasOnlineState ? node.onlineState.toLowerCase() : 'online-state-unknown']">
                     <td>{{node.hostname}}</td>
                     <td v-if="shallRedactField(node, 'nickname')">
                         <span
@@ -102,12 +112,51 @@ refresh();
                         </span>
                     </td>
                     <td>{{node.mac}}</td>
-                    <td>{{node.key}}</td><!-- TODO: Icon if set -->
+                    <td class="icon">
+                        <i
+                            v-if="node.key"
+                            class="fa fa-lock"
+                            aria-hidden="true"
+                            title="Hat VPN-Schlüssel" />
+                        <i
+                            v-if="!node.key"
+                            class="fa fa-times not-available"
+                            aria-hidden="true"
+                            title="Hat keinen VPN-Schlüssel" />
+                    </td>
                     <td>{{node.site}}</td>
                     <td>{{node.domain}}</td>
-                    <td>{{node.coords}}</td><!-- TODO: Icon with link if set -->
-                    <td>{{node.onlineState}}</td>
-                    <td>{{node.monitoring}}</td><!-- TODO: Icon regarding state -->
+                    <td class="icon">
+                        <i
+                            v-if="node.coords"
+                            class="fa fa-map-marker"
+                            aria-hidden="true"
+                            title="Hat Koordinaten" />
+                        <i
+                            v-if="!node.coords"
+                            class="fa fa-times not-available"
+                            aria-hidden="true"
+                            title="Hat keinen Koordinaten" />
+                    </td>
+                    <td v-if="node.onlineState !== undefined">{{node.onlineState.toLowerCase()}}</td>
+                    <td v-if="node.onlineState === undefined">unbekannt</td>
+                    <td class="icon">
+                        <i
+                            v-if="node.monitoring && node.monitoringConfirmed"
+                            class="fa fa-heartbeat"
+                            aria-hidden="true"
+                            title="Monitoring aktiv" />
+                        <i
+                            v-if="node.monitoring && !node.monitoringConfirmed"
+                            class="fa fa-envelope"
+                            aria-hidden="true"
+                            title="Monitoring nicht bestätigt" />
+                        <i
+                            v-if="!node.monitoring"
+                            class="fa fa-times not-available"
+                            aria-hidden="true"
+                            title="Monitoring deaktiviert" />
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -127,12 +176,32 @@ table {
         border-top: 1px solid $gray-light;
     }
 
+    .online {
+        color: $variant-color-success;
+    }
+
+    .offline {
+        color: $variant-color-danger;
+    }
+
+    .online-state-unknown {
+        color: $variant-color-warning;
+    }
+
+    .icon {
+        text-align: center;
+    }
+
     .redacted, .redactable {
         cursor: pointer;
     }
 
     .redacted {
         filter: blur(0.2em);
+    }
+
+    .not-available {
+        color: $gray-dark
     }
 }
 </style>
