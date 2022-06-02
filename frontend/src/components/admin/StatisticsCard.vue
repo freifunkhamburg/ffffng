@@ -1,14 +1,7 @@
 <script setup lang="ts">
 import {computed, defineProps} from "vue";
 
-const {
-    title,
-    icon,
-    variant,
-    value,
-    link,
-    filter,
-} = defineProps({
+const props = defineProps({
     title: {
         type: String,
         required: true,
@@ -36,11 +29,11 @@ const {
 });
 
 const linkTarget = computed(() => {
-    if (filter) {
-        const json = JSON.stringify(filter);
-        return `${link}?search=${encodeURIComponent(json)}`;
+    if (props.filter) {
+        const json = JSON.stringify(props.filter);
+        return `${props.link}?search=${encodeURIComponent(json)}`;
     } else {
-        return link;
+        return props.link;
     }
 });
 </script>
