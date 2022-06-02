@@ -23,12 +23,22 @@ class Api {
         }
     }
 
-    private toURL(path: string): string {
-        return this.baseURL + this.apiPrefix + path;
+    private toURL(path: string, queryParams?: object): string {
+        let queryString = "";
+        if (queryParams) {
+            const queryStrings: string[] = [];
+            for (const [key, value] of Object.entries(queryParams)) {
+                queryStrings.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+            }
+            if (queryStrings.length > 0) {
+                queryString = `?${queryStrings.join("&")}`;
+            }
+        }
+        return this.baseURL + this.apiPrefix + path + queryString;
     }
 
-    private async doGet<T>(path: string, isT: TypeGuard<T>): Promise<Response<T>> {
-        const url = this.toURL(path);
+    private async doGet<T>(path: string, isT: TypeGuard<T>, queryParams?: object): Promise<Response<T>> {
+        const url = this.toURL(path, queryParams);
         const result = await fetch(url);
         const json = await result.json();
 
@@ -48,8 +58,16 @@ class Api {
         return response.result;
     }
 
-    async getPagedList<T>(path: string, isT: TypeGuard<T>): Promise<PagedListResult<T>> {
-        const response = await this.doGet(path, toIsArray(isT));
+    async getPagedList<T>(
+        path: string,
+        isT: TypeGuard<T>,
+        page: number,
+        itemsPerPage: number,
+    ): Promise<PagedListResult<T>> {
+        const response = await this.doGet(path, toIsArray(isT), {
+            _page: page,
+            _perPage: itemsPerPage,
+        });
         const totalStr = response.headers.get("x-total-count");
         const total = parseInteger(totalStr, 10);
 

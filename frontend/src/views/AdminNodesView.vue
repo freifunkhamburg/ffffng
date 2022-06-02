@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import {useNodesStore} from "@/stores/nodes";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import type {EnhancedNode, MAC} from "@/types";
+import Pager from "@/components/Pager.vue";
 
 type NodeRedactField = "nickname" | "email" | "token";
 type NodeRedactFieldsMap = Partial<Record<NodeRedactField, boolean>>;
 type NodesRedactFieldsMap = Partial<Record<MAC, NodeRedactFieldsMap>>;
 
 const nodes = useNodesStore();
-const page = ref(0);
 const redactFieldsByDefault = ref(true);
 const nodesRedactFieldsMap = ref({} as NodesRedactFieldsMap)
 
-function refresh(): void {
-    nodes.refresh();
+async function refresh(page: number): Promise<void> {
+    await nodes.refresh(page, 50);
 }
 
 function redactAllFields(shallRedactFields: boolean): void {
@@ -39,11 +39,7 @@ function setRedactField(node: EnhancedNode, field: NodeRedactField, value: boole
     redactFieldsMap[field] = value;
 }
 
-function hasOnlineState(node: EnhancedNode): boolean {
-    return node.onlineState !== undefined;
-}
-
-refresh();
+onMounted(async () => await refresh(1));
 </script>
 
 <template>
@@ -62,6 +58,13 @@ refresh();
             Sensible Daten ausblenden
         </button>
     </div>
+
+    <Pager
+        :page="nodes.getPage"
+        :itemsPerPage="nodes.getNodesPerPage"
+        :totalItems="nodes.getTotalNodes"
+        @changePage="refresh" />
+
     <table>
         <thead>
             <tr>
@@ -82,7 +85,7 @@ refresh();
         <tbody>
             <tr
                 v-for="node in nodes.getNodes"
-                :class="[hasOnlineState ? node.onlineState.toLowerCase() : 'online-state-unknown']">
+                :class="[node.onlineState ? node.onlineState.toLowerCase() : 'online-state-unknown']">
                 <td>{{node.hostname}}</td>
                 <td v-if="shallRedactField(node, 'nickname')">
                     <span
@@ -175,6 +178,12 @@ refresh();
             </tr>
         </tbody>
     </table>
+
+    <Pager
+        :page="nodes.getPage"
+        :itemsPerPage="nodes.getNodesPerPage"
+        :totalItems="nodes.getTotalNodes"
+        @changePage="refresh" />
 </template>
 
 <style lang="scss" scoped>
