@@ -23,12 +23,24 @@ export function isString(arg: unknown): arg is string {
     return typeof arg === "string"
 }
 
+export function isNumber(arg: unknown): arg is number {
+    return typeof arg === "number"
+}
+
+export function isBoolean(arg: unknown): arg is boolean {
+    return typeof arg === "boolean"
+}
+
 export function toIsArray<T>(isT: TypeGuard<T>): TypeGuard<T[]> {
     return (arg): arg is T[] => isArray(arg, isT);
 }
 
 export function toIsEnum<E>(enumDef: E): TypeGuard<E> {
     return (arg): arg is E => Object.values(enumDef).includes(arg as [keyof E]);
+}
+
+export function isOptional<T>(arg: unknown, isT: TypeGuard<T>): arg is (T | undefined) {
+    return arg === undefined || isT(arg);
 }
 
 export type Version = string;
@@ -51,14 +63,13 @@ export function isNodeStatistics(arg: unknown): arg is NodeStatistics {
         return false;
     }
     const stats = arg as NodeStatistics;
-    // noinspection SuspiciousTypeOfGuard
     return (
-        typeof stats.registered === "number" &&
-        typeof stats.withVPN === "number" &&
-        typeof stats.withCoords === "number" &&
-        typeof stats.monitoring === "object" &&
-        typeof stats.monitoring.active === "number" &&
-        typeof stats.monitoring.pending === "number"
+        isNumber(stats.registered) &&
+        isNumber(stats.withVPN) &&
+        isNumber(stats.withCoords) &&
+        isObject(stats.monitoring) &&
+        isNumber(stats.monitoring.active) &&
+        isNumber(stats.monitoring.pending)
     );
 }
 
@@ -85,11 +96,10 @@ export function isCommunityConfig(arg: unknown): arg is CommunityConfig {
         return false;
     }
     const cfg = arg as CommunityConfig;
-    // noinspection SuspiciousTypeOfGuard
     return (
-        typeof cfg.name === "string" &&
-        typeof cfg.domain === "string" &&
-        typeof cfg.contactEmail === "string" &&
+        isString(cfg.name) &&
+        isString(cfg.domain) &&
+        isString(cfg.contactEmail) &&
         isArray(cfg.sites, isString) &&
         isArray(cfg.domains, isString)
     );
@@ -107,10 +117,9 @@ export function isLegalConfig(arg: unknown): arg is LegalConfig {
         return false;
     }
     const cfg = arg as LegalConfig;
-    // noinspection SuspiciousTypeOfGuard
     return (
-        (cfg.privacyUrl === undefined || typeof cfg.privacyUrl === "string") &&
-        (cfg.imprintUrl === undefined || typeof cfg.imprintUrl === "string")
+        isOptional(cfg.privacyUrl, isString) &&
+        isOptional(cfg.imprintUrl, isString)
     );
 }
 
@@ -125,8 +134,7 @@ export function isClientMapConfig(arg: unknown): arg is ClientMapConfig {
         return false;
     }
     const cfg = arg as ClientMapConfig;
-    // noinspection SuspiciousTypeOfGuard
-    return typeof cfg.mapUrl === "string";
+    return isString(cfg.mapUrl);
 }
 
 export class MonitoringConfig {
@@ -140,8 +148,7 @@ export function isMonitoringConfig(arg: unknown): arg is MonitoringConfig {
         return false;
     }
     const cfg = arg as MonitoringConfig;
-    // noinspection SuspiciousTypeOfGuard
-    return typeof cfg.enabled === "boolean";
+    return isBoolean(cfg.enabled);
 }
 
 export class Coords {
@@ -156,10 +163,9 @@ export function isCoords(arg: unknown): arg is Coords {
         return false;
     }
     const coords = arg as Coords;
-    // noinspection SuspiciousTypeOfGuard
     return (
-        typeof coords.lat === "number" &&
-        typeof coords.lng === "number"
+        isNumber(coords.lat) &&
+        isNumber(coords.lng)
     );
 }
 
@@ -177,11 +183,10 @@ export function isCoordsSelectorConfig(arg: unknown): arg is CoordsSelectorConfi
         return false;
     }
     const cfg = arg as CoordsSelectorConfig;
-    // noinspection SuspiciousTypeOfGuard
     return (
-        typeof cfg.lat === "number" &&
-        typeof cfg.lng === "number" &&
-        typeof cfg.defaultZoom === "number" &&
+        isNumber(cfg.lat) &&
+        isNumber(cfg.lng) &&
+        isNumber(cfg.defaultZoom) &&
         isObject(cfg.layers) // TODO: Better types!
     );
 }
@@ -199,10 +204,9 @@ export function isOtherCommunityInfoConfig(arg: unknown): arg is OtherCommunityI
         return false;
     }
     const cfg = arg as OtherCommunityInfoConfig;
-    // noinspection SuspiciousTypeOfGuard
     return (
-        typeof cfg.showInfo === "boolean" &&
-        typeof cfg.showBorderForDebugging === "boolean" &&
+        isBoolean(cfg.showInfo) &&
+        isBoolean(cfg.showBorderForDebugging) &&
         isArray(cfg.localCommunityPolygon, isCoords)
     );
 }
@@ -225,7 +229,6 @@ export function isClientConfig(arg: unknown): arg is ClientConfig {
         return false;
     }
     const cfg = arg as ClientConfig;
-    // noinspection SuspiciousTypeOfGuard
     return (
         isCommunityConfig(cfg.community) &&
         isLegalConfig(cfg.legal) &&
@@ -233,7 +236,7 @@ export function isClientConfig(arg: unknown): arg is ClientConfig {
         isMonitoringConfig(cfg.monitoring) &&
         isCoordsSelectorConfig(cfg.coordsSelector) &&
         isOtherCommunityInfoConfig(cfg.otherCommunityInfo) &&
-        typeof cfg.rootPath === "string"
+        isString(cfg.rootPath)
     );
 }
 
@@ -281,19 +284,18 @@ export function isNode(arg: unknown): arg is Node {
         return false;
     }
     const node = arg as Node;
-    // noinspection SuspiciousTypeOfGuard
     return (
         isToken(node.token) &&
-        typeof node.nickname === "string" &&
-        typeof node.email === "string" &&
-        typeof node.hostname === "string" &&
-        (node.coords === undefined || typeof node.coords === "string") &&
-        (node.key === undefined || isFastdKey(node.key)) &&
+        isString(node.nickname) &&
+        isString(node.email) &&
+        isString(node.hostname) &&
+        isOptional(node.coords, isString) &&
+        isOptional(node.key, isFastdKey) &&
         isMAC(node.mac) &&
-        typeof node.monitoring === "boolean" &&
-        typeof node.monitoringConfirmed === "boolean" &&
+        isBoolean(node.monitoring) &&
+        isBoolean(node.monitoringConfirmed) &&
         isMonitoringState(node.monitoringState) &&
-        typeof node.modifiedAt === "number"
+        isNumber(node.modifiedAt)
     );
 }
 
@@ -321,8 +323,26 @@ export function isEnhancedNode(arg: unknown): arg is EnhancedNode {
     }
     const node = arg as EnhancedNode;
     return (
-        (node.site === undefined || isSite(node.site)) &&
-        (node.domain === undefined || isDomain(node.domain)) &&
-        (node.onlineState === undefined || isOnlineState(node.onlineState))
+        isOptional(node.site, isSite) &&
+        isOptional(node.domain, isDomain) &&
+        isOptional(node.onlineState, isOnlineState)
+    );
+}
+
+export interface NodesFilter {
+    hasKey?: boolean;
+    hasCoords?: boolean;
+    monitoringState?: MonitoringState;
+}
+
+export function isNodesFilter(arg: unknown): arg is NodesFilter {
+    if (!isObject(arg)) {
+        return false;
+    }
+    const filter = arg as NodesFilter;
+    return (
+        isOptional(filter.hasKey, isBoolean) &&
+        isOptional(filter.hasCoords, isBoolean) &&
+        isOptional(filter.monitoringState, isMonitoringState)
     );
 }
