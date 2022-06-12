@@ -1,37 +1,24 @@
 <script setup lang="ts">
 import {computed, defineProps} from "vue";
+import type {NodesFilter} from "@/types";
 
-const props = defineProps({
-    title: {
-        type: String,
-        required: true,
-    },
-    icon: {
-        type: String,
-        required: true,
-    },
-    variant: {
-        type: String,
-        required: true,
-    },
-    value: {
-        type: Number,
-        required: true,
-    },
-    link: {
-        type: String,
-        required: true,
-    },
-    filter: {
-        type: Object,
-        required: false,
-    },
-});
+interface Props {
+    title: string;
+    icon: string;
+    variant: string;
+    value: number;
+    link: string;
+    filter?: NodesFilter;
+}
+
+const props = defineProps<Props>();
 
 const linkTarget = computed(() => {
     if (props.filter) {
-        const json = JSON.stringify(props.filter);
-        return `${props.link}?search=${encodeURIComponent(json)}`;
+        return {
+            path: props.link,
+            query: props.filter,
+        }
     } else {
         return props.link;
     }

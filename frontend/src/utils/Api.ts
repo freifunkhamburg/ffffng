@@ -1,5 +1,4 @@
-import type {TypeGuard} from "@/types/shared";
-import {toIsArray} from "@/types/shared";
+import {toIsArray, type TypeGuard} from "@/types";
 import type {Headers} from "request";
 import {parseInteger} from "@/utils/Numbers";
 
@@ -63,10 +62,12 @@ class Api {
         isT: TypeGuard<T>,
         page: number,
         itemsPerPage: number,
+        filter?: object,
     ): Promise<PagedListResult<T>> {
         const response = await this.doGet(path, toIsArray(isT), {
             _page: page,
             _perPage: itemsPerPage,
+            ...filter,
         });
         const totalStr = response.headers.get("x-total-count");
         const total = parseInteger(totalStr, 10);

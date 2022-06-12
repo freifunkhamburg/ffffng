@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import {useNodesStore} from "@/stores/nodes";
 import {onMounted, ref} from "vue";
-import type {EnhancedNode, MAC} from "@/types";
+import type {EnhancedNode, MAC, NodesFilter} from "@/types";
 import Pager from "@/components/Pager.vue";
 import LoadingContainer from "@/components/LoadingContainer.vue";
 
 const NODE_PER_PAGE = 50;
+
+interface Props {
+    filter: NodesFilter;
+}
+
+const props = defineProps<Props>();
 
 type NodeRedactField = "nickname" | "email" | "token";
 type NodeRedactFieldsMap = Partial<Record<NodeRedactField, boolean>>;
@@ -21,7 +27,7 @@ async function refresh(page: number): Promise<void> {
     loading.value = true;
     redactAllFields(true);
     try {
-        await nodes.refresh(page, NODE_PER_PAGE);
+        await nodes.refresh(page, NODE_PER_PAGE, props.filter);
     } finally {
         loading.value = false;
     }

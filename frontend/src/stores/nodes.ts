@@ -1,5 +1,5 @@
 import {defineStore} from "pinia";
-import {isEnhancedNode, type EnhancedNode} from "@/types";
+import {type EnhancedNode, isEnhancedNode, type NodesFilter} from "@/types";
 import {internalApi} from "@/utils/Api";
 
 interface NodesStoreState {
@@ -37,12 +37,13 @@ export const useNodesStore = defineStore({
         },
     },
     actions: {
-        async refresh(page: number, nodesPerPage: number): Promise<void> {
+        async refresh(page: number, nodesPerPage: number, filter: NodesFilter): Promise<void> {
             const result = await internalApi.getPagedList<EnhancedNode>(
                 "nodes",
                 isEnhancedNode,
                 page,
                 nodesPerPage,
+                filter,
             );
             this.nodes = result.entries;
             this.totalNodes = result.total;
