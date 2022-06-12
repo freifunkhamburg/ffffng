@@ -38,7 +38,6 @@ export const useNodesStore = defineStore({
     },
     actions: {
         async refresh(page: number, nodesPerPage: number): Promise<void> {
-            // TODO: Handle paging
             const result = await internalApi.getPagedList<EnhancedNode>(
                 "nodes",
                 isEnhancedNode,

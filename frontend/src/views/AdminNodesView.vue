@@ -3,17 +3,28 @@ import {useNodesStore} from "@/stores/nodes";
 import {onMounted, ref} from "vue";
 import type {EnhancedNode, MAC} from "@/types";
 import Pager from "@/components/Pager.vue";
+import LoadingContainer from "@/components/LoadingContainer.vue";
+
+const NODE_PER_PAGE = 50;
 
 type NodeRedactField = "nickname" | "email" | "token";
 type NodeRedactFieldsMap = Partial<Record<NodeRedactField, boolean>>;
-type NodesRedactFieldsMap = Partial<Record<MAC, NodeRedactFieldsMap>>;
 
+type NodesRedactFieldsMap = Partial<Record<MAC, NodeRedactFieldsMap>>;
 const nodes = useNodesStore();
 const redactFieldsByDefault = ref(true);
 const nodesRedactFieldsMap = ref({} as NodesRedactFieldsMap)
 
+const loading = ref(false);
+
 async function refresh(page: number): Promise<void> {
-    await nodes.refresh(page, 50);
+    loading.value = true;
+    redactAllFields(true);
+    try {
+        await nodes.refresh(page, NODE_PER_PAGE);
+    } finally {
+        loading.value = false;
+    }
 }
 
 function redactAllFields(shallRedactFields: boolean): void {
@@ -46,7 +57,7 @@ onMounted(async () => await refresh(1));
     <h2>Knoten</h2>
 
     <div>
-        <span>Gesamt: {{nodes.getTotalNodes}}</span>
+        <span>Gesamt: {{ nodes.getTotalNodes }}</span>
         <button
             v-if="redactFieldsByDefault"
             @click="redactAllFields(false)">
@@ -63,10 +74,11 @@ onMounted(async () => await refresh(1));
         :page="nodes.getPage"
         :itemsPerPage="nodes.getNodesPerPage"
         :totalItems="nodes.getTotalNodes"
-        @changePage="refresh" />
+        @changePage="refresh"/>
 
-    <table>
-        <thead>
+    <LoadingContainer :loading="loading">
+        <table>
+            <thead>
             <tr>
                 <th>Name</th>
                 <th>Besitzer*in</th>
@@ -80,13 +92,13 @@ onMounted(async () => await refresh(1));
                 <th>Status</th>
                 <th>Monitoring</th>
             </tr>
-        </thead>
+            </thead>
 
-        <tbody>
+            <tbody>
             <tr
                 v-for="node in nodes.getNodes"
                 :class="[node.onlineState ? node.onlineState.toLowerCase() : 'online-state-unknown']">
-                <td>{{node.hostname}}</td>
+                <td>{{ node.hostname }}</td>
                 <td v-if="shallRedactField(node, 'nickname')">
                     <span
                         class="redacted"
@@ -98,7 +110,7 @@ onMounted(async () => await refresh(1));
                     <span
                         class="redactable"
                         @click="setRedactField(node, 'nickname', true)">
-                        {{node.nickname}}
+                        {{ node.nickname }}
                     </span>
                 </td>
                 <td v-if="shallRedactField(node, 'email')">
@@ -112,7 +124,7 @@ onMounted(async () => await refresh(1));
                     <span
                         class="redactable"
                         @click="setRedactField(node, 'email', true)">
-                        {{node.email}}
+                        {{ node.email }}
                     </span>
                 </td>
                 <td v-if="shallRedactField(node, 'token')">
@@ -126,68 +138,70 @@ onMounted(async () => await refresh(1));
                     <span
                         class="redactable"
                         @click="setRedactField(node, 'token', true)">
-                        {{node.token}}
+                        {{ node.token }}
                     </span>
                 </td>
-                <td>{{node.mac}}</td>
+                <td>{{ node.mac }}</td>
                 <td class="icon">
                     <i
                         v-if="node.key"
                         class="fa fa-lock"
                         aria-hidden="true"
-                        title="Hat VPN-Schlüssel" />
+                        title="Hat VPN-Schlüssel"/>
                     <i
                         v-if="!node.key"
                         class="fa fa-times not-available"
                         aria-hidden="true"
-                        title="Hat keinen VPN-Schlüssel" />
+                        title="Hat keinen VPN-Schlüssel"/>
                 </td>
-                <td>{{node.site}}</td>
-                <td>{{node.domain}}</td>
+                <td>{{ node.site }}</td>
+                <td>{{ node.domain }}</td>
                 <td class="icon">
                     <i
                         v-if="node.coords"
                         class="fa fa-map-marker"
                         aria-hidden="true"
-                        title="Hat Koordinaten" />
+                        title="Hat Koordinaten"/>
                     <i
                         v-if="!node.coords"
                         class="fa fa-times not-available"
                         aria-hidden="true"
-                        title="Hat keinen Koordinaten" />
+                        title="Hat keinen Koordinaten"/>
                 </td>
-                <td v-if="node.onlineState !== undefined">{{node.onlineState.toLowerCase()}}</td>
+                <td v-if="node.onlineState !== undefined">{{ node.onlineState.toLowerCase() }}</td>
                 <td v-if="node.onlineState === undefined">unbekannt</td>
                 <td class="icon">
                     <i
                         v-if="node.monitoring && node.monitoringConfirmed"
                         class="fa fa-heartbeat"
                         aria-hidden="true"
-                        title="Monitoring aktiv" />
+                        title="Monitoring aktiv"/>
                     <i
                         v-if="node.monitoring && !node.monitoringConfirmed"
                         class="fa fa-envelope"
                         aria-hidden="true"
-                        title="Monitoring nicht bestätigt" />
+                        title="Monitoring nicht bestätigt"/>
                     <i
                         v-if="!node.monitoring"
                         class="fa fa-times not-available"
                         aria-hidden="true"
-                        title="Monitoring deaktiviert" />
+                        title="Monitoring deaktiviert"/>
                 </td>
             </tr>
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </LoadingContainer>
 
     <Pager
         :page="nodes.getPage"
         :itemsPerPage="nodes.getNodesPerPage"
         :totalItems="nodes.getTotalNodes"
-        @changePage="refresh" />
+        @changePage="refresh"/>
 </template>
 
 <style lang="scss" scoped>
 @import "../scss/variables";
+
 table {
     border-collapse: collapse;
 
