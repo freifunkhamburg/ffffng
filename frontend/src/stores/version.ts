@@ -1,6 +1,6 @@
-import { defineStore } from "pinia";
-import { isObject, isVersion, type Version } from "@/types";
-import { api } from "@/utils/Api";
+import {defineStore} from "pinia";
+import {isObject, isVersion, type Version} from "@/types";
+import {api} from "@/utils/Api";
 
 interface VersionResponse {
     version: Version;

@@ -17,7 +17,9 @@ const linkTarget = computed(() => {
     if (props.filter) {
         return {
             path: props.link,
-            query: props.filter,
+            query: {
+                filter: JSON.stringify(props.filter),
+            },
         }
     } else {
         return props.link;
@@ -47,11 +49,19 @@ const linkTarget = computed(() => {
     padding: $statistics-card-padding;
 
     border-radius: $statistics-card-border-radius;
+    border-width: 0.2em;
+    border-style: solid;
 
     @each $variant, $color in $variant-colors {
         &.statistics-card-#{$variant} {
             background-color: $color;
             color: map-get($variant-text-colors, $variant);
+            border-color: $color;
+
+            &:focus {
+                border-color: $page-background-color;
+                outline: 0.2em solid $color;
+            }
         }
     }
 

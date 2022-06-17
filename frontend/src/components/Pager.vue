@@ -17,7 +17,6 @@ const props = defineProps({
 });
 
 const firstItem = computed(() => {
-    console.log(props.totalItems, props.page, props.itemsPerPage);
     return Math.min(props.totalItems, (props.page - 1) * props.itemsPerPage + 1)
 });
 const lastItem = computed(() => Math.min(props.totalItems, firstItem.value + props.itemsPerPage - 1));

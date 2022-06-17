@@ -1,8 +1,8 @@
 // Grays
 $black: #000000;
-$gray-darkest: #222222;
-$gray-darker: #333333;
-$gray-dark: #444444;
+$gray-darkest: #1c1c1c;
+$gray-darker: #2c2c2c;
+$gray-dark: #333333;
 $gray: #666666;
 $gray-light: #d6d6d6;
 $gray-lighter: #ededed;
@@ -14,7 +14,7 @@ $variant-colors: (
     success: #4ba74b,
     warning: #fdbc41,
     danger: #ef5652,
-    info: #009ee0,
+    info: #0097c4,
 );
 $variant-text-colors: (
     // primary: do not use, contrast too low
@@ -37,9 +37,24 @@ $page-padding: 0.5em 0.5em 4.5em 0.5em;
 
 // Links
 $link-color: $variant-color-warning;
+$link-hover-color: $variant-color-warning;
+
+// Inputs
+$input-background-color: $gray-lighter;
+$input-text-color: $gray-darkest;
+$input-placeholder-color: $gray-darkest;
+$input-placeholder-opacity: 0.8;
+$input-border: 0.1em solid $page-background-color;
+$input-border-radius: 0.5em;
+$input-focus-outline: 0.1em solid $variant-color-info;
+
+$button-padding: 0.25em 0.5em;
+$button-border-radius: $input-border-radius;
+$button-border-width: 0.1em;
+$button-border-style: solid;
 
 // Navigation
-$nav-bar-background-color: $gray-darker;
+$nav-bar-background-color: $gray-dark;
 $nav-link-color: $page-text-color;
 $nav-link-spacing: 1.5em;
 
@@ -57,3 +72,9 @@ $statistics-card-border-radius: 0.5em;
 $statistics-card-icon-size: 4em;
 $statistics-card-icon-gap: 0.15em;
 $statistics-card-value-font-size: 2.5em;
+
+// Nodes filter panel
+$nodes-filter-panel-pill-variant: success;
+$nodes-filter-panel-pill-text-color: map-get($variant-text-colors, $nodes-filter-panel-pill-variant);
+$nodes-filter-panel-pill-background-color: map-get($variant-colors, $nodes-filter-panel-pill-variant);
+$nodes-filter-panel-pill-font-weight: bold;

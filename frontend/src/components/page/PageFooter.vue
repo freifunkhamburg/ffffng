@@ -4,13 +4,6 @@ import {useVersionStore} from "@/stores/version";
 
 const config = useConfigStore();
 const version = useVersionStore();
-
-function refresh(): void {
-    config.refresh();
-    version.refresh();
-}
-
-refresh();
 </script>
 
 <template>

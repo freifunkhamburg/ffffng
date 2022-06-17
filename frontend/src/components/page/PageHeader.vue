@@ -2,12 +2,6 @@
 import { useConfigStore } from "@/stores/config";
 
 const config = useConfigStore();
-
-function refresh(): void {
-    config.refresh();
-}
-
-refresh();
 </script>
 
 <template>

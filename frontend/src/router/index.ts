@@ -21,9 +21,25 @@ const router = createRouter({
             path: "/admin/nodes",
             name: "admin-nodes",
             component: AdminNodesView,
-            props: route => ({
-                filter: isNodesFilter(route.query) ? route.query : {}
-            })
+            props: route => {
+                let filter: any;
+                if (route.query.hasOwnProperty("filter")) {
+                    try {
+                        filter = JSON.parse(route.query.filter as string);
+                    } catch (e) {
+                        console.warn(e);
+                        filter = {};
+                    }
+                } else {
+                    filter = {};
+                }
+
+                const searchTerm = route.query.q ? route.query.q as string : undefined;
+                return {
+                    filter: isNodesFilter(filter) ? filter : {},
+                    searchTerm,
+                }
+            }
         },
     ],
 });

@@ -1,17 +1,22 @@
 <script setup lang="ts">
 import {useNodesStore} from "@/stores/nodes";
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import type {EnhancedNode, MAC, NodesFilter} from "@/types";
 import Pager from "@/components/Pager.vue";
 import LoadingContainer from "@/components/LoadingContainer.vue";
+import NodesFilterPanel from "@/components/nodes/NodesFilterPanel.vue";
+import router from "@/router";
 
 const NODE_PER_PAGE = 50;
 
 interface Props {
     filter: NodesFilter;
+    searchTerm?: string;
 }
 
 const props = defineProps<Props>();
+const currentFilter = ref<NodesFilter>({});
+const currentSearchTerm = ref<string | undefined>(undefined);
 
 type NodeRedactField = "nickname" | "email" | "token";
 type NodeRedactFieldsMap = Partial<Record<NodeRedactField, boolean>>;
@@ -27,7 +32,7 @@ async function refresh(page: number): Promise<void> {
     loading.value = true;
     redactAllFields(true);
     try {
-        await nodes.refresh(page, NODE_PER_PAGE, props.filter);
+        await nodes.refresh(page, NODE_PER_PAGE, currentFilter.value, currentSearchTerm.value);
     } finally {
         loading.value = false;
     }
@@ -56,31 +61,58 @@ function setRedactField(node: EnhancedNode, field: NodeRedactField, value: boole
     redactFieldsMap[field] = value;
 }
 
-onMounted(async () => await refresh(1));
+async function updateFilter(filter: NodesFilter, searchTerm?: string): Promise<void> {
+    const filterStr = Object.keys(filter).length > 0 ? JSON.stringify(filter) : undefined;
+    await router.push({
+        path: '/admin/nodes',
+        query: {
+            q: searchTerm,
+            filter: filterStr
+        }
+    });
+    currentFilter.value = filter;
+    currentSearchTerm.value = searchTerm;
+    await refresh(1);
+}
+
+async function refreshFromProps(): Promise<void> {
+    const needsRefresh = currentFilter.value !== props.filter || currentSearchTerm.value !== props.searchTerm;
+    currentFilter.value = props.filter;
+    currentSearchTerm.value = props.searchTerm;
+    if (needsRefresh) {
+        await refresh(1);
+    }
+}
+
+onMounted(refreshFromProps);
+watch(props, refreshFromProps);
 </script>
 
 <template>
     <h2>Knoten</h2>
 
-    <div>
-        <span>Gesamt: {{ nodes.getTotalNodes }}</span>
-        <button
-            v-if="redactFieldsByDefault"
-            @click="redactAllFields(false)">
-            Sensible Daten einblenden
-        </button>
-        <button
-            v-if="!redactFieldsByDefault"
-            @click="redactAllFields(true)">
-            Sensible Daten ausblenden
-        </button>
-    </div>
+    <NodesFilterPanel :filter="props.filter" @update-filter="updateFilter"/>
 
     <Pager
         :page="nodes.getPage"
         :itemsPerPage="nodes.getNodesPerPage"
         :totalItems="nodes.getTotalNodes"
         @changePage="refresh"/>
+
+    <div class="actions">
+        <button
+            v-if="redactFieldsByDefault"
+            class="warning"
+            @click="redactAllFields(false)">
+            Sensible Daten einblenden
+        </button>
+        <button
+            v-if="!redactFieldsByDefault"
+            class="success"
+            @click="redactAllFields(true)">
+            Sensible Daten ausblenden
+        </button>
+    </div>
 
     <LoadingContainer :loading="loading">
         <table>
@@ -208,8 +240,16 @@ onMounted(async () => await refresh(1));
 <style lang="scss" scoped>
 @import "../scss/variables";
 
+.actions {
+    margin: 0 0 0.5em 0;
+}
+
 table {
     border-collapse: collapse;
+
+    tbody tr:hover {
+        background-color: $gray-darker;
+    }
 
     th, td {
         padding: 0.5em 0.25em;

@@ -37,13 +37,19 @@ export const useNodesStore = defineStore({
         },
     },
     actions: {
-        async refresh(page: number, nodesPerPage: number, filter: NodesFilter): Promise<void> {
+        async refresh(page: number, nodesPerPage: number, filter: NodesFilter, searchTerm?: string): Promise<void> {
+            const query: Record<string, any> = {
+                ...filter,
+            };
+            if (searchTerm) {
+                query.q = searchTerm;
+            }
             const result = await internalApi.getPagedList<EnhancedNode>(
                 "nodes",
                 isEnhancedNode,
                 page,
                 nodesPerPage,
-                filter,
+                query,
             );
             this.nodes = result.entries;
             this.totalNodes = result.total;

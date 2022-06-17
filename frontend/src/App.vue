@@ -32,5 +32,43 @@ main {
 a {
     color: $link-color;
     text-decoration: none;
+
+    &:hover {
+        color: $link-hover-color;
+    }
+
+    &:focus {
+        outline: 0.1em solid $link-hover-color;
+    }
+}
+
+button {
+    padding: $button-padding;
+    border-radius: $button-border-radius;
+    border-width: $button-border-width;
+    border-style: $button-border-style;
+
+    cursor: pointer;
+
+    @each $variant, $color in $variant-colors {
+        &.#{$variant} {
+            background-color: map-get($variant-text-colors, $variant);
+            border-color: $color;
+            color: $color;
+
+            &:hover, &:active {
+                background-color: $color;
+                border-color: $color;
+                color: map-get($variant-text-colors, $variant);
+            }
+
+            &:focus {
+                background-color: $color;
+                border-color: $page-background-color;
+                color: map-get($variant-text-colors, $variant);
+                outline: 0.1em solid $color;
+            }
+        }
+    }
 }
 </style>
