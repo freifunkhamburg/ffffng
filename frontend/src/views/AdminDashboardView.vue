@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import StatisticsCard from "@/components/admin/StatisticsCard.vue";
-import { useStatisticsStore } from "@/stores/statistics";
+import {useStatisticsStore} from "@/stores/statistics";
+import {MonitoringState} from "@/types";
 
 const statistics = useStatisticsStore();
 
@@ -45,7 +46,7 @@ refresh();
                 variant="success"
                 :value="statistics.getStatistics.nodes.monitoring.active"
                 link="/admin/nodes"
-                :filter="{monitoringState: 'active'}"
+                :filter="{monitoringState: MonitoringState.ACTIVE}"
                 />
             <StatisticsCard
                 title="Monitoring noch nicht bestätigt"
@@ -53,7 +54,7 @@ refresh();
                 variant="danger"
                 :value="statistics.getStatistics.nodes.monitoring.pending"
                 link="/admin/nodes"
-                :filter="{monitoringState: 'pending'}"
+                :filter="{monitoringState: MonitoringState.PENDING}"
                 />
         </div>
     </div>
