@@ -19,6 +19,10 @@ export function isArray<T>(arg: unknown, isT: TypeGuard<T>): arg is Array<T> {
     return true;
 }
 
+export function isMap(arg: unknown): arg is Map<any, any> {
+    return arg instanceof Map;
+}
+
 export function isString(arg: unknown): arg is string {
     return typeof arg === "string"
 }
@@ -333,7 +337,19 @@ export interface NodesFilter {
     hasKey?: boolean;
     hasCoords?: boolean;
     monitoringState?: MonitoringState;
+    site?: Site;
+    domain?: Domain;
+    onlineState?: OnlineState;
 }
+
+export const NODES_FILTER_FIELDS = {
+    hasKey: Boolean,
+    hasCoords: Boolean,
+    monitoringState: MonitoringState,
+    site: String,
+    domain: String,
+    onlineState: OnlineState,
+};
 
 export function isNodesFilter(arg: unknown): arg is NodesFilter {
     if (!isObject(arg)) {
@@ -343,6 +359,9 @@ export function isNodesFilter(arg: unknown): arg is NodesFilter {
     return (
         isOptional(filter.hasKey, isBoolean) &&
         isOptional(filter.hasCoords, isBoolean) &&
-        isOptional(filter.monitoringState, isMonitoringState)
+        isOptional(filter.monitoringState, isMonitoringState) &&
+        isOptional(filter.site, isSite) &&
+        isOptional(filter.domain, isDomain) &&
+        isOptional(filter.onlineState, isOnlineState)
     );
 }
