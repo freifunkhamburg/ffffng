@@ -16,7 +16,17 @@ import {normalizeMac} from "../utils/strings";
 import {monitoringDisableUrl} from "../utils/urlBuilder";
 import CONSTRAINTS from "../validation/constraints";
 import {forConstraint} from "../validation/validator";
-import {MAC, MailType, Node, NodeId, OnlineState, NodeStateData, UnixTimestampSeconds} from "../types";
+import {
+    isMonitoringSortField,
+    MAC,
+    MailType,
+    MonitoringSortField,
+    Node,
+    NodeId,
+    NodeStateData,
+    OnlineState,
+    UnixTimestampSeconds
+} from "../types";
 
 const MONITORING_STATE_MACS_CHUNK_SIZE = 100;
 const NEVER_ONLINE_NODES_DELETION_CHUNK_SIZE = 20;
@@ -24,12 +34,12 @@ const MONITORING_MAILS_DB_BATCH_SIZE = 50;
 /**
  * Defines the intervals emails are sent if a node is offline
  */
-const MONITORING_OFFLINE_MAILS_SCHEDULE: {[key: number]: {amount: number, unit: unitOfTime.DurationConstructor}} = {
-    1: { amount: 3, unit: 'hours' },
-    2: { amount: 1, unit: 'days' },
-    3: { amount: 7, unit: 'days' }
+const MONITORING_OFFLINE_MAILS_SCHEDULE: { [key: number]: { amount: number, unit: unitOfTime.DurationConstructor } } = {
+    1: {amount: 3, unit: 'hours'},
+    2: {amount: 1, unit: 'days'},
+    3: {amount: 7, unit: 'days'}
 };
-const DELETE_OFFLINE_NODES_AFTER_DURATION: {amount: number, unit: unitOfTime.DurationConstructor} = {
+const DELETE_OFFLINE_NODES_AFTER_DURATION: { amount: number, unit: unitOfTime.DurationConstructor } = {
     amount: 100,
     unit: 'days'
 };
@@ -220,7 +230,7 @@ export function parseNode(importTimestamp: Moment, nodeData: any): ParsedNode {
 }
 
 // TODO: Use sparkson for JSON parsing.
-export function parseNodesJson (body: string): NodesParsingResult {
+export function parseNodesJson(body: string): NodesParsingResult {
     Logger.tag('monitoring', 'information-retrieval').debug('Parsing nodes.json...');
 
     const json = JSON.parse(body);
@@ -255,8 +265,7 @@ export function parseNodesJson (body: string): NodesParsingResult {
             const parsedNode = parseNode(result.importTimestamp, nodeData);
             Logger.tag('monitoring', 'parsing-nodes-json').debug(`Parsing node successful: ${parsedNode.mac}`);
             result.nodes.push(parsedNode);
-        }
-        catch (error) {
+        } catch (error) {
             result.failedNodesCount += 1;
             Logger.tag('monitoring', 'parsing-nodes-json').error("Could not parse node.", error, nodeData);
         }
@@ -414,8 +423,8 @@ async function sendOfflineMails(startTime: Moment, mailNumber: number): Promise<
     );
 }
 
-function doRequest(url: string): Promise<{response: request.Response, body: string}> {
-    return new Promise<{response: request.Response, body: string}>((resolve, reject) => {
+function doRequest(url: string): Promise<{ response: request.Response, body: string }> {
+    return new Promise<{ response: request.Response, body: string }>((resolve, reject) => {
         request(url, function (err, response, body) {
             if (err) {
                 return reject(err);
@@ -531,22 +540,7 @@ async function retrieveNodeInformationForUrls(urls: string[]): Promise<RetrieveN
     }
 }
 
-export async function getAll(restParams: RestParams): Promise<{total: number, monitoringStates: any[]}> {
-    const sortFields = [
-        'id',
-        'hostname',
-        'mac',
-        'site',
-        'domain',
-        'monitoring_state',
-        'state',
-        'last_seen',
-        'import_timestamp',
-        'last_status_mail_type',
-        'last_status_mail_sent',
-        'created_at',
-        'modified_at'
-    ];
+export async function getAll(restParams: RestParams): Promise<{ total: number, monitoringStates: any[] }> {
     const filterFields = [
         'hostname',
         'mac',
@@ -566,8 +560,8 @@ export async function getAll(restParams: RestParams): Promise<{total: number, mo
 
     const filter = Resources.filterClause(
         restParams,
-        'id',
-        sortFields,
+        MonitoringSortField.ID,
+        isMonitoringSortField,
         filterFields
     );
 
@@ -579,12 +573,12 @@ export async function getAll(restParams: RestParams): Promise<{total: number, mo
     return {monitoringStates, total};
 }
 
-export async function getByMacs(macs: MAC[]): Promise<{[key: string]: NodeStateData}> {
+export async function getByMacs(macs: MAC[]): Promise<{ [key: string]: NodeStateData }> {
     if (_.isEmpty(macs)) {
         return {};
     }
 
-    const nodeStateByMac: {[key: string]: NodeStateData} = {};
+    const nodeStateByMac: { [key: string]: NodeStateData } = {};
 
     for (const subMacs of _.chunk(macs, MONITORING_STATE_MACS_CHUNK_SIZE)) {
         const inCondition = DatabaseUtil.inCondition('mac', subMacs);
@@ -648,8 +642,7 @@ export async function sendMonitoringMails(): Promise<void> {
 
     try {
         await sendOnlineAgainMails(startTime);
-    }
-    catch (error) {
+    } catch (error) {
         // only logging an continuing with next type
         Logger
             .tag('monitoring', 'mail-sending')
@@ -659,8 +652,7 @@ export async function sendMonitoringMails(): Promise<void> {
     for (let mailNumber = 1; mailNumber <= 3; mailNumber++) {
         try {
             await sendOfflineMails(startTime, mailNumber);
-        }
-        catch (error) {
+        } catch (error) {
             // only logging an continuing with next type
             Logger
                 .tag('monitoring', 'mail-sending')
@@ -731,7 +723,7 @@ async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestampSeconds):
             ','
         );
 
-        const rows: {mac: MAC}[] = await db.all(
+        const rows: { mac: MAC }[] = await db.all(
             `SELECT * FROM node_state WHERE mac IN (${placeholders})`,
             macs
         );
@@ -746,7 +738,7 @@ async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestampSeconds):
                 ' nodes found in monitoring database. Those should be skipped.'
             );
 
-        const seenMacs: MAC[] = _.map(rows, (row: {mac: MAC}) => row.mac as MAC);
+        const seenMacs: MAC[] = _.map(rows, (row: { mac: MAC }) => row.mac as MAC);
         const neverSeenMacs = _.difference(macs, seenMacs);
 
         Logger
@@ -786,8 +778,7 @@ async function deleteNodeByMac(mac: MAC): Promise<void> {
 
     try {
         node = await NodeService.getNodeDataByMac(mac);
-    }
-    catch (error) {
+    } catch (error) {
         // Only log error. We try to delete the nodes state anyways.
         Logger.tag('nodes', 'delete-offline').error('Could not find node to delete: ' + mac, error);
     }
@@ -801,8 +792,7 @@ async function deleteNodeByMac(mac: MAC): Promise<void> {
             'DELETE FROM node_state WHERE mac = ? AND state = ?',
             [mac, 'OFFLINE'],
         );
-    }
-    catch (error) {
+    } catch (error) {
         // Only log error and continue with next node.
         Logger.tag('nodes', 'delete-offline').error('Could not delete node state: ' + mac, error);
     }
