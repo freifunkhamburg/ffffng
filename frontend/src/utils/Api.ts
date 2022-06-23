@@ -1,4 +1,4 @@
-import {toIsArray, type TypeGuard} from "@/types";
+import {SortDirection, toIsArray, type TypeGuard} from "@/types";
 import type {Headers} from "request";
 import {parseInteger} from "@/utils/Numbers";
 
@@ -57,16 +57,20 @@ class Api {
         return response.result;
     }
 
-    async getPagedList<T>(
+    async getPagedList<Element, SortField>(
         path: string,
-        isT: TypeGuard<T>,
+        isElement: TypeGuard<Element>,
         page: number,
         itemsPerPage: number,
+        sortDirection?: SortDirection,
+        sortField?: SortField,
         filter?: object,
-    ): Promise<PagedListResult<T>> {
-        const response = await this.doGet(path, toIsArray(isT), {
+    ): Promise<PagedListResult<Element>> {
+        const response = await this.doGet(path, toIsArray(isElement), {
             _page: page,
             _perPage: itemsPerPage,
+            _sortDir: sortDirection,
+            _sortField: sortField,
             ...filter,
         });
         const totalStr = response.headers.get("x-total-count");

@@ -5,14 +5,15 @@ import ErrorTypes from "../utils/errorTypes";
 import Logger from "../logger";
 import {Constraints, forConstraints, isConstraints} from "../validation/validator";
 import {Request, Response} from "express";
+import {EnumTypeGuard, EnumValue, type GenericSortField, SortDirection, TypeGuard} from "../types";
 
-export type Entity = {[key: string]: any};
+export type Entity = { [key: string]: any };
 
 export type RestParams = {
     q?: string;
 
-    _sortField?: string;
-    _sortDir?: string;
+    _sortField?: GenericSortField;
+    _sortDir?: SortDirection;
 
     _page: number;
     _perPage: number;
@@ -20,36 +21,36 @@ export type RestParams = {
     filters?: FilterClause;
 };
 
-export type OrderByClause = {query: string, params: any[]};
-export type LimitOffsetClause = {query: string, params: any[]};
-export type FilterClause = {query: string, params: any[]};
+export type OrderByClause = { query: string, params: any[] };
+export type LimitOffsetClause = { query: string, params: any[] };
+export type FilterClause = { query: string, params: any[] };
 
 function respond(res: Response, httpCode: number, data: any, type: string): void {
     switch (type) {
         case 'html':
             res.writeHead(httpCode, {'Content-Type': 'text/html'});
             res.end(data);
-        break;
+            break;
 
         default:
             res.writeHead(httpCode, {'Content-Type': 'application/json'});
             res.end(JSON.stringify(data));
-        break;
+            break;
     }
 }
 
-function orderByClause(
+function orderByClause<S>(
     restParams: RestParams,
-    defaultSortField: string,
-    allowedSortFields: string[]
+    defaultSortField: EnumValue<S>,
+    isSortField: EnumTypeGuard<S>,
 ): OrderByClause {
-    let sortField = _.includes(allowedSortFields, restParams._sortField) ? restParams._sortField : undefined;
+    let sortField: EnumValue<S> | undefined = isSortField(restParams._sortField) ? restParams._sortField : undefined;
     if (!sortField) {
         sortField = defaultSortField;
     }
 
     return {
-        query: 'ORDER BY ' + sortField + ' ' + (restParams._sortDir === 'ASC' ? 'ASC' : 'DESC'),
+        query: 'ORDER BY LOWER(' + sortField + ') ' + (restParams._sortDir === SortDirection.ASCENDING ? 'ASC' : 'DESC'),
         params: []
     };
 }
@@ -97,8 +98,8 @@ function filterCondition(restParams: RestParams, filterFields: string[]): Filter
     };
 }
 
-function getConstrainedValues(data: {[key: string]: any}, constraints: Constraints): {[key: string]: any} {
-    const values: {[key: string]: any} = {};
+function getConstrainedValues(data: { [key: string]: any }, constraints: Constraints): { [key: string]: any } {
+    const values: { [key: string]: any } = {};
     _.each(_.keys(constraints), (key: string): void => {
         const value = data[key];
         values[key] =
@@ -109,7 +110,7 @@ function getConstrainedValues(data: {[key: string]: any}, constraints: Constrain
     return values;
 }
 
-export function getData (req: Request): any {
+export function getData(req: Request): any {
     return _.extend({}, req.body, req.params, req.query);
 }
 
@@ -118,7 +119,7 @@ export async function getValidRestParams(
     subtype: string | null,
     req: Request,
 ): Promise<RestParams> {
-    const restConstraints = CONSTRAINTS.rest as {[key: string]: any};
+    const restConstraints = CONSTRAINTS.rest as { [key: string]: any };
     let constraints: Constraints;
     if (!(type in restConstraints) || !isConstraints(restConstraints[type])) {
         Logger.tag('validation', 'rest').error('Unknown REST resource type: {}', type);
@@ -129,7 +130,7 @@ export async function getValidRestParams(
     let filterConstraints: Constraints = {};
     if (subtype) {
         const subtypeFilters = subtype + 'Filters';
-        const constraintsObj = CONSTRAINTS as {[key: string]: any};
+        const constraintsObj = CONSTRAINTS as { [key: string]: any };
         if (!(subtypeFilters in constraintsObj) || !isConstraints(constraintsObj[subtypeFilters])) {
             Logger.tag('validation', 'rest').error('Unknown REST resource subtype: {}', subtype);
             throw {data: 'Internal error.', type: ErrorTypes.internalError};
@@ -208,21 +209,21 @@ export function filter<E>(entities: ArrayLike<E>, allowedFilterFields: string[],
     });
 }
 
-export function sort<T>(entities: ArrayLike<T>, allowedSortFields: string[], restParams: RestParams): ArrayLike<T> {
-    const sortField = _.includes(allowedSortFields, restParams._sortField) ? restParams._sortField : undefined;
+export function sort<T, S>(entities: ArrayLike<T>, isSortField: TypeGuard<S>, restParams: RestParams): ArrayLike<T> {
+    const sortField: S | undefined = isSortField(restParams._sortField) ? restParams._sortField : undefined;
     if (!sortField) {
         return entities;
     }
 
     const sorted: T[] = _.sortBy(entities, [sortField]);
-    if (restParams._sortDir === 'ASC') {
+    if (restParams._sortDir === SortDirection.ASCENDING) {
         return sorted;
     } else {
         return _.reverse(sorted);
     }
 }
 
-export function getPageEntities (entities: ArrayLike<Entity>, restParams: RestParams) {
+export function getPageEntities(entities: ArrayLike<Entity>, restParams: RestParams) {
     const page = restParams._page;
     const perPage = restParams._perPage;
 
@@ -231,16 +232,16 @@ export function getPageEntities (entities: ArrayLike<Entity>, restParams: RestPa
 
 export {filterCondition as whereCondition};
 
-export function filterClause (
+export function filterClause<S>(
     restParams: RestParams,
-    defaultSortField: string,
-    allowedSortFields: string[],
+    defaultSortField: EnumValue<S>,
+    isSortField: EnumTypeGuard<S>,
     filterFields: string[],
 ): FilterClause {
-    const orderBy = orderByClause(
+    const orderBy = orderByClause<S>(
         restParams,
         defaultSortField,
-        allowedSortFields
+        isSortField,
     );
     const limitOffset = limitOffsetClause(restParams);
 
@@ -255,14 +256,14 @@ export function filterClause (
     };
 }
 
-export function success (res: Response, data: any) {
+export function success(res: Response, data: any) {
     respond(res, 200, data, 'json');
 }
 
-export function successHtml (res: Response, html: string) {
+export function successHtml(res: Response, html: string) {
     respond(res, 200, html, 'html');
 }
 
-export function error (res: Response, err: {data: any, type: {code: number}}) {
+export function error(res: Response, err: { data: any, type: { code: number } }) {
     respond(res, err.type.code, err.data, 'json');
 }

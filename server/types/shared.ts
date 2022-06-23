@@ -3,6 +3,9 @@ import {ArrayField, Field, RawJsonField} from "sparkson";
 // Types shared with the client.
 export type TypeGuard<T> = (arg: unknown) => arg is T;
 
+export type EnumValue<E> = E[keyof E];
+export type EnumTypeGuard<E> = TypeGuard<EnumValue<E>>;
+
 export function isObject(arg: unknown): arg is object {
     return arg !== null && typeof arg === "object";
 }
@@ -39,8 +42,8 @@ export function toIsArray<T>(isT: TypeGuard<T>): TypeGuard<T[]> {
     return (arg): arg is T[] => isArray(arg, isT);
 }
 
-export function toIsEnum<E>(enumDef: E): TypeGuard<E> {
-    return (arg): arg is E => Object.values(enumDef).includes(arg as [keyof E]);
+export function toIsEnum<E>(enumDef: E): EnumTypeGuard<E> {
+    return (arg): arg is EnumValue<E> => Object.values(enumDef).includes(arg as [keyof E]);
 }
 
 export function isOptional<T>(arg: unknown, isT: TypeGuard<T>): arg is (T | undefined) {
@@ -333,6 +336,22 @@ export function isEnhancedNode(arg: unknown): arg is EnhancedNode {
     );
 }
 
+export enum NodeSortField {
+    HOSTNAME = 'hostname',
+    NICKNAME = 'nickname',
+    EMAIL = 'email',
+    TOKEN = 'token',
+    MAC = 'mac',
+    KEY = 'key',
+    SITE = 'site',
+    DOMAIN = 'domain',
+    COORDS = 'coords',
+    ONLINE_STATE = 'onlineState',
+    MONITORING_STATE = 'monitoringState',
+}
+
+export const isNodeSortField = toIsEnum(NodeSortField);
+
 export interface NodesFilter {
     hasKey?: boolean;
     hasCoords?: boolean;
@@ -365,3 +384,53 @@ export function isNodesFilter(arg: unknown): arg is NodesFilter {
         isOptional(filter.onlineState, isOnlineState)
     );
 }
+
+export enum MonitoringSortField {
+    ID = 'id',
+    HOSTNAME = 'hostname',
+    MAC = 'mac',
+    SITE = 'site',
+    DOMAIN = 'domain',
+    MONITORING_STATE = 'monitoring_state',
+    STATE = 'state',
+    LAST_SEEN = 'last_seen',
+    IMPORT_TIMESTAMP = 'import_timestamp',
+    LAST_STATUS_MAIL_TYPE = 'last_status_mail_type',
+    LAST_STATUS_MAIL_SENT = 'last_status_mail_sent',
+    CREATED_AT = 'created_at',
+    MODIFIED_AT = 'modified_at',
+}
+
+export const isMonitoringSortField = toIsEnum(MonitoringSortField);
+
+export enum TaskSortField {
+    ID = 'id',
+    NAME = 'name',
+    SCHEDULE = 'schedule',
+    STATE = 'state',
+    RUNNING_SINCE = 'runningSince',
+    LAST_RUN_STARTED = 'lastRunStarted',
+}
+
+export const isTaskSortField = toIsEnum(TaskSortField);
+
+export enum MailSortField {
+    ID = 'id',
+    FAILURES = 'failures',
+    SENDER = 'sender',
+    RECIPIENT = 'recipient',
+    EMAIL = 'email',
+    CREATED_AT = 'created_at',
+    MODIFIED_AT = 'modified_at',
+}
+
+export const isMailSortField = toIsEnum(MailSortField);
+
+export type GenericSortField = string;
+
+export enum SortDirection {
+    ASCENDING = "ASC",
+    DESCENDING = "DESC",
+}
+
+export const isSortDirection = toIsEnum(SortDirection);

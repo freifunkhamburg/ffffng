@@ -9,7 +9,7 @@ import Logger from "../logger";
 import * as MailTemplateService from "./mailTemplateService";
 import * as Resources from "../utils/resources";
 import {RestParams} from "../utils/resources";
-import {Mail, MailData, MailId, MailType} from "../types";
+import {isMailSortField, Mail, MailData, MailId, MailSortField, MailType} from "../types";
 
 const MAIL_QUEUE_DB_BATCH_SIZE = 50;
 
@@ -128,8 +128,8 @@ export async function getPendingMails (restParams: RestParams): Promise<{mails: 
 
     const filter = Resources.filterClause(
         restParams,
-        'id',
-        ['id', 'failures', 'sender', 'recipient', 'email', 'created_at', 'modified_at'],
+        MailSortField.ID,
+        isMailSortField,
         ['id', 'failures', 'sender', 'recipient', 'email']
     );
 

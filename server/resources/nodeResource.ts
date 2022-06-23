@@ -10,7 +10,7 @@ import {forConstraint, forConstraints} from "../validation/validator";
 import * as Resources from "../utils/resources";
 import {Entity} from "../utils/resources";
 import {Request, Response} from "express";
-import {EnhancedNode, Node} from "../types";
+import {EnhancedNode, isNodeSortField, Node} from "../types";
 
 const nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords', 'monitoring'];
 
@@ -130,19 +130,7 @@ async function doGetAll(req: Request): Promise<{ total: number; pageNodes: any }
 
     const sortedNodes = Resources.sort(
         filteredNodes,
-        [
-            'hostname',
-            'nickname',
-            'email',
-            'token',
-            'mac',
-            'key',
-            'site',
-            'domain',
-            'coords',
-            'onlineState',
-            'monitoringState'
-        ],
+        isNodeSortField,
         restParams
     );
     const pageNodes = Resources.getPageEntities(sortedNodes, restParams);

@@ -8,6 +8,7 @@ import {getTasks, Task, TaskState} from "../jobs/scheduler";
 import {normalizeString} from "../utils/strings";
 import {forConstraint} from "../validation/validator";
 import {Request, Response} from "express";
+import {isTaskSortField} from "../types";
 
 const isValidId = forConstraint(CONSTRAINTS.id, false);
 
@@ -81,7 +82,7 @@ async function doGetAll(req: Request): Promise<{total: number, pageTasks: Entity
 
     const tasks = Resources.sort(
         _.values(getTasks()),
-        ['id', 'name', 'schedule', 'state', 'runningSince', 'lastRunStarted'],
+        isTaskSortField,
         restParams
     );
     const filteredTasks = Resources.filter(

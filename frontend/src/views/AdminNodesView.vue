@@ -2,6 +2,7 @@
 import {useNodesStore} from "@/stores/nodes";
 import {onMounted, ref, watch} from "vue";
 import type {EnhancedNode, MAC, NodesFilter} from "@/types";
+import {NodeSortField, SortDirection} from "@/types";
 import Pager from "@/components/Pager.vue";
 import LoadingContainer from "@/components/LoadingContainer.vue";
 import NodesFilterPanel from "@/components/nodes/NodesFilterPanel.vue";
@@ -32,7 +33,14 @@ async function refresh(page: number): Promise<void> {
     loading.value = true;
     redactAllFields(true);
     try {
-        await nodes.refresh(page, NODE_PER_PAGE, currentFilter.value, currentSearchTerm.value);
+        await nodes.refresh(
+            page,
+            NODE_PER_PAGE,
+            SortDirection.ASCENDING,
+            NodeSortField.HOSTNAME,
+            currentFilter.value,
+            currentSearchTerm.value,
+        );
     } finally {
         loading.value = false;
     }

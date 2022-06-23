@@ -1,5 +1,5 @@
 import {defineStore} from "pinia";
-import {type EnhancedNode, isEnhancedNode, type NodesFilter} from "@/types";
+import {type EnhancedNode, isEnhancedNode, type NodesFilter, NodeSortField, SortDirection} from "@/types";
 import {internalApi} from "@/utils/Api";
 
 interface NodesStoreState {
@@ -7,6 +7,8 @@ interface NodesStoreState {
     page: number;
     nodesPerPage: number;
     totalNodes: number;
+    sortDirection: SortDirection;
+    sortField: NodeSortField;
 }
 
 export const useNodesStore = defineStore({
@@ -17,6 +19,8 @@ export const useNodesStore = defineStore({
             page: 1,
             nodesPerPage: 20,
             totalNodes: 0,
+            sortDirection: SortDirection.ASCENDING,
+            sortField: NodeSortField.HOSTNAME,
         };
     },
     getters: {
@@ -37,18 +41,27 @@ export const useNodesStore = defineStore({
         },
     },
     actions: {
-        async refresh(page: number, nodesPerPage: number, filter: NodesFilter, searchTerm?: string): Promise<void> {
+        async refresh(
+            page: number,
+            nodesPerPage: number,
+            sortDirection: SortDirection,
+            sortField: NodeSortField,
+            filter: NodesFilter,
+            searchTerm?: string
+        ): Promise<void> {
             const query: Record<string, any> = {
                 ...filter,
             };
             if (searchTerm) {
                 query.q = searchTerm;
             }
-            const result = await internalApi.getPagedList<EnhancedNode>(
+            const result = await internalApi.getPagedList<EnhancedNode, NodeSortField>(
                 "nodes",
                 isEnhancedNode,
                 page,
                 nodesPerPage,
+                sortDirection,
+                sortField,
                 query,
             );
             this.nodes = result.entries;
