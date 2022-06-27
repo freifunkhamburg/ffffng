@@ -7,12 +7,14 @@ import {
     NODES_FILTER_FIELDS,
     type NodesFilter,
     OnlineState,
+    type SearchTerm,
     type UnixTimestampMilliseconds,
 } from "@/types";
 import {computed, nextTick, onMounted, ref, watch} from "vue";
 import {useConfigStore} from "@/stores/config";
 
 interface Props {
+    searchTerm: SearchTerm;
     filter: NodesFilter;
 }
 
@@ -41,7 +43,7 @@ const FILTER_LABELS: Record<string, string | Map<any, any>> = {
 }
 
 const emit = defineEmits<{
-    (e: "updateFilter", filter: NodesFilter, searchTerm?: string): void,
+    (e: "updateFilter", filter: NodesFilter, searchTerm: SearchTerm): void,
 }>();
 
 const props = defineProps<Props>();
@@ -204,15 +206,12 @@ function buildNodesFilter(): NodesFilter {
 
 let lastSearchTimestamp: UnixTimestampMilliseconds = 0 as UnixTimestampMilliseconds;
 let searchTimeout: NodeJS.Timeout | undefined = undefined;
-let lastSearchTerm = "";
+let lastSearchTerm: SearchTerm = "" as SearchTerm;
 
 function doSearch(): void {
     const nodesFilter = buildNodesFilter();
-    lastSearchTerm = input.value.value;
-    let searchTerm: string | undefined = lastSearchTerm.trim();
-    if (!searchTerm) {
-        searchTerm = undefined;
-    }
+    lastSearchTerm = input.value.value as SearchTerm;
+    const searchTerm: SearchTerm = lastSearchTerm.trim() as SearchTerm;
     emit("updateFilter", nodesFilter, searchTerm);
 }
 
@@ -258,6 +257,7 @@ function doThrottledSearch(): void {
                 @keyup="doThrottledSearch()"
                 maxlength="64"
                 type="search"
+                :value="searchTerm"
                 placeholder="Knoten durchsuchen..."/>
             <i class="fa fa-search search" @click="doSearch()"/>
         </div>

@@ -2,7 +2,7 @@ import {createRouter, createWebHistory} from "vue-router";
 import AdminDashboardView from "@/views/AdminDashboardView.vue";
 import AdminNodesView from "@/views/AdminNodesView.vue";
 import HomeView from "@/views/HomeView.vue";
-import {isNodesFilter} from "@/types";
+import {isNodesFilter, isNodeSortField, isSortDirection, type SearchTerm} from "@/types";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,10 +34,12 @@ const router = createRouter({
                     filter = {};
                 }
 
-                const searchTerm = route.query.q ? route.query.q as string : undefined;
+                const searchTerm = route.query.q ? route.query.q as SearchTerm : undefined;
                 return {
                     filter: isNodesFilter(filter) ? filter : {},
                     searchTerm,
+                    sortDirection: isSortDirection(route.query.sortDir) ? route.query.sortDir : undefined,
+                    sortField: isNodeSortField(route.query.sortField) ? route.query.sortField : undefined,
                 }
             }
         },

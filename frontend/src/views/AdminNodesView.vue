@@ -1,23 +1,53 @@
 <script setup lang="ts">
 import {useNodesStore} from "@/stores/nodes";
-import {onMounted, ref, watch} from "vue";
-import type {DomainSpecificNodeResponse, MAC, NodesFilter} from "@/types";
+import {onMounted, type PropType, ref, watch} from "vue";
+import type {DomainSpecificNodeResponse, MAC, NodesFilter, SearchTerm} from "@/types";
 import {NodeSortField, SortDirection} from "@/types";
 import Pager from "@/components/Pager.vue";
 import LoadingContainer from "@/components/LoadingContainer.vue";
 import NodesFilterPanel from "@/components/nodes/NodesFilterPanel.vue";
+import {SortTH} from "@/components/table/SortTH.vue";
 import router from "@/router";
+
+function debug(...args: any[]): void {
+    console.debug("==================================================================");
+    console.debug("AdminNodesVue:", ...args);
+    console.table({
+        filter: JSON.stringify(props.filter),
+        searchTerm: props.searchTerm,
+        sortDirection: props.sortDirection,
+        sortField: props.sortField,
+    });
+    console.debug("==================================================================");
+    console.debug();
+}
+
+debug("init page");
 
 const NODE_PER_PAGE = 50;
 
-interface Props {
-    filter: NodesFilter;
-    searchTerm?: string;
-}
+// noinspection JSUnusedGlobalSymbols
+const sth = SortTH<NodeSortField>();
 
-const props = defineProps<Props>();
-const currentFilter = ref<NodesFilter>({});
-const currentSearchTerm = ref<string | undefined>(undefined);
+const props = defineProps({
+    filter: {
+        type: Object as PropType<NodesFilter>,
+        required: true,
+    },
+    searchTerm: {
+        type: String as unknown as PropType<SearchTerm>,
+        default: "" as SearchTerm,
+    },
+
+    sortDirection: {
+        type: String as PropType<SortDirection>,
+        default: SortDirection.ASCENDING,
+    },
+    sortField: {
+        type: String as PropType<NodeSortField>,
+        default: NodeSortField.HOSTNAME,
+    },
+});
 
 type NodeRedactField = "nickname" | "email" | "token";
 type NodeRedactFieldsMap = Partial<Record<NodeRedactField, boolean>>;
@@ -36,10 +66,10 @@ async function refresh(page: number): Promise<void> {
         await nodes.refresh(
             page,
             NODE_PER_PAGE,
-            SortDirection.ASCENDING,
-            NodeSortField.HOSTNAME,
-            currentFilter.value,
-            currentSearchTerm.value,
+            props.sortDirection,
+            props.sortField,
+            props.filter,
+            props.searchTerm,
         );
     } finally {
         loading.value = false;
@@ -69,37 +99,44 @@ function setRedactField(node: DomainSpecificNodeResponse, field: NodeRedactField
     redactFieldsMap[field] = value;
 }
 
-async function updateFilter(filter: NodesFilter, searchTerm?: string): Promise<void> {
+async function updateRouterState(
+    filter: NodesFilter,
+    searchTerm: SearchTerm,
+    sortDirection: SortDirection,
+    sortField: NodeSortField,
+): Promise<void> {
     const filterStr = Object.keys(filter).length > 0 ? JSON.stringify(filter) : undefined;
-    await router.push({
+    await router.replace({
         path: '/admin/nodes',
         query: {
-            q: searchTerm,
-            filter: filterStr
+            q: searchTerm || undefined,
+            filter: filterStr,
+            sortDir: sortDirection,
+            sortField: sortField,
         }
     });
-    currentFilter.value = filter;
-    currentSearchTerm.value = searchTerm;
+}
+
+async function updateFilter(filter: NodesFilter, searchTerm: SearchTerm): Promise<void> {
+    await updateRouterState(filter, searchTerm, props.sortDirection, props.sortField);
+}
+
+async function updateSortOrder(sortField: NodeSortField, sortDirection: SortDirection): Promise<void> {
+    await updateRouterState(props.filter, props.searchTerm, sortDirection, sortField);
+}
+
+onMounted(async () => {
     await refresh(1);
-}
-
-async function refreshFromProps(): Promise<void> {
-    const needsRefresh = currentFilter.value !== props.filter || currentSearchTerm.value !== props.searchTerm;
-    currentFilter.value = props.filter;
-    currentSearchTerm.value = props.searchTerm;
-    if (needsRefresh) {
-        await refresh(1);
-    }
-}
-
-onMounted(refreshFromProps);
-watch(props, refreshFromProps);
+});
+watch(props, async () => {
+    await refresh(1);
+});
 </script>
 
 <template>
     <h2>Knoten</h2>
 
-    <NodesFilterPanel :filter="props.filter" @update-filter="updateFilter"/>
+    <NodesFilterPanel :search-term="searchTerm" :filter="filter" @update-filter="updateFilter"/>
 
     <Pager
         :page="nodes.getPage"
@@ -126,17 +163,83 @@ watch(props, refreshFromProps);
         <table>
             <thead>
             <tr>
-                <th>Name</th>
-                <th>Besitzer*in</th>
-                <th>E-Mail</th>
-                <th>Token</th>
-                <th>MAC</th>
-                <th>VPN</th>
-                <th>Site</th>
-                <th>Domäne</th>
-                <th>GPS</th>
-                <th>Status</th>
-                <th>Monitoring</th>
+                <sth
+                    :field="NodeSortField.HOSTNAME"
+                    :currentField="sortField"
+                    :currentDirection="sortDirection"
+                    @sort="updateSortOrder">
+                    Name
+                </sth>
+                <sth
+                    :field="NodeSortField.NICKNAME"
+                    :currentField="sortField"
+                    :currentDirection="sortDirection"
+                    @sort="updateSortOrder">
+                    Besitzer*in
+                </sth>
+                <sth
+                    :field="NodeSortField.EMAIL"
+                    :currentField="sortField"
+                    :currentDirection="sortDirection"
+                    @sort="updateSortOrder">
+                    E-Mail
+                </sth>
+                <sth
+                    :field="NodeSortField.TOKEN"
+                    :currentField="sortField"
+                    :currentDirection="sortDirection"
+                    @sort="updateSortOrder">
+                    Token
+                </sth>
+                <sth
+                    :field="NodeSortField.MAC"
+                    :currentField="sortField"
+                    :currentDirection="sortDirection"
+                    @sort="updateSortOrder">
+                    MAC
+                </sth>
+                <sth
+                    :field="NodeSortField.KEY"
+                    :currentField="sortField"
+                    :currentDirection="sortDirection"
+                    @sort="updateSortOrder">
+                    VPN
+                </sth>
+                <sth
+                    :field="NodeSortField.SITE"
+                    :currentField="sortField"
+                    :currentDirection="sortDirection"
+                    @sort="updateSortOrder">
+                    Site
+                </sth>
+                <sth
+                    :field="NodeSortField.DOMAIN"
+                    :currentField="sortField"
+                    :currentDirection="sortDirection"
+                    @sort="updateSortOrder">
+                    Domäne
+                </sth>
+                <sth
+                    :field="NodeSortField.COORDS"
+                    :currentField="sortField"
+                    :currentDirection="sortDirection"
+                    @sort="updateSortOrder">
+                    GPS
+                </sth>
+                <sth
+                    :field="NodeSortField.ONLINE_STATE"
+                    :currentField="sortField"
+                    :currentDirection="sortDirection"
+                    @sort="updateSortOrder">
+                    Status
+                </sth>
+                <sth
+                    :field="NodeSortField.MONITORING_STATE"
+                    :currentField="sortField"
+                    :currentDirection="sortDirection"
+                    @sort="updateSortOrder">
+                    Monitoring
+                </sth>
             </tr>
             </thead>
 

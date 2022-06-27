@@ -562,6 +562,9 @@ export function isNodesFilter(arg: unknown): arg is NodesFilter {
     );
 }
 
+export type SearchTerm = string & { readonly __tag: unique symbol }
+export const isSearchTerm = isString;
+
 export enum MonitoringSortField {
     ID = 'id',
     HOSTNAME = 'hostname',
