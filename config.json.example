@@ -14,8 +14,12 @@
 
         "internal": {
             "active": false,
-            "user": "admin",
-            "password": "secret"
+            "users": [
+                {
+                    "user": "admin",
+                    "passwordHash": "$2b$05$VPAg8XHOjhEXlY03SOe7huG1NE.UFvPLdukS0VMiolajdZjrdgj.W"
+                }
+            ]
         },
 
         "email": {

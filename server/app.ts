@@ -1,14 +1,69 @@
-import _ from "lodash"
-import auth, {BasicAuthCheckerCallback} from "http-auth"
-import authConnect from "http-auth-connect"
-import bodyParser from "body-parser"
-import compress from "compression"
-import express, {Express, NextFunction, Request, Response} from "express"
-import {promises as fs} from "graceful-fs"
+import _ from "lodash";
+import auth, {BasicAuthCheckerCallback} from "http-auth";
+import authConnect from "http-auth-connect";
+import bodyParser from "body-parser";
+import bcrypt from "bcrypt";
+import compress from "compression";
+import express, {Express, NextFunction, Request, Response} from "express";
+import {promises as fs} from "graceful-fs";
 
 import {config} from "./config";
+import type {CleartextPassword, PasswordHash, Username} from "./types";
+import {isString} from "./types";
+import Logger from "./logger";
 
 export const app: Express = express();
+
+/**
+ * Used to have some password comparison in case the user does not exist to avoid timing attacks.
+ */
+const INVALID_PASSWORD_HASH = "$2b$05$JebmV1q/ySuxa89GoJYlc.6SEnj1OZYBOfTf.TYAehcC5HLeJiWPi";
+
+/**
+ * Trying to implement a timing safe string compare.
+ *
+ * TODO: Write tests for timing.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+    const lenA = a.length;
+    const lenB = b.length;
+
+    // Greater than 0 for differing strings.
+    let different = Math.abs(lenA - lenB);
+
+    // Make sure b is always the same length as a. Use slice to try avoiding optimizations.
+    b = different === 0 ? b.slice() : a.slice();
+
+    for (let i = 0; i < lenA; i += 1) {
+        different += Math.abs(a.charCodeAt(i) - b.charCodeAt(i));
+    }
+
+    return different === 0;
+}
+
+async function isValidLogin(username: Username, password: CleartextPassword): Promise<boolean> {
+    if (!config.server.internal.active) {
+        return false;
+    }
+
+    let passwordHash: PasswordHash | undefined = undefined;
+
+    // Iterate over all users every time to reduce risk of timing attacks.
+    for (const userConfig of config.server.internal.users) {
+        if (timingSafeEqual(username, userConfig.username)) {
+            passwordHash = userConfig.passwordHash;
+        }
+    }
+
+    // Always compare some password even if the user does not exist to reduce risk of timing attacks.
+    const isValidPassword = await bcrypt.compare(
+        password,
+        passwordHash || INVALID_PASSWORD_HASH
+    );
+
+    // Make sure password is only considered valid is user exists and therefor passwordHash is not undefined.
+    return isString(passwordHash) && isValidPassword;
+}
 
 export function init(): void {
     const router = express.Router();
@@ -18,18 +73,18 @@ export function init(): void {
         {
             realm: 'Knotenformular - Intern'
         },
-        function (username: string, password: string, callback: BasicAuthCheckerCallback): void {
-            callback(
-                config.server.internal.active &&
-                username === config.server.internal.user &&
-                password === config.server.internal.password
-            );
+        function (username: Username, password: CleartextPassword, callback: BasicAuthCheckerCallback): void {
+            isValidLogin(username, password)
+                .then(result => callback(result))
+                .catch(err => {
+                    Logger.tag('login').error(err);
+                });
         }
     );
     router.use('/internal', authConnect(internalAuth));
 
     router.use(bodyParser.json());
-    router.use(bodyParser.urlencoded({ extended: true }));
+    router.use(bodyParser.urlencoded({extended: true}));
 
     const adminDir = __dirname + '/../admin';
     const clientDir = __dirname + '/../client';
@@ -47,11 +102,11 @@ export function init(): void {
 
     router.use(compress());
 
-    async function serveTemplate (mimeType: string, req: Request, res: Response): Promise<void> {
+    async function serveTemplate(mimeType: string, req: Request, res: Response): Promise<void> {
         const body = await fs.readFile(templateDir + '/' + req.path + '.template', 'utf8');
 
-        res.writeHead(200, { 'Content-Type': mimeType });
-        res.end(_.template(body)({ config: config.client }));
+        res.writeHead(200, {'Content-Type': mimeType});
+        res.end(_.template(body)({config: config.client}));
     }
 
     usePromise(async (req: Request, res: Response): Promise<void> => {

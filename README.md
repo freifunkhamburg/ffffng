@@ -121,8 +121,28 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 
 * **`server.internal.active`** Gibt an, ob interne URLs, wie Admin-Panel und Logging-Interface, erreichbar sein sollen,
   z. B.: `true`
-* **`server.internal.user`** Benutzername für den Login beim Aufrufen interner URLs, z. B.: `"admin"`
-* **`server.internal.password`** Das zugehörige Passwort, z. B.: `"secret"`
+* **`server.internal.users`** Liste an Nutzer*innen im folgenden Format. Der Passwort-Hash kann mit dem Befehl
+  `mkpasswd -m bcrypt` generiert werden.
+
+```
+{
+    "server": {
+        ...
+        "internal": {
+            ...
+            "users": [
+                {
+                    "user": "username",
+                    "passwordHash": "$2b$05$VPAg8XHOjhEXlY03SOe7huG1NE.UFvPLdukS0VMiolajdZjrdgj.W"
+                }
+            ]
+            ...
+        }
+        ...
+    }
+    ...
+}
+```
 
 * **`server.email.from`** Absender für versendete E-Mails, z. B.: `"Freifunk Knotenformular <no-reply@musterstadt.freifunk.net>"`
 * **`server.email.smtp`** Konfiguration des SMTP-Servers für den E-Mail-Versand entsprechend der Dokumentation unter
@@ -166,7 +186,7 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 
 * **`client.map.mapUrl`** URL der Knotenkarte, z. B.: `"http://map.musterstadt.freifunk.net"`
 
-* **`client.monitoring.enabled`** Gibt an, ob die Nutzer Monitoring für ihre Knoten aktivieren können sollen, z. B.: `true`
+* **`client.monitoring.enabled`** Gibt an, ob die Nutzer*innen Monitoring für ihre Knoten aktivieren können sollen, z. B.: `true`
 
 * **`client.coordsSelector.lat`** Breitengrad auf den die Karte zur Auswahl der Koordinaten zentriert werden soll, z. B.: `53.565278`
 * **`client.coordsSelector.lng`** Längengrad auf den die Karte zur Auswahl der Koordinaten zentriert werden soll, z. B.: `10.001389`
@@ -317,7 +337,7 @@ msgstr ""
 "</div>"
 ```
 
-Auf diese Weise landet der Nutzer direkt im teilweise vorausgefüllten Formular und muss nicht mehr den Knotennamen,
+Auf diese Weise landet der Nutzer*innen direkt im teilweise vorausgefüllten Formular und muss nicht mehr den Knotennamen,
 fastd-Key und die MAC-Adresse angeben.
 
 
