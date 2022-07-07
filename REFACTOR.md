@@ -2,6 +2,9 @@
 
 ## TODO
 
+* Different user accounts for admin panel:
+  * Username + password hash in config
+  * Commandline tool to generate hash
 * Test email rendering!
 
 ## Short term
