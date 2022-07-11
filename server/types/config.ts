@@ -3,6 +3,17 @@ import {ClientConfig} from "./shared";
 
 // TODO: Replace string types by more specific types like URL, Password, etc.
 
+export type Username = string;
+export type CleartextPassword = string;
+export type PasswordHash = string;
+
+export class UsersConfig {
+    constructor(
+        @Field("user") public username: Username,
+        @Field("passwordHash") public passwordHash: PasswordHash,
+    ) {}
+}
+
 export class LoggingConfig {
     constructor(
         @Field("enabled") public enabled: boolean,
@@ -14,8 +25,7 @@ export class LoggingConfig {
 export class InternalConfig {
     constructor(
         @Field("active") public active: boolean,
-        @Field("user") public user: string,
-        @Field("password") public password: string,
+        @ArrayField("users", UsersConfig) public users: UsersConfig[],
     ) {}
 }
 
