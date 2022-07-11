@@ -122,7 +122,7 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 * **`server.internal.active`** Gibt an, ob interne URLs, wie Admin-Panel und Logging-Interface, erreichbar sein sollen,
   z. B.: `true`
 * **`server.internal.users`** Liste an Nutzer*innen im folgenden Format. Der Passwort-Hash kann mit dem Befehl
-  `mkpasswd -m bcrypt` generiert werden.
+  `mkpasswd -m bcrypt -R 10` oder dem beiliegenden Skript `bin/mkpasswd.sh` generiert werden.
 
 ```
 {
