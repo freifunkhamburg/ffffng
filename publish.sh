@@ -44,5 +44,5 @@ if confirm "Continue publishing?"; then
     yarn run dist
 
     cd dist
-    yarn publish
+    npm publish
 fi
