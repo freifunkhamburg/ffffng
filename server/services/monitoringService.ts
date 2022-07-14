@@ -17,14 +17,19 @@ import {monitoringDisableUrl} from "../utils/urlBuilder";
 import CONSTRAINTS from "../validation/constraints";
 import {forConstraint} from "../validation/validator";
 import {
+    Domain,
+    equal,
     isMonitoringSortField,
     MAC,
     MailType,
     MonitoringSortField,
+    MonitoringToken,
     Node,
     NodeId,
     NodeStateData,
     OnlineState,
+    Site,
+    to,
     UnixTimestampSeconds
 } from "../types";
 
@@ -45,12 +50,12 @@ const DELETE_OFFLINE_NODES_AFTER_DURATION: { amount: number, unit: unitOfTime.Du
 };
 
 export type ParsedNode = {
-    mac: string,
+    mac: MAC,
     importTimestamp: Moment,
     state: OnlineState,
     lastSeen: Moment,
-    site: string,
-    domain: string,
+    site: Site,
+    domain: Domain,
 };
 
 export type NodesParsingResult = {
@@ -220,12 +225,12 @@ export function parseNode(importTimestamp: Moment, nodeData: any): ParsedNode {
     }
 
     return {
-        mac: mac,
+        mac: to(mac),
         importTimestamp: importTimestamp,
         state: isOnline ? OnlineState.ONLINE : OnlineState.OFFLINE,
         lastSeen: lastSeen,
-        site: site || '<unknown-site>',
-        domain: domain || '<unknown-domain>'
+        site: to(site || '<unknown-site>'), // FIXME: Handle this
+        domain: to(domain || '<unknown-domain>') // FIXME: Handle this
     };
 }
 
@@ -573,7 +578,7 @@ export async function getAll(restParams: RestParams): Promise<{ total: number, m
     return {monitoringStates, total};
 }
 
-export async function getByMacs(macs: MAC[]): Promise<{ [key: string]: NodeStateData }> {
+export async function getByMacs(macs: MAC[]): Promise<Record<string, NodeStateData>> {
     if (_.isEmpty(macs)) {
         return {};
     }
@@ -596,9 +601,9 @@ export async function getByMacs(macs: MAC[]): Promise<{ [key: string]: NodeState
     return nodeStateByMac;
 }
 
-export async function confirm(token: string): Promise<Node> {
+export async function confirm(token: MonitoringToken): Promise<Node> {
     const {node, nodeSecrets} = await NodeService.getNodeDataWithSecretsByMonitoringToken(token);
-    if (!node.monitoring || !nodeSecrets.monitoringToken || nodeSecrets.monitoringToken !== token) {
+    if (!node.monitoring || !nodeSecrets.monitoringToken || !equal(nodeSecrets.monitoringToken, token)) {
         throw {data: 'Invalid token.', type: ErrorTypes.badRequest};
     }
 
@@ -612,15 +617,15 @@ export async function confirm(token: string): Promise<Node> {
     return newNode;
 }
 
-export async function disable(token: string): Promise<Node> {
+export async function disable(token: MonitoringToken): Promise<Node> {
     const {node, nodeSecrets} = await NodeService.getNodeDataWithSecretsByMonitoringToken(token);
-    if (!node.monitoring || !nodeSecrets.monitoringToken || nodeSecrets.monitoringToken !== token) {
+    if (!node.monitoring || !nodeSecrets.monitoringToken || !equal(nodeSecrets.monitoringToken, token)) {
         throw {data: 'Invalid token.', type: ErrorTypes.badRequest};
     }
 
     node.monitoring = false;
     node.monitoringConfirmed = false;
-    nodeSecrets.monitoringToken = '';
+    nodeSecrets.monitoringToken = undefined;
 
     const {node: newNode} = await NodeService.internalUpdateNode(node.token, node, nodeSecrets);
     return newNode;
