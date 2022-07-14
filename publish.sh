@@ -22,7 +22,7 @@ function confirm() {
     done
 }
 
-cd $(dirname $0)
+cd "$(dirname "${BASH_SOURCE[0]}")"
 
 version=$(grep '^ *"version": *"[^"]*" *, *$' package.json | cut -d '"' -f4)
 
@@ -44,5 +44,5 @@ if confirm "Continue publishing?"; then
     yarn run dist
 
     cd dist
-    yarn publish
+    yarn publish --new-version "$version"
 fi

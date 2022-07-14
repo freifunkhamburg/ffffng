@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+source "$REPO/nix/lib.inc.sh"
+
+set -e
+
+cd "$REPO"
+wrap "$REPO/publish.sh" "$REPO" "$@"
