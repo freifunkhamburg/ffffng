@@ -5,7 +5,6 @@ import * as Resources from "../utils/resources";
 import {Request, Response} from "express";
 
 export function get (req: Request, res: Response): void {
-    // TODO: Promises and types.
     getNodeStatistics()
         .then(nodeStatistics => Resources.success(
             res,

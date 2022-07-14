@@ -4,7 +4,7 @@ import {MonitoringToken} from "../types"
 
 // TODO: Typed URLs
 
-function formUrl(route: string, queryParams?: {[key: string]: string}): string {
+function formUrl(route: string, queryParams?: { [key: string]: string }): string {
     let url = config.server.baseUrl;
     if (route || queryParams) {
         url += '/#/';
@@ -27,14 +27,14 @@ function formUrl(route: string, queryParams?: {[key: string]: string}): string {
     return url;
 }
 
-export function editNodeUrl (): string {
+export function editNodeUrl(): string {
     return formUrl('update');
 }
 
-export function monitoringConfirmUrl (monitoringToken: MonitoringToken): string {
-    return formUrl('monitoring/confirm', { token: monitoringToken });
+export function monitoringConfirmUrl(monitoringToken: MonitoringToken): string {
+    return formUrl('monitoring/confirm', {token: monitoringToken.value});
 }
 
-export function monitoringDisableUrl (monitoringToken: MonitoringToken): string {
-    return formUrl('monitoring/disable', { token: monitoringToken });
+export function monitoringDisableUrl(monitoringToken: MonitoringToken): string {
+    return formUrl('monitoring/disable', {token: monitoringToken.value});
 }

@@ -7,6 +7,7 @@ import * as Resources from "../utils/resources";
 import {normalizeString} from "../utils/strings";
 import {forConstraint} from "../validation/validator";
 import {Request, Response} from "express";
+import {MonitoringToken, to} from "../types";
 
 const isValidToken = forConstraint(CONSTRAINTS.token, false);
 
@@ -38,8 +39,9 @@ export function confirm(req: Request, res: Response): void {
     if (!isValidToken(token)) {
         return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
     }
+    const validatedToken: MonitoringToken = to(token);
 
-    MonitoringService.confirm(token)
+    MonitoringService.confirm(validatedToken)
         .then(node => Resources.success(res, {
             hostname: node.hostname,
             mac: node.mac,
@@ -57,8 +59,9 @@ export function disable(req: Request, res: Response): void {
     if (!isValidToken(token)) {
         return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
     }
+    const validatedToken: MonitoringToken = to(token);
 
-    MonitoringService.disable(token)
+    MonitoringService.disable(validatedToken)
         .then(node => Resources.success(res, {
             hostname: node.hostname,
             mac: node.mac,

@@ -1,17 +1,32 @@
 import {ArrayField, Field, RawJsonField} from "sparkson"
-import {ClientConfig} from "./shared";
+import {ClientConfig, to} from "./shared";
 
 // TODO: Replace string types by more specific types like URL, Password, etc.
 
-export type Username = string;
-export type CleartextPassword = string;
-export type PasswordHash = string;
+export type Username = {
+    value: string;
+    readonly __tag: unique symbol
+};
+export type CleartextPassword = {
+    value: string;
+    readonly __tag: unique symbol
+};
+export type PasswordHash = {
+    value: string;
+    readonly __tag: unique symbol
+};
 
 export class UsersConfig {
+    public username: Username;
+    public passwordHash: PasswordHash;
+
     constructor(
-        @Field("user") public username: Username,
-        @Field("passwordHash") public passwordHash: PasswordHash,
-    ) {}
+        @Field("user") username: string,
+        @Field("passwordHash") passwordHash: string,
+    ) {
+        this.username = to(username);
+        this.passwordHash = to(passwordHash);
+    }
 }
 
 export class LoggingConfig {

@@ -9,7 +9,7 @@ import {promises as fs} from "graceful-fs";
 
 import {config} from "./config";
 import type {CleartextPassword, PasswordHash, Username} from "./types";
-import {isString} from "./types";
+import {isString, lift2, to} from "./types";
 import Logger from "./logger";
 
 export const app: Express = express();
@@ -17,7 +17,7 @@ export const app: Express = express();
 /**
  * Used to have some password comparison in case the user does not exist to avoid timing attacks.
  */
-const INVALID_PASSWORD_HASH = "$2b$05$JebmV1q/ySuxa89GoJYlc.6SEnj1OZYBOfTf.TYAehcC5HLeJiWPi";
+const INVALID_PASSWORD_HASH: PasswordHash = to("$2b$05$JebmV1q/ySuxa89GoJYlc.6SEnj1OZYBOfTf.TYAehcC5HLeJiWPi");
 
 /**
  * Trying to implement a timing safe string compare.
@@ -50,15 +50,15 @@ async function isValidLogin(username: Username, password: CleartextPassword): Pr
 
     // Iterate over all users every time to reduce risk of timing attacks.
     for (const userConfig of config.server.internal.users) {
-        if (timingSafeEqual(username, userConfig.username)) {
+        if (lift2(timingSafeEqual)(username, userConfig.username)) {
             passwordHash = userConfig.passwordHash;
         }
     }
 
     // Always compare some password even if the user does not exist to reduce risk of timing attacks.
     const isValidPassword = await bcrypt.compare(
-        password,
-        passwordHash || INVALID_PASSWORD_HASH
+        password.value,
+        passwordHash?.value || INVALID_PASSWORD_HASH.value
     );
 
     // Make sure password is only considered valid is user exists and therefor passwordHash is not undefined.
@@ -73,8 +73,8 @@ export function init(): void {
         {
             realm: 'Knotenformular - Intern'
         },
-        function (username: Username, password: CleartextPassword, callback: BasicAuthCheckerCallback): void {
-            isValidLogin(username, password)
+        function (username: string, password: string, callback: BasicAuthCheckerCallback): void {
+            isValidLogin(to(username), to(password))
                 .then(result => callback(result))
                 .catch(err => {
                     Logger.tag('login').error(err);

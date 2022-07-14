@@ -1,6 +1,6 @@
 import moment from 'moment';
 import {ParsedNode, parseNode, parseNodesJson, parseTimestamp} from "./monitoringService";
-import {OnlineState} from "../types";
+import {MAC, OnlineState, to} from "../types";
 import Logger from '../logger';
 import {MockLogger} from "../__mocks__/logger";
 
@@ -240,12 +240,12 @@ test('parseNode() should succeed parsing node without site and domain', () => {
 
     // then
     const expectedParsedNode: ParsedNode = {
-        mac: "12:34:56:78:90:AB",
+        mac: to("12:34:56:78:90:AB"),
         importTimestamp: importTimestamp,
         state: OnlineState.ONLINE,
         lastSeen: parseTimestamp(TIMESTAMP_VALID_STRING),
-        site: '<unknown-site>',
-        domain: '<unknown-domain>'
+        site: to("<unknown-site>"),
+        domain: to("<unknown-domain>"),
     };
     expect(parseNode(importTimestamp, nodeData)).toEqual(expectedParsedNode);
 });
@@ -272,12 +272,12 @@ test('parseNode() should succeed parsing node with site and domain', () => {
 
     // then
     const expectedParsedNode: ParsedNode = {
-        mac: "12:34:56:78:90:AB",
+        mac: to("12:34:56:78:90:AB"),
         importTimestamp: importTimestamp,
         state: OnlineState.ONLINE,
         lastSeen: parseTimestamp(TIMESTAMP_VALID_STRING),
-        site: 'test-site',
-        domain: 'test-domain'
+        site: to("test-site"),
+        domain: to("test-domain")
     };
     expect(parseNode(importTimestamp, nodeData)).toEqual(expectedParsedNode);
 });
@@ -461,12 +461,12 @@ test('parseNodesJson() should parse valid nodes', () => {
 
     // then
     const expectedParsedNode: ParsedNode = {
-        mac: "12:34:56:78:90:AB",
+        mac: to("12:34:56:78:90:AB"),
         importTimestamp: parseTimestamp(TIMESTAMP_VALID_STRING),
         state: OnlineState.ONLINE,
         lastSeen: parseTimestamp(TIMESTAMP_VALID_STRING),
-        site: 'test-site',
-        domain: 'test-domain'
+        site: to("test-site"),
+        domain: to("test-domain"),
     };
 
     expect(result.importTimestamp.isValid()).toBe(true);

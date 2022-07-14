@@ -10,7 +10,7 @@ import {forConstraint, forConstraints} from "../validation/validator";
 import * as Resources from "../utils/resources";
 import {Entity} from "../utils/resources";
 import {Request, Response} from "express";
-import {EnhancedNode, isNodeSortField, Node} from "../types";
+import {EnhancedNode, isNodeSortField, MAC, Node, to, Token} from "../types";
 
 const nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords', 'monitoring'];
 
@@ -49,13 +49,14 @@ export function update (req: Request, res: Response): void {
     if (!isValidToken(token)) {
         return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
     }
+    const validatedToken: Token = to(token);
 
     const node = getNormalizedNodeData(data);
     if (!isValidNode(node)) {
         return Resources.error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
     }
 
-    NodeService.updateNode(token, node)
+    NodeService.updateNode(validatedToken, node)
         .then(result => Resources.success(res, result))
         .catch(err => Resources.error(res, err));
 }
@@ -67,8 +68,9 @@ export function remove(req: Request, res: Response): void {
     if (!isValidToken(token)) {
         return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
     }
+    const validatedToken: Token = to(token);
 
-    NodeService.deleteNode(token)
+    NodeService.deleteNode(validatedToken)
         .then(() => Resources.success(res, {}))
         .catch(err => Resources.error(res, err));
 }
@@ -78,8 +80,9 @@ export function get(req: Request, res: Response): void {
     if (!isValidToken(token)) {
         return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
     }
+    const validatedToken: Token = to(token);
 
-    NodeService.getNodeDataByToken(token)
+    NodeService.getNodeDataByToken(validatedToken)
         .then(node => Resources.success(res, node))
         .catch(err => Resources.error(res, err));
 }
@@ -94,11 +97,11 @@ async function doGetAll(req: Request): Promise<{ total: number; pageNodes: any }
         !!node.token
     );
 
-    const macs = _.map(realNodes, (node: Node): string => node.mac);
+    const macs: MAC[] = _.map(realNodes, (node: Node): MAC => node.mac);
     const nodeStateByMac = await MonitoringService.getByMacs(macs);
 
     const enhancedNodes: EnhancedNode[] = _.map(realNodes, (node: Node): EnhancedNode => {
-        const nodeState = nodeStateByMac[node.mac];
+        const nodeState = nodeStateByMac[node.mac.value];
         if (nodeState) {
             return deepExtend({}, node, {
                 site: nodeState.site,

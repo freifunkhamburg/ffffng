@@ -10,51 +10,69 @@ import Logger from "../logger";
 import * as MailService from "../services/mailService";
 import {normalizeString} from "../utils/strings";
 import {monitoringConfirmUrl, monitoringDisableUrl} from "../utils/urlBuilder";
-import {FastdKey, MonitoringState, MonitoringToken, Node, NodeSecrets, NodeStatistics, UnixTimestampSeconds, Token} from "../types";
+import {
+    FastdKey,
+    MAC,
+    MonitoringState,
+    MonitoringToken,
+    Node,
+    NodeSecrets,
+    NodeStatistics,
+    to,
+    Token,
+    unhandledEnumField,
+    UnixTimestampSeconds
+} from "../types";
 import util from "util";
 
 const pglob = util.promisify(glob);
 
 type NodeFilter = {
+    // TODO: Newtype
     hostname?: string,
-    mac?: string,
-    key?: string,
+    mac?: MAC,
+    key?: FastdKey,
     token?: Token,
-    monitoringToken?: string,
+    monitoringToken?: MonitoringToken,
 }
 
+// TODO: Newtypes?
 type NodeFilenameParsed = {
     hostname?: string,
     mac?: string,
     key?: string,
-    token?: Token,
+    token?: string,
     monitoringToken?: string,
 }
 
-const linePrefixes = {
-    hostname: '# Knotenname: ',
-    nickname: '# Ansprechpartner: ',
-    email: '# Kontakt: ',
-    coords: '# Koordinaten: ',
-    mac: '# MAC: ',
-    token: '# Token: ',
-    monitoring: '# Monitoring: ',
-    monitoringToken: '# Monitoring-Token: '
-};
+enum LINE_PREFIX {
+    HOSTNAME = "# Knotenname: ",
+    NICKNAME = "# Ansprechpartner: ",
+    EMAIL = "# Kontakt: ",
+    COORDS = "# Koordinaten: ",
+    MAC = "# MAC: ",
+    TOKEN = "# Token: ",
+    MONITORING = "# Monitoring: ",
+    MONITORING_TOKEN = "# Monitoring-Token: ",
+}
 
 const filenameParts = ['hostname', 'mac', 'key', 'token', 'monitoringToken'];
 
-function generateToken(): Token {
-    return crypto.randomBytes(8).toString('hex');
+function generateToken<Type extends { readonly __tag: symbol, value: any } =
+    { readonly __tag: unique symbol, value: never }>(): Type {
+    return to<Type>(crypto.randomBytes(8).toString('hex'));
 }
 
 function toNodeFilesPattern(filter: NodeFilter): string {
-    const pattern = _.join(
-        _.map(
-            filenameParts,
-            field => field in filter ? (filter as {[key: string]: string | undefined})[field] : '*'),
-        '@'
-    );
+    const fields: (string | undefined)[] = [
+        filter.hostname,
+        filter.mac?.value,
+        filter.key?.value,
+        filter.token?.value,
+        filter.monitoringToken?.value,
+    ];
+
+    const pattern = fields.map((value) => value || '*').join('@');
 
     return config.server.peersPath + '/' + pattern.toLowerCase();
 }
@@ -83,7 +101,7 @@ async function findFilesInPeersPath(): Promise<string[]> {
 
 function parseNodeFilename(filename: string): NodeFilenameParsed {
     const parts = _.split(filename, '@', filenameParts.length);
-    const parsed: {[key: string]: string | undefined} = {};
+    const parsed: { [key: string]: string | undefined } = {};
     const zippedParts = _.zip<string, string>(filenameParts, parts);
     _.each(zippedParts, part => {
         const key = part[0];
@@ -104,25 +122,25 @@ function isDuplicate(filter: NodeFilter, token: Token | null): boolean {
         return true;
     }
 
-    return parseNodeFilename(files[0]).token !== token;
+    return parseNodeFilename(files[0]).token !== token.value;
 }
 
 function checkNoDuplicates(token: Token | null, node: Node, nodeSecrets: NodeSecrets): void {
-    if (isDuplicate({ hostname: node.hostname }, token)) {
+    if (isDuplicate({hostname: node.hostname}, token)) {
         throw {data: {msg: 'Already exists.', field: 'hostname'}, type: ErrorTypes.conflict};
     }
 
     if (node.key) {
-        if (isDuplicate({ key: node.key }, token)) {
+        if (isDuplicate({key: node.key}, token)) {
             throw {data: {msg: 'Already exists.', field: 'key'}, type: ErrorTypes.conflict};
         }
     }
 
-    if (isDuplicate({ mac: node.mac }, token)) {
+    if (isDuplicate({mac: node.mac}, token)) {
         throw {data: {msg: 'Already exists.', field: 'mac'}, type: ErrorTypes.conflict};
     }
 
-    if (nodeSecrets.monitoringToken && isDuplicate({ monitoringToken: nodeSecrets.monitoringToken }, token)) {
+    if (nodeSecrets.monitoringToken && isDuplicate({monitoringToken: nodeSecrets.monitoringToken}, token)) {
         throw {data: {msg: 'Already exists.', field: 'monitoringToken'}, type: ErrorTypes.conflict};
     }
 }
@@ -138,49 +156,55 @@ function toNodeFilename(token: Token, node: Node, nodeSecrets: NodeSecrets): str
         ).toLowerCase();
 }
 
+function getNodeValue(prefix: LINE_PREFIX, node: Node, nodeSecrets: NodeSecrets): string {
+    switch (prefix) {
+        case LINE_PREFIX.HOSTNAME:
+            return node.hostname;
+        case LINE_PREFIX.NICKNAME:
+            return node.nickname;
+        case LINE_PREFIX.EMAIL:
+            return node.email;
+        case LINE_PREFIX.COORDS:
+            return node.coords || "";
+        case LINE_PREFIX.MAC:
+            return node.mac.value;
+        case LINE_PREFIX.TOKEN:
+            return node.token.value;
+        case LINE_PREFIX.MONITORING:
+            if (node.monitoring && node.monitoringConfirmed) {
+                return "aktiv";
+            } else if (node.monitoring && !node.monitoringConfirmed) {
+                return "pending";
+            }
+            return "";
+        case LINE_PREFIX.MONITORING_TOKEN:
+            return nodeSecrets.monitoringToken?.value || "";
+        default:
+            return unhandledEnumField(prefix);
+    }
+}
+
 async function writeNodeFile(
     isUpdate: boolean,
     token: Token,
     node: Node,
     nodeSecrets: NodeSecrets,
-): Promise<{token: Token, node: Node}> {
+): Promise<{ token: Token, node: Node }> {
     const filename = toNodeFilename(token, node, nodeSecrets);
     let data = '';
-    _.each(linePrefixes, function (prefix, key) {
-        let value;
-        switch (key) {
-            case 'monitoring':
-                if (node.monitoring && node.monitoringConfirmed) {
-                    value = 'aktiv';
-                } else if (node.monitoring && !node.monitoringConfirmed) {
-                    value = 'pending';
-                } else {
-                    value = '';
-                }
-            break;
 
-            case 'monitoringToken':
-                value = nodeSecrets.monitoringToken || '';
-            break;
+    for (const prefix of Object.values(LINE_PREFIX)) {
+        data += `${prefix}${getNodeValue(prefix, node, nodeSecrets)}\n`;
+    }
 
-            default:
-                value = key === 'token' ? token : (node as {[key: string]: any})[key];
-                if (_.isUndefined(value)) {
-                    const nodeSecret = (nodeSecrets as {[key: string]: string})[key];
-                    value = _.isUndefined(nodeSecret) ? '' : nodeSecret;
-                }
-            break;
-        }
-        data += prefix + value + '\n';
-    });
     if (node.key) {
-        data += 'key "' + node.key + '";\n';
+        data += `key "${node.key}";\n`;
     }
 
     // since node.js is single threaded we don't need a lock
 
     if (isUpdate) {
-        const files = findNodeFilesSync({ token: token });
+        const files = findNodeFilesSync({token: token});
         if (files.length !== 1) {
             throw {data: 'Node not found.', type: ErrorTypes.notFound};
         }
@@ -190,8 +214,7 @@ async function writeNodeFile(
         const file = files[0];
         try {
             oldFs.unlinkSync(file);
-        }
-        catch (error) {
+        } catch (error) {
             Logger.tag('node', 'save').error('Could not delete old node file: ' + file, error);
             throw {data: 'Could not remove old node data.', type: ErrorTypes.internalError};
         }
@@ -202,8 +225,7 @@ async function writeNodeFile(
     try {
         oldFs.writeFileSync(filename, data, 'utf8');
         return {token, node};
-    }
-    catch (error) {
+    } catch (error) {
         Logger.tag('node', 'save').error('Could not write node file: ' + filename, error);
         throw {data: 'Could not write node data.', type: ErrorTypes.internalError};
     }
@@ -212,9 +234,8 @@ async function writeNodeFile(
 async function deleteNodeFile(token: Token): Promise<void> {
     let files;
     try {
-        files = await findNodeFiles({ token: token });
-    }
-    catch (error) {
+        files = await findNodeFiles({token: token});
+    } catch (error) {
         Logger.tag('node', 'delete').error('Could not find node file: ' + files, error);
         throw {data: 'Could not delete node.', type: ErrorTypes.internalError};
     }
@@ -225,86 +246,113 @@ async function deleteNodeFile(token: Token): Promise<void> {
 
     try {
         oldFs.unlinkSync(files[0]);
-    }
-    catch (error) {
+    } catch (error) {
         Logger.tag('node', 'delete').error('Could not delete node file: ' + files, error);
         throw {data: 'Could not delete node.', type: ErrorTypes.internalError};
     }
 }
 
-async function parseNodeFile(file: string): Promise<{node: Node, nodeSecrets: NodeSecrets}> {
+class NodeBuilder {
+    public token: Token = to(""); // FIXME: Either make token optional in Node or handle this!
+    public nickname: string = "";
+    public email: string = "";
+    public hostname: string = ""; // FIXME: Either make hostname optional in Node or handle this!
+    public coords?: string;
+    public key?: FastdKey;
+    public mac: MAC = to(""); // FIXME: Either make mac optional in Node or handle this!
+    public monitoring: boolean = false;
+    public monitoringConfirmed: boolean = false;
+    public monitoringState: MonitoringState = MonitoringState.DISABLED;
+
+    constructor(
+        public readonly modifiedAt: UnixTimestampSeconds,
+    ) {
+    }
+
+    public build(): Node {
+        return {
+            token: this.token,
+            nickname: this.nickname,
+            email: this.email,
+            hostname: this.hostname,
+            coords: this.coords,
+            key: this.key,
+            mac: this.mac,
+            monitoring: this.monitoring,
+            monitoringConfirmed: this.monitoringConfirmed,
+            monitoringState: this.monitoringState,
+            modifiedAt: this.modifiedAt,
+        }
+    }
+}
+
+function setNodeValue(prefix: LINE_PREFIX, node: NodeBuilder, nodeSecrets: NodeSecrets, value: string) {
+    switch (prefix) {
+        case LINE_PREFIX.HOSTNAME:
+            node.hostname = value;
+            break;
+        case LINE_PREFIX.NICKNAME:
+            node.nickname = value;
+            break;
+        case LINE_PREFIX.EMAIL:
+            node.email = value;
+            break;
+        case LINE_PREFIX.COORDS:
+            node.coords = value;
+            break;
+        case LINE_PREFIX.MAC:
+            node.mac = to(value);
+            break;
+        case LINE_PREFIX.TOKEN:
+            node.token = to(value);
+            break;
+        case LINE_PREFIX.MONITORING:
+            const active = value === 'aktiv';
+            const pending = value === 'pending';
+            node.monitoring = active || pending;
+            node.monitoringConfirmed = active;
+            node.monitoringState =
+                active ? MonitoringState.ACTIVE : (pending ? MonitoringState.PENDING : MonitoringState.DISABLED);
+            break;
+        case LINE_PREFIX.MONITORING_TOKEN:
+            nodeSecrets.monitoringToken = to<MonitoringToken>(value);
+            break;
+        default:
+            return unhandledEnumField(prefix);
+    }
+}
+
+async function parseNodeFile(file: string): Promise<{ node: Node, nodeSecrets: NodeSecrets }> {
     const contents = await fs.readFile(file);
     const stats = await fs.lstat(file);
     const modifiedAt = Math.floor(stats.mtimeMs / 1000);
 
-    const lines = contents.toString();
+    const lines = contents.toString().split("\n");
 
-    const node: {[key: string]: any} = {};
-    const nodeSecrets: {[key: string]: any} = {};
+    const node = new NodeBuilder(modifiedAt);
+    const nodeSecrets: NodeSecrets = {};
 
-    _.each(lines.split('\n'), function (line) {
-        const entries: {[key: string]: string} = {};
-
-        for (const key of Object.keys(linePrefixes)) {
-            const prefix = (linePrefixes as {[key: string]: string})[key];
-            if (line.substring(0, prefix.length) === prefix) {
-                entries[key] = normalizeString(line.substr(prefix.length));
-                break;
+    for (const line of lines) {
+        if (line.substring(0, 5) === 'key "') {
+            node.key = to<FastdKey>(normalizeString(line.split('"')[1]));
+        } else {
+            for (const prefix of Object.values(LINE_PREFIX)) {
+                if (line.substring(0, prefix.length) === prefix) {
+                    const value = normalizeString(line.substring(prefix.length));
+                    setNodeValue(prefix, node, nodeSecrets, value);
+                    break;
+                }
             }
         }
-
-        if (_.isEmpty(entries) && line.substring(0, 5) === 'key "') {
-            entries.key = normalizeString(line.split('"')[1]);
-        }
-
-        _.each(entries, function (value, key) {
-            switch (key) {
-                case 'mac':
-                    node.mac = value;
-                    node.mapId = _.toLower(value).replace(/:/g, '');
-                    break;
-
-                case 'monitoring':
-                    const active = value === 'aktiv';
-                    const pending = value === 'pending';
-                    node.monitoring = active || pending;
-                    node.monitoringConfirmed = active;
-                    node.monitoringState =
-                        active ? MonitoringState.ACTIVE : (pending ? MonitoringState.PENDING : MonitoringState.DISABLED);
-                    break;
-
-                case 'monitoringToken':
-                    nodeSecrets.monitoringToken = value;
-                    break;
-
-                default:
-                   node[key] = value;
-                   break;
-            }
-        });
-    });
+    }
 
     return {
-        node: {
-            token: node.token as Token || '',
-            nickname: node.nickname as string || '',
-            email: node.email as string || '',
-            hostname: node.hostname as string || '',
-            coords: node.coords as string || undefined,
-            key: node.key as FastdKey || undefined,
-            mac: node.mac as string || '',
-            monitoring: !!node.monitoring,
-            monitoringConfirmed: !!node.monitoringConfirmed,
-            monitoringState: node.monitoringState as MonitoringState || MonitoringState.DISABLED,
-            modifiedAt,
-        },
-        nodeSecrets: {
-            monitoringToken: nodeSecrets.monitoringToken as MonitoringToken || undefined,
-        },
+        node: node.build(),
+        nodeSecrets,
     };
 }
 
-async function findNodeDataByFilePattern(filter: NodeFilter): Promise<{node: Node, nodeSecrets: NodeSecrets} | null> {
+async function findNodeDataByFilePattern(filter: NodeFilter): Promise<{ node: Node, nodeSecrets: NodeSecrets } | null> {
     const files = await findNodeFiles(filter);
 
     if (files.length !== 1) {
@@ -315,7 +363,7 @@ async function findNodeDataByFilePattern(filter: NodeFilter): Promise<{node: Nod
     return await parseNodeFile(file);
 }
 
-async function getNodeDataByFilePattern(filter: NodeFilter): Promise<{node: Node, nodeSecrets: NodeSecrets}> {
+async function getNodeDataByFilePattern(filter: NodeFilter): Promise<{ node: Node, nodeSecrets: NodeSecrets }> {
     const result = await findNodeDataByFilePattern(filter);
     if (!result) {
         throw {data: 'Node not found.', type: ErrorTypes.notFound};
@@ -348,14 +396,14 @@ async function sendMonitoringConfirmationMail(node: Node, nodeSecrets: NodeSecre
     );
 }
 
-export async function createNode (node: Node): Promise<{token: Token, node: Node}> {
-    const token = generateToken();
+export async function createNode(node: Node): Promise<{ token: Token, node: Node }> {
+    const token: Token = generateToken();
     const nodeSecrets: NodeSecrets = {};
 
     node.monitoringConfirmed = false;
 
     if (node.monitoring) {
-        nodeSecrets.monitoringToken = generateToken();
+        nodeSecrets.monitoringToken = generateToken<MonitoringToken>();
     }
 
     const written = await writeNodeFile(false, token, node, nodeSecrets);
@@ -367,17 +415,17 @@ export async function createNode (node: Node): Promise<{token: Token, node: Node
     return written;
 }
 
-export async function updateNode (token: Token, node: Node): Promise<{token: Token, node: Node}> {
+export async function updateNode(token: Token, node: Node): Promise<{ token: Token, node: Node }> {
     const {node: currentNode, nodeSecrets} = await getNodeDataWithSecretsByToken(token);
 
     let monitoringConfirmed = false;
-    let monitoringToken = '';
+    let monitoringToken: MonitoringToken | undefined;
 
     if (node.monitoring) {
         if (!currentNode.monitoring) {
             // monitoring just has been enabled
             monitoringConfirmed = false;
-            monitoringToken = generateToken();
+            monitoringToken = generateToken<MonitoringToken>();
 
         } else {
             // monitoring is still enabled
@@ -385,12 +433,12 @@ export async function updateNode (token: Token, node: Node): Promise<{token: Tok
             if (currentNode.email !== node.email) {
                 // new email so we need a new token and a reconfirmation
                 monitoringConfirmed = false;
-                monitoringToken = generateToken();
+                monitoringToken = generateToken<MonitoringToken>();
 
             } else {
                 // email unchanged, keep token (fix if not set) and confirmation state
                 monitoringConfirmed = currentNode.monitoringConfirmed;
-                monitoringToken = nodeSecrets.monitoringToken || generateToken();
+                monitoringToken = nodeSecrets.monitoringToken || generateToken<MonitoringToken>();
             }
         }
     }
@@ -409,11 +457,11 @@ export async function updateNode (token: Token, node: Node): Promise<{token: Tok
 export async function internalUpdateNode(
     token: Token,
     node: Node, nodeSecrets: NodeSecrets
-): Promise<{token: Token, node: Node}> {
+): Promise<{ token: Token, node: Node }> {
     return await writeNodeFile(true, token, node, nodeSecrets);
 }
 
-export async function deleteNode (token: Token): Promise<void> {
+export async function deleteNode(token: Token): Promise<void> {
     await deleteNodeFile(token);
 }
 
@@ -440,34 +488,34 @@ export async function getAllNodes(): Promise<Node[]> {
     return nodes;
 }
 
-export async function getNodeDataWithSecretsByMac (mac: string): Promise<{node: Node, nodeSecrets: NodeSecrets} | null> {
-    return await findNodeDataByFilePattern({ mac: mac });
+export async function getNodeDataWithSecretsByMac(mac: MAC): Promise<{ node: Node, nodeSecrets: NodeSecrets } | null> {
+    return await findNodeDataByFilePattern({mac});
 }
 
-export async function getNodeDataByMac (mac: string): Promise<Node | null> {
-    const result = await findNodeDataByFilePattern({ mac: mac });
+export async function getNodeDataByMac(mac: MAC): Promise<Node | null> {
+    const result = await findNodeDataByFilePattern({mac});
     return result ? result.node : null;
 }
 
-export async function getNodeDataWithSecretsByToken (token: Token): Promise<{node: Node, nodeSecrets: NodeSecrets}> {
-    return await getNodeDataByFilePattern({ token: token });
+export async function getNodeDataWithSecretsByToken(token: Token): Promise<{ node: Node, nodeSecrets: NodeSecrets }> {
+    return await getNodeDataByFilePattern({token: token});
 }
 
-export async function getNodeDataByToken (token: Token): Promise<Node> {
-    const {node} = await getNodeDataByFilePattern({ token: token });
+export async function getNodeDataByToken(token: Token): Promise<Node> {
+    const {node} = await getNodeDataByFilePattern({token: token});
     return node;
 }
 
-export async function getNodeDataWithSecretsByMonitoringToken (
+export async function getNodeDataWithSecretsByMonitoringToken(
     monitoringToken: MonitoringToken
-): Promise<{node: Node, nodeSecrets: NodeSecrets}> {
-    return await getNodeDataByFilePattern({ monitoringToken: monitoringToken });
+): Promise<{ node: Node, nodeSecrets: NodeSecrets }> {
+    return await getNodeDataByFilePattern({monitoringToken: monitoringToken});
 }
 
-export async function getNodeDataByMonitoringToken (
+export async function getNodeDataByMonitoringToken(
     monitoringToken: MonitoringToken
 ): Promise<Node> {
-    const {node} = await getNodeDataByFilePattern({ monitoringToken: monitoringToken });
+    const {node} = await getNodeDataByFilePattern({monitoringToken: monitoringToken});
     return node;
 }
 
@@ -481,8 +529,7 @@ export async function fixNodeFilenames(): Promise<void> {
         if (file !== expectedFilename) {
             try {
                 await fs.rename(file, expectedFilename);
-            }
-            catch (error) {
+            } catch (error) {
                 throw new Error(
                     'Cannot rename file ' + file + ' to ' + expectedFilename + ' => ' + error
                 );
@@ -518,24 +565,20 @@ export async function getNodeStatistics(): Promise<NodeStatistics> {
             nodeStatistics.withCoords += 1;
         }
 
-        function ensureExhaustive(monitoringState: never): void {
-            throw new Error('Add missing case for monitoring stat below: ' + monitoringState);
-        }
-
         const monitoringState = node.monitoringState;
         switch (monitoringState) {
             case MonitoringState.ACTIVE:
                 nodeStatistics.monitoring.active += 1;
-            break;
+                break;
             case MonitoringState.PENDING:
                 nodeStatistics.monitoring.pending += 1;
-            break;
+                break;
             case MonitoringState.DISABLED:
                 // Not counted seperately.
-            break;
+                break;
 
             default:
-                ensureExhaustive(monitoringState);
+                unhandledEnumField(monitoringState);
         }
     });
 

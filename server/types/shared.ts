@@ -6,8 +6,35 @@ export type TypeGuard<T> = (arg: unknown) => arg is T;
 export type EnumValue<E> = E[keyof E];
 export type EnumTypeGuard<E> = TypeGuard<EnumValue<E>>;
 
+export function unhandledEnumField(field: never): never {
+    throw new Error(`Unhandled enum field: ${field}`);
+}
+
+export function to<Type extends { readonly __tag: symbol, value: any } = { readonly __tag: unique symbol, value: never }>(value: Type['value']): Type {
+    return value as any as Type;
+}
+
+export function lift2<Result, Type extends { readonly __tag: symbol, value: any }>(callback: (a: Type["value"], b: Type["value"]) => Result): (newtype1: Type, newtype2: Type) => Result {
+    return (a, b) => callback(a.value, b.value);
+}
+
+export function equal<Result, Type extends { readonly __tag: symbol, value: any }>(a: Type, b: Type): boolean {
+    return lift2((a, b) => a === b)(a, b);
+}
+
 export function isObject(arg: unknown): arg is object {
     return arg !== null && typeof arg === "object";
+}
+
+export function toIsNewtype<Type extends { readonly __tag: symbol, value: Value } = { readonly __tag: unique symbol, value: never }, Value = any>(isValue: TypeGuard<Value>): TypeGuard<Type> {
+    // TODO: Add validation pattern.
+    return (arg: unknown): arg is Type => {
+        if (!isObject(arg)) {
+            return false;
+        }
+        const newtype = arg as Type;
+        return isValue(newtype.value);
+    }
 }
 
 export function isArray<T>(arg: unknown, isT: TypeGuard<T>): arg is Array<T> {
@@ -248,19 +275,32 @@ export function isClientConfig(arg: unknown): arg is ClientConfig {
 }
 
 // TODO: Token type.
-export type Token = string;
-export const isToken = isString;
+export type Token = {
+    value: string;
+    readonly __tag: unique symbol
+};
+export const isToken = toIsNewtype<Token>(isString);
 
-export type FastdKey = string;
-export const isFastdKey = isString;
+export type FastdKey = {
+    value: string;
+    readonly __tag: unique symbol
+};
+export const isFastdKey = toIsNewtype<FastdKey>(isString);
 
-export type MAC = string;
-export const isMAC = isString;
+export type MAC = {
+    value: string;
+    readonly __tag: unique symbol
+};
+export const isMAC = toIsNewtype<MAC>(isString);
 
 export type UnixTimestampSeconds = number;
 export type UnixTimestampMilliseconds = number;
 
-export type MonitoringToken = string;
+export type MonitoringToken = {
+    value: string;
+    readonly __tag: unique symbol
+};
+
 export enum MonitoringState {
     ACTIVE = "active",
     PENDING = "pending",
@@ -269,9 +309,12 @@ export enum MonitoringState {
 
 export const isMonitoringState = toIsEnum(MonitoringState);
 
-export type NodeId = string;
-export const isNodeId = isString;
+export type NodeId = {
+    value: string;
+    readonly __tag: unique symbol
+};
 
+// TODO: More Newtypes
 export interface Node {
     token: Token;
     nickname: string;
@@ -310,13 +353,20 @@ export enum OnlineState {
     ONLINE = "ONLINE",
     OFFLINE = "OFFLINE",
 }
+
 export const isOnlineState = toIsEnum(OnlineState);
 
-export type Site = string;
-export const isSite = isString;
+export type Site = {
+    value: string;
+    readonly __tag: unique symbol
+};
+export const isSite = toIsNewtype<Site>(isString);
 
-export type Domain = string;
-export const isDomain = isString;
+export type Domain = {
+    value: string;
+    readonly __tag: unique symbol
+};
+export const isDomain = toIsNewtype<Domain>(isString);
 
 export interface EnhancedNode extends Node {
     site?: Site,
@@ -426,7 +476,10 @@ export enum MailSortField {
 
 export const isMailSortField = toIsEnum(MailSortField);
 
-export type GenericSortField = string;
+export type GenericSortField = {
+    value: string;
+    readonly __tag: unique symbol
+};
 
 export enum SortDirection {
     ASCENDING = "ASC",
