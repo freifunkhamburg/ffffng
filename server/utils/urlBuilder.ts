@@ -1,11 +1,9 @@
 import _ from "lodash"
 import {config} from "../config"
-import {MonitoringToken} from "../types"
+import {MonitoringToken, Url} from "../types"
 
-// TODO: Typed URLs
-
-function formUrl(route: string, queryParams?: { [key: string]: string }): string {
-    let url = config.server.baseUrl;
+function formUrl(route: string, queryParams?: { [key: string]: string }): Url {
+    let url = config.server.baseUrl as string;
     if (route || queryParams) {
         url += '/#/';
     }
@@ -24,17 +22,17 @@ function formUrl(route: string, queryParams?: { [key: string]: string }): string
             '&'
         );
     }
-    return url;
+    return url as Url;
 }
 
-export function editNodeUrl(): string {
+export function editNodeUrl(): Url {
     return formUrl('update');
 }
 
-export function monitoringConfirmUrl(monitoringToken: MonitoringToken): string {
-    return formUrl('monitoring/confirm', {token: monitoringToken.value});
+export function monitoringConfirmUrl(monitoringToken: MonitoringToken): Url {
+    return formUrl('monitoring/confirm', {token: monitoringToken});
 }
 
-export function monitoringDisableUrl(monitoringToken: MonitoringToken): string {
-    return formUrl('monitoring/disable', {token: monitoringToken.value});
+export function monitoringDisableUrl(monitoringToken: MonitoringToken): Url {
+    return formUrl('monitoring/disable', {token: monitoringToken});
 }

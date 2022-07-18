@@ -1,32 +1,17 @@
 import {ArrayField, Field, RawJsonField} from "sparkson"
-import {ClientConfig, to} from "./shared";
+import {ClientConfig, JSONObject, Url} from "./shared";
 
 // TODO: Replace string types by more specific types like URL, Password, etc.
 
-export type Username = {
-    value: string;
-    readonly __tag: unique symbol
-};
-export type CleartextPassword = {
-    value: string;
-    readonly __tag: unique symbol
-};
-export type PasswordHash = {
-    value: string;
-    readonly __tag: unique symbol
-};
+export type Username = string & { readonly __tag: unique symbol };
+export type CleartextPassword = string & { readonly __tag: unique symbol };
+export type PasswordHash = string & { readonly __tag: unique symbol };
 
 export class UsersConfig {
-    public username: Username;
-    public passwordHash: PasswordHash;
-
     constructor(
-        @Field("user") username: string,
-        @Field("passwordHash") passwordHash: string,
-    ) {
-        this.username = to(username);
-        this.passwordHash = to(passwordHash);
-    }
+        @Field("user") public username: Username,
+        @Field("passwordHash") public passwordHash: PasswordHash,
+    ) {}
 }
 
 export class LoggingConfig {
@@ -49,19 +34,19 @@ export class EmailConfig {
         @Field("from") public from: string,
 
         // For details see: https://nodemailer.com/2-0-0-beta/setup-smtp/
-        @RawJsonField("smtp") public smtp: any, // TODO: Better types!
+        @RawJsonField("smtp") public smtp: JSONObject,
     ) {}
 }
 
 export class ServerMapConfig {
     constructor(
-        @ArrayField("nodesJsonUrl", String) public nodesJsonUrl: string[],
+        @ArrayField("nodesJsonUrl", String) public nodesJsonUrl: Url[],
     ) {}
 }
 
 export class ServerConfig {
     constructor(
-        @Field("baseUrl") public baseUrl: string,
+        @Field("baseUrl") public baseUrl: Url,
         @Field("port") public port: number,
 
         @Field("databaseFile") public databaseFile: string,

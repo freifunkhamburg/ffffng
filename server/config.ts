@@ -3,17 +3,17 @@ import commandLineUsage from "command-line-usage"
 import fs from "graceful-fs"
 import url from "url"
 import {parse} from "sparkson"
-import {Config, Version} from "./types"
+import {Config, Url, Version} from "./types"
 
 // @ts-ignore
 export let config: Config = {};
-export let version: Version = "unknown";
+export let version: Version = "unknown" as Version;
 
 export function parseCommandLine(): void {
     const commandLineDefs = [
-        { name: 'help', alias: 'h', type: Boolean, description: 'Show this help' },
-        { name: 'config', alias: 'c', type: String, description: 'Location of config.json' },
-        { name: 'version', alias: 'v', type: Boolean, description: 'Show ffffng version' }
+        {name: 'help', alias: 'h', type: Boolean, description: 'Show this help'},
+        {name: 'config', alias: 'c', type: String, description: 'Location of config.json'},
+        {name: 'version', alias: 'v', type: Boolean, description: 'Show ffffng version'}
     ];
 
     let commandLineOptions;
@@ -34,7 +34,7 @@ export function parseCommandLine(): void {
         version = JSON.parse(fs.readFileSync(packageJsonFile, 'utf8')).version;
     }
 
-    function usage () {
+    function usage() {
         console.log(commandLineUsage([
             {
                 header: 'ffffng - ' + version + ' - Freifunk node management form',
@@ -70,8 +70,10 @@ export function parseCommandLine(): void {
 
     config = parse(Config, configJSON);
 
-    function stripTrailingSlash(url: string): string {
-        return url.endsWith("/") ? url.substr(0, url.length - 1) : url;
+    function stripTrailingSlash(url: Url): Url {
+        return url.endsWith("/")
+            ? url.substr(0, url.length - 1) as Url
+            : url;
     }
 
     config.server.baseUrl = stripTrailingSlash(config.server.baseUrl);

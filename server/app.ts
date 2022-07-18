@@ -9,7 +9,7 @@ import {promises as fs} from "graceful-fs";
 
 import {config} from "./config";
 import type {CleartextPassword, PasswordHash, Username} from "./types";
-import {isString, lift2, to} from "./types";
+import {isString} from "./types";
 import Logger from "./logger";
 
 export const app: Express = express();
@@ -17,14 +17,14 @@ export const app: Express = express();
 /**
  * Used to have some password comparison in case the user does not exist to avoid timing attacks.
  */
-const INVALID_PASSWORD_HASH: PasswordHash = to("$2b$05$JebmV1q/ySuxa89GoJYlc.6SEnj1OZYBOfTf.TYAehcC5HLeJiWPi");
+const INVALID_PASSWORD_HASH: PasswordHash = "$2b$05$JebmV1q/ySuxa89GoJYlc.6SEnj1OZYBOfTf.TYAehcC5HLeJiWPi" as PasswordHash;
 
 /**
  * Trying to implement a timing safe string compare.
  *
  * TODO: Write tests for timing.
  */
-function timingSafeEqual(a: string, b: string): boolean {
+function timingSafeEqual<T extends string>(a: T, b: T): boolean {
     const lenA = a.length;
     const lenB = b.length;
 
@@ -32,7 +32,7 @@ function timingSafeEqual(a: string, b: string): boolean {
     let different = Math.abs(lenA - lenB);
 
     // Make sure b is always the same length as a. Use slice to try avoiding optimizations.
-    b = different === 0 ? b.slice() : a.slice();
+    b = (different === 0 ? b.slice() : a.slice()) as T;
 
     for (let i = 0; i < lenA; i += 1) {
         different += Math.abs(a.charCodeAt(i) - b.charCodeAt(i));
@@ -50,15 +50,15 @@ async function isValidLogin(username: Username, password: CleartextPassword): Pr
 
     // Iterate over all users every time to reduce risk of timing attacks.
     for (const userConfig of config.server.internal.users) {
-        if (lift2(timingSafeEqual)(username, userConfig.username)) {
+        if (timingSafeEqual(username, userConfig.username)) {
             passwordHash = userConfig.passwordHash;
         }
     }
 
     // Always compare some password even if the user does not exist to reduce risk of timing attacks.
     const isValidPassword = await bcrypt.compare(
-        password.value,
-        passwordHash?.value || INVALID_PASSWORD_HASH.value
+        password,
+        passwordHash || INVALID_PASSWORD_HASH
     );
 
     // Make sure password is only considered valid is user exists and therefor passwordHash is not undefined.
@@ -74,7 +74,7 @@ export function init(): void {
             realm: 'Knotenformular - Intern'
         },
         function (username: string, password: string, callback: BasicAuthCheckerCallback): void {
-            isValidLogin(to(username), to(password))
+            isValidLogin(username as Username, password as CleartextPassword)
                 .then(result => callback(result))
                 .catch(err => {
                     Logger.tag('login').error(err);

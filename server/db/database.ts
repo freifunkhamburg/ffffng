@@ -4,12 +4,125 @@ import glob from "glob";
 import path from "path";
 import {config} from "../config";
 import Logger from "../logger";
-import sqlite, {Database, Statement} from "sqlite";
+import {Database, ISqlite, open, Statement} from "sqlite";
+import * as sqlite3 from "sqlite3";
 
 const pglob = util.promisify(glob);
 const pReadFile = util.promisify(fs.readFile);
 
-async function applyPatch(db: sqlite.Database, file: string): Promise<void> {
+export type RunResult = ISqlite.RunResult;
+export type SqlType = ISqlite.SqlType;
+
+export interface TypedDatabase {
+    /**
+     * @see Database.on
+     */
+    on(event: string, listener: any): Promise<void>;
+
+    /**
+     * @see Database.run
+     */
+    run(sql: SqlType, ...params: any[]): Promise<RunResult>;
+
+    /**
+     * @see Database.get
+     */
+    get<T>(sql: SqlType, ...params: any[]): Promise<T | undefined>;
+
+    /**
+     * @see Database.each
+     */
+    each<T>(sql: SqlType, callback: (err: any, row: T) => void): Promise<number>;
+
+    each<T>(sql: SqlType, param1: any, callback: (err: any, row: T) => void): Promise<number>;
+
+    each<T>(sql: SqlType, param1: any, param2: any, callback: (err: any, row: T) => void): Promise<number>;
+
+    each<T>(sql: SqlType, param1: any, param2: any, param3: any, callback: (err: any, row: T) => void): Promise<number>;
+
+    each<T>(sql: SqlType, ...params: any[]): Promise<number>;
+
+    /**
+     * @see Database.all
+     */
+    all<T = never>(sql: SqlType, ...params: any[]): Promise<T[]>;
+
+    /**
+     * @see Database.exec
+     */
+    exec(sql: SqlType, ...params: any[]): Promise<void>;
+
+    /**
+     * @see Database.prepare
+     */
+    prepare(sql: SqlType, ...params: any[]): Promise<Statement>;
+}
+
+/**
+ * Typesafe database wrapper.
+ *
+ * @see Database
+ */
+class DatabasePromiseWrapper implements TypedDatabase {
+    private db: Promise<Database>;
+
+    constructor() {
+        this.db = new Promise<Database>((resolve, reject) => {
+            open({
+                filename: config.server.databaseFile,
+                driver: sqlite3.Database,
+            })
+                .then(resolve)
+                .catch(reject);
+        });
+        this.db.catch(err => {
+            Logger.tag('database', 'init').error('Error initializing database: ', err);
+            process.exit(1);
+        });
+    }
+
+    async on(event: string, listener: any): Promise<void> {
+        const db = await this.db;
+        db.on(event, listener);
+    }
+
+    async run(sql: SqlType, ...params: any[]): Promise<RunResult> {
+        const db = await this.db;
+        return db.run(sql, ...params);
+    }
+
+    async get<T>(sql: SqlType, ...params: any[]): Promise<T | undefined> {
+        const db = await this.db;
+        return await db.get<T>(sql, ...params);
+    }
+
+    async each<T>(sql: SqlType, callback: (err: any, row: T) => void): Promise<number>;
+    async each<T>(sql: SqlType, param1: any, callback: (err: any, row: T) => void): Promise<number>;
+    async each<T>(sql: SqlType, param1: any, param2: any, callback: (err: any, row: T) => void): Promise<number>;
+    async each<T>(sql: SqlType, param1: any, param2: any, param3: any, callback: (err: any, row: T) => void): Promise<number>;
+    async each<T>(sql: SqlType, ...params: any[]): Promise<number> {
+        const db = await this.db;
+        // @ts-ignore
+        return await db.each.apply(db, arguments);
+    }
+
+    async all<T>(sql: SqlType, ...params: any[]): Promise<T[]> {
+        const db = await this.db;
+        return (await db.all<T[]>(sql, ...params));
+    }
+
+    async exec(sql: SqlType, ...params: any[]): Promise<void> {
+        const db = await this.db;
+        return await db.exec(sql, ...params);
+    }
+
+    async prepare(sql: SqlType, ...params: any[]): Promise<Statement> {
+        const db = await this.db;
+        return await db.prepare(sql, ...params);
+    }
+}
+
+async function applyPatch(db: TypedDatabase, file: string): Promise<void> {
     Logger.tag('database', 'migration').info('Checking if patch need to be applied: %s', file);
 
     const contents = await pReadFile(file);
@@ -23,22 +136,22 @@ async function applyPatch(db: sqlite.Database, file: string): Promise<void> {
     }
 
     const sql = 'BEGIN TRANSACTION;\n' +
-              contents.toString() + '\n' +
-              'INSERT INTO schema_version (version) VALUES (\'' + version + '\');\n' +
-              'END TRANSACTION;';
+        contents.toString() + '\n' +
+        'INSERT INTO schema_version (version) VALUES (\'' + version + '\');\n' +
+        'END TRANSACTION;';
 
     await db.exec(sql);
 
     Logger.tag('database', 'migration').info('Patch successfully applied: %s', file);
 }
 
-async function applyMigrations(db: sqlite.Database): Promise<void> {
+async function applyMigrations(db: TypedDatabase): Promise<void> {
     Logger.tag('database', 'migration').info('Migrating database...');
 
     const sql = 'BEGIN TRANSACTION; CREATE TABLE IF NOT EXISTS schema_version (\n' +
-              '    version VARCHAR(255) PRIMARY KEY ASC,\n' +
-              '    applied_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\n' +
-              '); END TRANSACTION;';
+        '    version VARCHAR(255) PRIMARY KEY ASC,\n' +
+        '    applied_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\n' +
+        '); END TRANSACTION;';
 
     await db.exec(sql);
 
@@ -48,106 +161,18 @@ async function applyMigrations(db: sqlite.Database): Promise<void> {
     }
 }
 
-const dbPromise = new Promise<Database>((resolve, reject) => {
-    sqlite.open(config.server.databaseFile)
-        .then(resolve)
-        .catch(reject);
-});
+export const db: TypedDatabase = new DatabasePromiseWrapper();
 
 export async function init(): Promise<void> {
     Logger.tag('database').info('Setting up database: %s', config.server.databaseFile);
-
-    let db: Database;
-    try {
-        db = await dbPromise;
-    }
-    catch (error) {
-        Logger.tag('database').error('Error initialzing database:', error);
-        throw error;
-    }
-
-    db.on('profile', (sql, time) => Logger.tag('database').profile('[%sms]\t%s', time, sql));
+    await db.on('profile', (sql: string, time: number) => Logger.tag('database').profile('[%sms]\t%s', time, sql));
 
     try {
         await applyMigrations(db);
-    }
-    catch (error) {
+    } catch (error) {
         Logger.tag('database').error('Error migrating database:', error);
         throw error;
     }
 }
 
-/**
- * Wrapper around a Promise<Database> providing the same interface as the Database itself.
- */
-class DatabasePromiseWrapper implements Database {
-    constructor(private db: Promise<Database>) {
-        db.catch(err => {
-            Logger.tag('database', 'init').error('Error initializing database: ', err);
-            process.exit(1);
-        });
-    }
-
-    async close() {
-        const db = await this.db;
-        // @ts-ignore
-        return await db.close.apply(db, arguments);
-    }
-
-    async run() {
-        const db = await this.db;
-        // @ts-ignore
-        return await db.run.apply(db, arguments);
-    }
-
-    async get() {
-        const db = await this.db;
-        // @ts-ignore
-        return await db.get.apply(db, arguments);
-    }
-
-    async all() {
-        const db = await this.db;
-        // @ts-ignore
-        return await db.all.apply(db, arguments);
-    }
-
-    async exec() {
-        const db = await this.db;
-        // @ts-ignore
-        return await db.exec.apply(db, arguments);
-    }
-
-    async each() {
-        const db = await this.db;
-        // @ts-ignore
-        return await db.each.apply(db, arguments);
-    }
-
-    async prepare() {
-        const db = await this.db;
-        // @ts-ignore
-        return await db.prepare.apply(db, arguments);
-    }
-
-    async configure() {
-        const db = await this.db;
-        // @ts-ignore
-        return await db.configure.apply(db, arguments);
-    }
-
-    async migrate() {
-        const db = await this.db;
-        // @ts-ignore
-        return await db.migrate.apply(db, arguments);
-    }
-
-    async on() {
-        const db = await this.db;
-        // @ts-ignore
-        return await db.on.apply(db, arguments);
-    }
-}
-
-export const db: Database = new DatabasePromiseWrapper(dbPromise);
-export {Database, Statement};
+export {Statement};

@@ -17,7 +17,11 @@ export function normalizeMac (mac: string): string {
     return macParts.join(':');
 }
 
-export function parseInteger (str: string): number | undefined {
+export function parseInteger (str: string): number {
     const parsed = _.parseInt(str, 10);
-    return parsed.toString() === str ? parsed : undefined;
+    if (parsed.toString() === str) {
+        return parsed;
+    } else {
+        throw new SyntaxError(`String does not represent a valid integer: "${str}"`);
+    }
 }
