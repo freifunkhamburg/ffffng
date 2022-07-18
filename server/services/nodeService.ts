@@ -11,14 +11,18 @@ import * as MailService from "../services/mailService";
 import {normalizeString} from "../utils/strings";
 import {monitoringConfirmUrl, monitoringDisableUrl} from "../utils/urlBuilder";
 import {
+    Coordinates,
+    EmailAddress,
     FastdKey,
+    Hostname,
     MAC,
+    MailType,
     MonitoringState,
     MonitoringToken,
+    Nickname,
     Node,
     NodeSecrets,
     NodeStatistics,
-    to,
     Token,
     toUnixTimestampSeconds,
     unhandledEnumField,
@@ -60,18 +64,17 @@ enum LINE_PREFIX {
 
 const filenameParts = ['hostname', 'mac', 'key', 'token', 'monitoringToken'];
 
-function generateToken<Type extends { readonly __tag: symbol, value: any } =
-    { readonly __tag: unique symbol, value: never }>(): Type {
-    return to<Type>(crypto.randomBytes(8).toString('hex'));
+function generateToken<Type extends string & { readonly __tag: symbol } = never>(): Type {
+    return crypto.randomBytes(8).toString('hex') as Type;
 }
 
 function toNodeFilesPattern(filter: NodeFilter): string {
     const fields: (string | undefined)[] = [
         filter.hostname,
-        filter.mac?.value,
-        filter.key?.value,
-        filter.token?.value,
-        filter.monitoringToken?.value,
+        filter.mac,
+        filter.key,
+        filter.token,
+        filter.monitoringToken,
     ];
 
     const pattern = fields.map((value) => value || '*').join('@');
@@ -124,7 +127,7 @@ function isDuplicate(filter: NodeFilter, token: Token | null): boolean {
         return true;
     }
 
-    return parseNodeFilename(files[0]).token !== token.value;
+    return parseNodeFilename(files[0]).token !== token;
 }
 
 function checkNoDuplicates(token: Token | null, node: Node, nodeSecrets: NodeSecrets): void {
@@ -169,9 +172,9 @@ function getNodeValue(prefix: LINE_PREFIX, node: Node, nodeSecrets: NodeSecrets)
         case LINE_PREFIX.COORDS:
             return node.coords || "";
         case LINE_PREFIX.MAC:
-            return node.mac.value;
+            return node.mac;
         case LINE_PREFIX.TOKEN:
-            return node.token.value;
+            return node.token;
         case LINE_PREFIX.MONITORING:
             if (node.monitoring && node.monitoringConfirmed) {
                 return "aktiv";
@@ -180,7 +183,7 @@ function getNodeValue(prefix: LINE_PREFIX, node: Node, nodeSecrets: NodeSecrets)
             }
             return "";
         case LINE_PREFIX.MONITORING_TOKEN:
-            return nodeSecrets.monitoringToken?.value || "";
+            return nodeSecrets.monitoringToken || "";
         default:
             return unhandledEnumField(prefix);
     }
@@ -255,13 +258,13 @@ async function deleteNodeFile(token: Token): Promise<void> {
 }
 
 class NodeBuilder {
-    public token: Token = to(""); // FIXME: Either make token optional in Node or handle this!
-    public nickname: string = "";
-    public email: string = "";
-    public hostname: string = ""; // FIXME: Either make hostname optional in Node or handle this!
-    public coords?: string;
+    public token: Token = "" as Token; // FIXME: Either make token optional in Node or handle this!
+    public nickname: Nickname = "" as Nickname;
+    public email: EmailAddress = "" as EmailAddress;
+    public hostname: Hostname = "" as Hostname; // FIXME: Either make hostname optional in Node or handle this!
+    public coords?: Coordinates;
     public key?: FastdKey;
-    public mac: MAC = to(""); // FIXME: Either make mac optional in Node or handle this!
+    public mac: MAC = "" as MAC; // FIXME: Either make mac optional in Node or handle this!
     public monitoring: boolean = false;
     public monitoringConfirmed: boolean = false;
     public monitoringState: MonitoringState = MonitoringState.DISABLED;
@@ -291,22 +294,22 @@ class NodeBuilder {
 function setNodeValue(prefix: LINE_PREFIX, node: NodeBuilder, nodeSecrets: NodeSecrets, value: string) {
     switch (prefix) {
         case LINE_PREFIX.HOSTNAME:
-            node.hostname = value;
+            node.hostname = value as Hostname;
             break;
         case LINE_PREFIX.NICKNAME:
-            node.nickname = value;
+            node.nickname = value as Nickname;
             break;
         case LINE_PREFIX.EMAIL:
-            node.email = value;
+            node.email = value as EmailAddress;
             break;
         case LINE_PREFIX.COORDS:
-            node.coords = value;
+            node.coords = value as Coordinates;
             break;
         case LINE_PREFIX.MAC:
-            node.mac = to(value);
+            node.mac = value as MAC;
             break;
         case LINE_PREFIX.TOKEN:
-            node.token = to(value);
+            node.token = value as Token;
             break;
         case LINE_PREFIX.MONITORING:
             const active = value === 'aktiv';
@@ -317,7 +320,7 @@ function setNodeValue(prefix: LINE_PREFIX, node: NodeBuilder, nodeSecrets: NodeS
                 active ? MonitoringState.ACTIVE : (pending ? MonitoringState.PENDING : MonitoringState.DISABLED);
             break;
         case LINE_PREFIX.MONITORING_TOKEN:
-            nodeSecrets.monitoringToken = to<MonitoringToken>(value);
+            nodeSecrets.monitoringToken = value as MonitoringToken;
             break;
         default:
             return unhandledEnumField(prefix);
@@ -340,7 +343,7 @@ async function parseNodeFile(file: string): Promise<{ node: Node, nodeSecrets: N
 
     for (const line of lines) {
         if (line.substring(0, 5) === 'key "') {
-            node.key = to<FastdKey>(normalizeString(line.split('"')[1]));
+            node.key = normalizeString(line.split('"')[1]) as FastdKey;
         } else {
             for (const prefix of Object.values(LINE_PREFIX)) {
                 if (line.substring(0, prefix.length) === prefix) {
@@ -393,7 +396,7 @@ async function sendMonitoringConfirmationMail(node: Node, nodeSecrets: NodeSecre
     await MailService.enqueue(
         config.server.email.from,
         node.nickname + ' <' + node.email + '>',
-        'monitoring-confirmation',
+        MailType.MONITORING_CONFIRMATION,
         {
             node: node,
             confirmUrl: confirmUrl,

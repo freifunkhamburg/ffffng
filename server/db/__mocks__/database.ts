@@ -1,93 +1,48 @@
-import {Database, Statement} from "sqlite";
+import {RunResult, SqlType, Statement, TypedDatabase} from "../database";
+import * as sqlite3 from "sqlite3";
 
-export async function init(): Promise<void> {}
+export async function init(): Promise<void> {
+}
 
-export class MockStatement implements Statement {
-    constructor() {}
-
-    readonly changes: number = 0;
-    readonly lastID: number = 0;
-    readonly sql: string = "";
-
-    async all(): Promise<any[]>;
-    async all(...params: any[]): Promise<any[]>;
-    async all<T>(): Promise<T[]>;
-    async all<T>(...params: any[]): Promise<T[]>;
-    all(...params: any[]): any {
+export class MockDatabase implements TypedDatabase {
+    constructor() {
     }
 
-    async bind(): Promise<Statement>;
-    async bind(...params: any[]): Promise<Statement>;
-    async bind(...params: any[]): Promise<Statement> {
-        return mockStatement();
+    async on(event: string, listener: any): Promise<void> {
     }
 
-    async each(callback?: (err: Error, row: any) => void): Promise<number>;
-    async each(...params: any[]): Promise<number>;
-    async each(...callback: (((err: Error, row: any) => void) | any)[]): Promise<number> {
+    async run(sql: SqlType, ...params: any[]): Promise<RunResult> {
+        return {
+            stmt: new Statement(new sqlite3.Statement()),
+        };
+    }
+
+    async get<T = any>(sql: SqlType, ...params: any[]): Promise<T | undefined> {
+        return undefined;
+    }
+
+    async each<T = any>(sql: SqlType, callback: (err: any, row: T) => void): Promise<number>;
+    async each<T = any>(sql: SqlType, param1: any, callback: (err: any, row: T) => void): Promise<number>;
+    async each<T = any>(sql: SqlType, param1: any, param2: any, callback: (err: any, row: T) => void): Promise<number>;
+    async each<T = any>(sql: SqlType, param1: any, param2: any, param3: any, callback: (err: any, row: T) => void): Promise<number>;
+    async each<T = any>(sql: SqlType, ...params: any[]): Promise<number>;
+    async each(sql: SqlType, ...callback: (any)[]): Promise<number> {
         return 0;
     }
 
-    async finalize(): Promise<void> {}
-
-    get(): Promise<any>;
-    get(...params: any[]): Promise<any>;
-    get<T>(): Promise<T>;
-    get<T>(...params: any[]): Promise<T>;
-    get(...params: any[]): any {
-    }
-
-    async reset(): Promise<Statement> {
-        return mockStatement();
-    }
-
-    async run(): Promise<Statement>;
-    async run(...params: any[]): Promise<Statement>;
-    async run(...params: any[]): Promise<Statement> {
-        return mockStatement();
-    }
-}
-
-function mockStatement(): Statement {
-    return new MockStatement();
-}
-
-export class MockDatabase implements Database {
-    constructor() {}
-
-    async close(): Promise<void> {}
-
-    async run(...args: any): Promise<Statement> {
-        return mockStatement();
-    }
-
-    async get(...args: any): Promise<any> {}
-
-    async all(...args: any): Promise<any[]> {
+    async all<T>(sql: SqlType, ...params: any[]): Promise<T[]> {
         return [];
     }
 
-    async exec(...args: any): Promise<Database> {
-        return this;
+    async exec(sql: SqlType, ...params: any[]): Promise<void> {
     }
 
-    async each(...args: any): Promise<number> {
-        return 0;
+
+    async prepare(sql: SqlType, ...params: any[]): Promise<Statement> {
+        return new Statement(new sqlite3.Statement());
     }
-
-    async prepare(...args: any): Promise<Statement> {
-        return mockStatement();
-    }
-
-    configure(...args: any): void {}
-
-    async migrate(...args: any): Promise<Database> {
-        return this;
-    }
-
-    on(...args: any): void {}
 }
 
 export const db: MockDatabase = new MockDatabase();
 
-export {Database, Statement}
+export {TypedDatabase, Statement}

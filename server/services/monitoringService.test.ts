@@ -1,6 +1,6 @@
 import moment from 'moment';
 import {ParsedNode, parseNode, parseNodesJson, parseTimestamp} from "./monitoringService";
-import {MAC, OnlineState, to} from "../types";
+import {Domain, MAC, OnlineState, Site} from "../types";
 import Logger from '../logger';
 import {MockLogger} from "../__mocks__/logger";
 
@@ -44,6 +44,7 @@ test('parseTimestamp() should fail parsing empty timestamp string', () => {
 
 test('parseTimestamp() should fail parsing invalid timestamp string', () => {
     // given
+    // noinspection UnnecessaryLocalVariableJS
     const timestamp = TIMESTAMP_INVALID_STRING;
 
     // when
@@ -240,12 +241,12 @@ test('parseNode() should succeed parsing node without site and domain', () => {
 
     // then
     const expectedParsedNode: ParsedNode = {
-        mac: to("12:34:56:78:90:AB"),
+        mac: "12:34:56:78:90:AB" as MAC,
         importTimestamp: importTimestamp,
         state: OnlineState.ONLINE,
         lastSeen: parseTimestamp(TIMESTAMP_VALID_STRING),
-        site: to("<unknown-site>"),
-        domain: to("<unknown-domain>"),
+        site: "<unknown-site>" as Site,
+        domain: "<unknown-domain>" as Domain,
     };
     expect(parseNode(importTimestamp, nodeData)).toEqual(expectedParsedNode);
 });
@@ -272,12 +273,12 @@ test('parseNode() should succeed parsing node with site and domain', () => {
 
     // then
     const expectedParsedNode: ParsedNode = {
-        mac: to("12:34:56:78:90:AB"),
+        mac: "12:34:56:78:90:AB" as MAC,
         importTimestamp: importTimestamp,
         state: OnlineState.ONLINE,
         lastSeen: parseTimestamp(TIMESTAMP_VALID_STRING),
-        site: to("test-site"),
-        domain: to("test-domain")
+        site: "test-site" as Site,
+        domain: "test-domain" as Domain,
     };
     expect(parseNode(importTimestamp, nodeData)).toEqual(expectedParsedNode);
 });
@@ -461,12 +462,12 @@ test('parseNodesJson() should parse valid nodes', () => {
 
     // then
     const expectedParsedNode: ParsedNode = {
-        mac: to("12:34:56:78:90:AB"),
+        mac: "12:34:56:78:90:AB" as MAC,
         importTimestamp: parseTimestamp(TIMESTAMP_VALID_STRING),
         state: OnlineState.ONLINE,
         lastSeen: parseTimestamp(TIMESTAMP_VALID_STRING),
-        site: to("test-site"),
-        domain: to("test-domain"),
+        site: "test-site" as Site,
+        domain: "test-domain" as Domain,
     };
 
     expect(result.importTimestamp.isValid()).toBe(true);

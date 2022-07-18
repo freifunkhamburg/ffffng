@@ -3,7 +3,7 @@ import moment, {Moment, unitOfTime} from "moment";
 import request from "request";
 
 import {config} from "../config";
-import {db, Statement} from "../db/database";
+import {db, RunResult} from "../db/database";
 import * as DatabaseUtil from "../utils/databaseUtil";
 import ErrorTypes from "../utils/errorTypes";
 import Logger from "../logger";
@@ -12,14 +12,15 @@ import * as MailService from "../services/mailService";
 import * as NodeService from "../services/nodeService";
 import * as Resources from "../utils/resources";
 import {RestParams} from "../utils/resources";
-import {normalizeMac} from "../utils/strings";
+import {normalizeMac, parseInteger} from "../utils/strings";
 import {monitoringDisableUrl} from "../utils/urlBuilder";
 import CONSTRAINTS from "../validation/constraints";
 import {forConstraint} from "../validation/validator";
 import {
     Domain,
-    equal,
+    Hostname,
     isMonitoringSortField,
+    isOnlineState,
     MAC,
     MailType,
     MonitoringSortField,
@@ -29,9 +30,24 @@ import {
     NodeStateData,
     OnlineState,
     Site,
-    to,
     UnixTimestampSeconds
 } from "../types";
+
+type NodeStateRow = {
+    id: number,
+    created_at: UnixTimestampSeconds,
+    domain: Domain | null,
+    hostname: Hostname | null,
+    import_timestamp: UnixTimestampSeconds,
+    last_seen: UnixTimestampSeconds,
+    last_status_mail_sent: string | null,
+    last_status_mail_type: string | null,
+    mac: MAC,
+    modified_at: UnixTimestampSeconds,
+    monitoring_state: string | null,
+    site: Site | null,
+    state: string,
+};
 
 const MONITORING_STATE_MACS_CHUNK_SIZE = 100;
 const NEVER_ONLINE_NODES_DELETION_CHUNK_SIZE = 20;
@@ -193,7 +209,7 @@ export function parseNode(importTimestamp: Moment, nodeData: any): ParsedNode {
             'Node ' + nodeId + ': Invalid MAC: ' + nodeData.nodeinfo.network.mac
         );
     }
-    const mac = normalizeMac(nodeData.nodeinfo.network.mac);
+    const mac = normalizeMac(nodeData.nodeinfo.network.mac) as MAC;
 
     if (!_.isPlainObject(nodeData.flags)) {
         throw new Error(
@@ -214,23 +230,23 @@ export function parseNode(importTimestamp: Moment, nodeData: any): ParsedNode {
         );
     }
 
-    let site = null;
+    let site = "<unknown-site>" as Site; // FIXME: Handle this
     if (_.isPlainObject(nodeData.nodeinfo.system) && _.isString(nodeData.nodeinfo.system.site_code)) {
-        site = nodeData.nodeinfo.system.site_code;
+        site = nodeData.nodeinfo.system.site_code as Site;
     }
 
-    let domain = null;
+    let domain = "<unknown-domain>" as Domain; // FIXME: Handle this
     if (_.isPlainObject(nodeData.nodeinfo.system) && _.isString(nodeData.nodeinfo.system.domain_code)) {
-        domain = nodeData.nodeinfo.system.domain_code;
+        domain = nodeData.nodeinfo.system.domain_code as Domain;
     }
 
     return {
-        mac: to(mac),
+        mac,
         importTimestamp: importTimestamp,
         state: isOnline ? OnlineState.ONLINE : OnlineState.OFFLINE,
         lastSeen: lastSeen,
-        site: to(site || '<unknown-site>'), // FIXME: Handle this
-        domain: to(domain || '<unknown-domain>') // FIXME: Handle this
+        site,
+        domain,
     };
 }
 
@@ -279,7 +295,7 @@ export function parseNodesJson(body: string): NodesParsingResult {
     return result;
 }
 
-async function updateSkippedNode(id: NodeId, node?: Node): Promise<Statement> {
+async function updateSkippedNode(id: NodeId, node?: Node): Promise<RunResult> {
     return await db.run(
         'UPDATE node_state ' +
         'SET hostname = ?, monitoring_state = ?, modified_at = ?' +
@@ -352,8 +368,7 @@ async function sendMonitoringMailsBatched(
                 {
                     node: node,
                     lastSeen: nodeState.last_seen,
-                    disableUrl: monitoringDisableUrl(monitoringToken)
-
+                    disableUrl: monitoringDisableUrl(monitoringToken),
                 }
             );
 
@@ -378,7 +393,7 @@ async function sendMonitoringMailsBatched(
 async function sendOnlineAgainMails(startTime: Moment): Promise<void> {
     await sendMonitoringMailsBatched(
         'online again',
-        'monitoring-online-again',
+        MailType.MONITORING_ONLINE_AGAIN,
         async (): Promise<any[]> => await db.all(
             'SELECT * FROM node_state ' +
             'WHERE modified_at < ? AND state = ? AND last_status_mail_type IN (' +
@@ -395,10 +410,11 @@ async function sendOnlineAgainMails(startTime: Moment): Promise<void> {
     );
 }
 
-async function sendOfflineMails(startTime: Moment, mailNumber: number): Promise<void> {
+async function sendOfflineMails(startTime: Moment, mailType: MailType): Promise<void> {
+    const mailNumber = parseInteger(mailType.split("-")[2]);
     await sendMonitoringMailsBatched(
         'offline ' + mailNumber,
-        'monitoring-offline-' + mailNumber,
+        mailType,
         async (): Promise<any[]> => {
             const previousType =
                 mailNumber === 1 ? 'monitoring-online-again' : ('monitoring-offline-' + (mailNumber - 1));
@@ -556,12 +572,12 @@ export async function getAll(restParams: RestParams): Promise<{ total: number, m
 
     const where = Resources.whereCondition(restParams, filterFields);
 
-    const row = await db.get(
+    const row = await db.get<{ total: number }>(
         'SELECT count(*) AS total FROM node_state WHERE ' + where.query,
         _.concat([], where.params),
     );
 
-    const total = row.total;
+    const total = row?.total || 0;
 
     const filter = Resources.filterClause(
         restParams,
@@ -578,7 +594,7 @@ export async function getAll(restParams: RestParams): Promise<{ total: number, m
     return {monitoringStates, total};
 }
 
-export async function getByMacs(macs: MAC[]): Promise<Record<string, NodeStateData>> {
+export async function getByMacs(macs: MAC[]): Promise<Record<MAC, NodeStateData>> {
     if (_.isEmpty(macs)) {
         return {};
     }
@@ -588,13 +604,22 @@ export async function getByMacs(macs: MAC[]): Promise<Record<string, NodeStateDa
     for (const subMacs of _.chunk(macs, MONITORING_STATE_MACS_CHUNK_SIZE)) {
         const inCondition = DatabaseUtil.inCondition('mac', subMacs);
 
-        const rows = await db.all(
+        const rows = await db.all<NodeStateRow>(
             'SELECT * FROM node_state WHERE ' + inCondition.query,
             _.concat([], inCondition.params),
         );
 
         for (const row of rows) {
-            nodeStateByMac[row.mac] = row;
+            const onlineState = row.state;
+            if (!isOnlineState(onlineState)) {
+                throw new Error(`Invalid online state in database: "${onlineState}"`);
+            }
+
+            nodeStateByMac[row.mac] = {
+                site: row.site || "<unknown-site>" as Site, // FIXME: Handle this
+                domain: row.domain || "<unknown-domain>" as Domain, // FIXME: Handle this
+                state: onlineState,
+            };
         }
     }
 
@@ -603,7 +628,7 @@ export async function getByMacs(macs: MAC[]): Promise<Record<string, NodeStateDa
 
 export async function confirm(token: MonitoringToken): Promise<Node> {
     const {node, nodeSecrets} = await NodeService.getNodeDataWithSecretsByMonitoringToken(token);
-    if (!node.monitoring || !nodeSecrets.monitoringToken || !equal(nodeSecrets.monitoringToken, token)) {
+    if (!node.monitoring || !nodeSecrets.monitoringToken || nodeSecrets.monitoringToken !== token) {
         throw {data: 'Invalid token.', type: ErrorTypes.badRequest};
     }
 
@@ -619,7 +644,7 @@ export async function confirm(token: MonitoringToken): Promise<Node> {
 
 export async function disable(token: MonitoringToken): Promise<Node> {
     const {node, nodeSecrets} = await NodeService.getNodeDataWithSecretsByMonitoringToken(token);
-    if (!node.monitoring || !nodeSecrets.monitoringToken || !equal(nodeSecrets.monitoringToken, token)) {
+    if (!node.monitoring || !nodeSecrets.monitoringToken || nodeSecrets.monitoringToken !== token) {
         throw {data: 'Invalid token.', type: ErrorTypes.badRequest};
     }
 
@@ -654,14 +679,18 @@ export async function sendMonitoringMails(): Promise<void> {
             .error('Error sending "online again" mails.', error);
     }
 
-    for (let mailNumber = 1; mailNumber <= 3; mailNumber++) {
+    for (const mailType of [
+        MailType.MONITORING_OFFLINE_1,
+        MailType.MONITORING_OFFLINE_2,
+        MailType.MONITORING_OFFLINE_3,
+    ]) {
         try {
-            await sendOfflineMails(startTime, mailNumber);
+            await sendOfflineMails(startTime, mailType);
         } catch (error) {
             // only logging an continuing with next type
             Logger
                 .tag('monitoring', 'mail-sending')
-                .error('Error sending "offline ' + mailNumber + '" mails.', error);
+                .error('Error sending "' + mailType + '" mails.', error);
         }
     }
 }
@@ -767,7 +796,7 @@ async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestampSeconds):
 }
 
 async function deleteNodesOfflineSinceBefore(deleteBefore: UnixTimestampSeconds): Promise<void> {
-    const rows = await db.all(
+    const rows = await db.all<NodeStateRow>(
         'SELECT * FROM node_state WHERE state = ? AND last_seen < ?',
         [
             'OFFLINE',

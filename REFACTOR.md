@@ -12,7 +12,6 @@
 * Split into seperate packages for server and frontend.
 * Make admin panel part of new frontend package.
 * Get rid of grunt.
-* Bluebird for promises?
 * Use generated type guards.
 
 ## Mid term

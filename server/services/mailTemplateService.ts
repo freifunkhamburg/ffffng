@@ -13,7 +13,13 @@ import {MailData, Mail} from "../types";
 const templateBasePath = __dirname + '/../mailTemplates';
 const snippetsBasePath = templateBasePath + '/snippets';
 
-const templateFunctions: {[key: string]: (...data: MailData) => string} = {};
+const templateFunctions: {
+    [key: string]:
+        | ((name: string, data: MailData) => string)
+        | ((data: MailData) => string)
+        | ((href: string, text: string) => string)
+        | ((unix: number) => string)
+} = {};
 
 function renderSnippet(this: any, name: string, data: MailData): string {
     const snippetFile = snippetsBasePath + '/' + name + '.html';

@@ -2,7 +2,7 @@ import CONSTRAINTS from "../validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
 import * as MailService from "../services/mailService";
 import * as Resources from "../utils/resources";
-import {normalizeString} from "../utils/strings";
+import {normalizeString, parseInteger} from "../utils/strings";
 import {forConstraint} from "../validation/validator";
 import {Request, Response} from "express";
 import {Mail, MailId} from "../types";
@@ -16,7 +16,7 @@ async function withValidMailId(req: Request): Promise<MailId> {
         throw {data: 'Invalid mail id.', type: ErrorTypes.badRequest};
     }
 
-    return id;
+    return parseInteger(id) as MailId;
 }
 
 async function doGet(req: Request): Promise<Mail> {

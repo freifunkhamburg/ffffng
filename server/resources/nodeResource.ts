@@ -8,9 +8,8 @@ import * as NodeService from "../services/nodeService";
 import {normalizeMac, normalizeString} from "../utils/strings";
 import {forConstraint, forConstraints} from "../validation/validator";
 import * as Resources from "../utils/resources";
-import {Entity} from "../utils/resources";
 import {Request, Response} from "express";
-import {EnhancedNode, isNodeSortField, MAC, Node, to, Token} from "../types";
+import {EnhancedNode, isNodeSortField, MAC, Node, Token} from "../types";
 
 const nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords', 'monitoring'];
 
@@ -49,7 +48,7 @@ export function update (req: Request, res: Response): void {
     if (!isValidToken(token)) {
         return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
     }
-    const validatedToken: Token = to(token);
+    const validatedToken: Token = token as Token;
 
     const node = getNormalizedNodeData(data);
     if (!isValidNode(node)) {
@@ -68,7 +67,7 @@ export function remove(req: Request, res: Response): void {
     if (!isValidToken(token)) {
         return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
     }
-    const validatedToken: Token = to(token);
+    const validatedToken: Token = token as Token;
 
     NodeService.deleteNode(validatedToken)
         .then(() => Resources.success(res, {}))
@@ -80,7 +79,7 @@ export function get(req: Request, res: Response): void {
     if (!isValidToken(token)) {
         return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
     }
-    const validatedToken: Token = to(token);
+    const validatedToken: Token = token as Token;
 
     NodeService.getNodeDataByToken(validatedToken)
         .then(node => Resources.success(res, node))
@@ -101,7 +100,7 @@ async function doGetAll(req: Request): Promise<{ total: number; pageNodes: any }
     const nodeStateByMac = await MonitoringService.getByMacs(macs);
 
     const enhancedNodes: EnhancedNode[] = _.map(realNodes, (node: Node): EnhancedNode => {
-        const nodeState = nodeStateByMac[node.mac.value];
+        const nodeState = nodeStateByMac[node.mac];
         if (nodeState) {
             return deepExtend({}, node, {
                 site: nodeState.site,
