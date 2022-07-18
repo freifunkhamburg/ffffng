@@ -666,6 +666,10 @@ export async function sendMonitoringMails(): Promise<void> {
     }
 }
 
+function toUnixTimestamp(moment: Moment): UnixTimestampSeconds {
+    return moment.unix() as UnixTimestampSeconds;
+}
+
 export async function deleteOfflineNodes(): Promise<void> {
     Logger
         .tag('nodes', 'delete-offline')
@@ -676,10 +680,10 @@ export async function deleteOfflineNodes(): Promise<void> {
         );
 
     const deleteBefore =
-        moment().subtract(
+        toUnixTimestamp(moment().subtract(
             DELETE_OFFLINE_NODES_AFTER_DURATION.amount,
             DELETE_OFFLINE_NODES_AFTER_DURATION.unit
-        ).unix();
+        ));
 
     await deleteNeverOnlineNodesBefore(deleteBefore);
     await deleteNodesOfflineSinceBefore(deleteBefore);
@@ -689,7 +693,7 @@ async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestampSeconds):
     Logger
         .tag('nodes', 'delete-never-online')
         .info(
-            'Deleting nodes that were never online created befor ' +
+            'Deleting nodes that were never online created before ' +
             deleteBefore
         );
 

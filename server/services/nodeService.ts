@@ -20,7 +20,9 @@ import {
     NodeStatistics,
     to,
     Token,
+    toUnixTimestampSeconds,
     unhandledEnumField,
+    UnixTimestampMilliseconds,
     UnixTimestampSeconds
 } from "../types";
 import util from "util";
@@ -322,10 +324,14 @@ function setNodeValue(prefix: LINE_PREFIX, node: NodeBuilder, nodeSecrets: NodeS
     }
 }
 
+async function getModifiedAt(file: string): Promise<UnixTimestampSeconds> {
+    const modifiedAtMs = (await fs.lstat(file)).mtimeMs as UnixTimestampMilliseconds;
+    return toUnixTimestampSeconds(modifiedAtMs);
+}
+
 async function parseNodeFile(file: string): Promise<{ node: Node, nodeSecrets: NodeSecrets }> {
     const contents = await fs.readFile(file);
-    const stats = await fs.lstat(file);
-    const modifiedAt = Math.floor(stats.mtimeMs / 1000);
+    const modifiedAt = await getModifiedAt(file);
 
     const lines = contents.toString().split("\n");
 

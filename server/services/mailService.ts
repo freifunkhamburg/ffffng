@@ -76,10 +76,9 @@ async function removePendingMailFromQueue(id: MailId): Promise<void> {
 }
 
 async function incrementFailureCounterForPendingEmail(id: MailId): Promise<void> {
-    const now = moment();
     await db.run(
         'UPDATE email_queue SET failures = failures + 1, modified_at = ? WHERE id = ?',
-        [now.unix(), id],
+        [moment().unix(), id],
     );
 }
 

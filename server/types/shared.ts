@@ -293,8 +293,12 @@ export type MAC = {
 };
 export const isMAC = toIsNewtype<MAC>(isString);
 
-export type UnixTimestampSeconds = number;
-export type UnixTimestampMilliseconds = number;
+export type UnixTimestampSeconds = number & { readonly __tag: unique symbol };
+export type UnixTimestampMilliseconds = number & { readonly __tag: unique symbol };
+
+export function toUnixTimestampSeconds(ms: UnixTimestampMilliseconds): UnixTimestampSeconds {
+    return Math.floor(ms) as UnixTimestampSeconds;
+}
 
 export type MonitoringToken = {
     value: string;
