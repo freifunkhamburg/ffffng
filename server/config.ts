@@ -72,7 +72,7 @@ export function parseCommandLine(): void {
 
     function stripTrailingSlash(url: Url): Url {
         return url.endsWith("/")
-            ? url.substr(0, url.length - 1) as Url
+            ? url.substring(0, url.length - 1) as Url
             : url;
     }
 

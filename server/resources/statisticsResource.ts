@@ -1,19 +1,16 @@
 import ErrorTypes from "../utils/errorTypes";
 import Logger from "../logger";
 import {getNodeStatistics} from "../services/nodeService";
-import * as Resources from "../utils/resources";
-import {Request, Response} from "express";
+import {handleJSON} from "../utils/resources";
 
-export function get (req: Request, res: Response): void {
-    getNodeStatistics()
-        .then(nodeStatistics => Resources.success(
-            res,
-            {
-                nodes: nodeStatistics
-            }
-        ))
-        .catch(err => {
-            Logger.tag('statistics').error('Error getting statistics:', err);
-            return Resources.error(res, {data: 'Internal error.', type: ErrorTypes.internalError});
-        });
-}
+export const get = handleJSON(async () => {
+    try {
+        const nodeStatistics = await getNodeStatistics();
+        return {
+            nodes: nodeStatistics
+        };
+    } catch (error) {
+        Logger.tag('statistics').error('Error getting statistics:', error);
+        throw {data: 'Internal error.', type: ErrorTypes.internalError};
+    }
+});

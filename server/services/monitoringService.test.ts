@@ -1,8 +1,9 @@
 import moment from 'moment';
-import {ParsedNode, parseNode, parseNodesJson, parseTimestamp} from "./monitoringService";
-import {Domain, MAC, OnlineState, Site} from "../types";
+import {ParsedNode, parseNode, parseNodesJson} from "./monitoringService";
+import {Domain, MAC, OnlineState, Site, UnixTimestampSeconds} from "../types";
 import Logger from '../logger';
 import {MockLogger} from "../__mocks__/logger";
+import {now, parseTimestamp} from "../utils/time";
 
 const mockedLogger = Logger as MockLogger;
 
@@ -15,60 +16,19 @@ const NODES_JSON_VALID_VERSION = 2;
 const TIMESTAMP_INVALID_STRING = "2020-01-02T42:99:23.000Z";
 const TIMESTAMP_VALID_STRING = "2020-01-02T12:34:56.000Z";
 
+const PARSED_TIMESTAMP_VALID = parseTimestamp(TIMESTAMP_VALID_STRING);
+if (PARSED_TIMESTAMP_VALID === null) {
+    fail("Should not happen: Parsed valid timestamp as invalid.");
+}
+const TIMESTAMP_VALID: UnixTimestampSeconds = PARSED_TIMESTAMP_VALID;
 
 beforeEach(() => {
     mockedLogger.reset();
 });
 
-test('parseTimestamp() should fail parsing non-string timestamp', () => {
-    // given
-    const timestamp = {};
-
-    // when
-    const parsedTimestamp = parseTimestamp(timestamp);
-
-    // then
-    expect(parsedTimestamp.isValid()).toBe(false);
-});
-
-test('parseTimestamp() should fail parsing empty timestamp string', () => {
-    // given
-    const timestamp = "";
-
-    // when
-    const parsedTimestamp = parseTimestamp(timestamp);
-
-    // then
-    expect(parsedTimestamp.isValid()).toBe(false);
-});
-
-test('parseTimestamp() should fail parsing invalid timestamp string', () => {
-    // given
-    // noinspection UnnecessaryLocalVariableJS
-    const timestamp = TIMESTAMP_INVALID_STRING;
-
-    // when
-    const parsedTimestamp = parseTimestamp(timestamp);
-
-    // then
-    expect(parsedTimestamp.isValid()).toBe(false);
-});
-
-test('parseTimestamp() should succeed parsing valid timestamp string', () => {
-    // given
-    const timestamp = TIMESTAMP_VALID_STRING;
-
-    // when
-    const parsedTimestamp = parseTimestamp(timestamp);
-
-    // then
-    expect(parsedTimestamp.isValid()).toBe(true);
-    expect(parsedTimestamp.toISOString()).toEqual(timestamp);
-});
-
 test('parseNode() should fail parsing node for undefined node data', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = undefined;
 
     // then
@@ -77,7 +37,7 @@ test('parseNode() should fail parsing node for undefined node data', () => {
 
 test('parseNode() should fail parsing node for empty node data', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = {};
 
     // then
@@ -86,7 +46,7 @@ test('parseNode() should fail parsing node for empty node data', () => {
 
 test('parseNode() should fail parsing node for empty node info', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = {
         nodeinfo: {}
     };
@@ -97,7 +57,7 @@ test('parseNode() should fail parsing node for empty node info', () => {
 
 test('parseNode() should fail parsing node for non-string node id', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = {
         nodeinfo: {
             node_id: 42
@@ -110,7 +70,7 @@ test('parseNode() should fail parsing node for non-string node id', () => {
 
 test('parseNode() should fail parsing node for empty node id', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = {
         nodeinfo: {
             node_id: ""
@@ -123,7 +83,7 @@ test('parseNode() should fail parsing node for empty node id', () => {
 
 test('parseNode() should fail parsing node for empty network info', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = {
         nodeinfo: {
             node_id: "1234567890ab",
@@ -137,7 +97,7 @@ test('parseNode() should fail parsing node for empty network info', () => {
 
 test('parseNode() should fail parsing node for invalid mac', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = {
         nodeinfo: {
             node_id: "1234567890ab",
@@ -153,7 +113,7 @@ test('parseNode() should fail parsing node for invalid mac', () => {
 
 test('parseNode() should fail parsing node for missing flags', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = {
         nodeinfo: {
             node_id: "1234567890ab",
@@ -169,7 +129,7 @@ test('parseNode() should fail parsing node for missing flags', () => {
 
 test('parseNode() should fail parsing node for empty flags', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = {
         nodeinfo: {
             node_id: "1234567890ab",
@@ -186,7 +146,7 @@ test('parseNode() should fail parsing node for empty flags', () => {
 
 test('parseNode() should fail parsing node for missing last seen timestamp', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = {
         nodeinfo: {
             node_id: "1234567890ab",
@@ -205,7 +165,7 @@ test('parseNode() should fail parsing node for missing last seen timestamp', () 
 
 test('parseNode() should fail parsing node for invalid last seen timestamp', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = {
         nodeinfo: {
             node_id: "1234567890ab",
@@ -225,7 +185,7 @@ test('parseNode() should fail parsing node for invalid last seen timestamp', () 
 
 test('parseNode() should succeed parsing node without site and domain', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = {
         nodeinfo: {
             node_id: "1234567890ab",
@@ -244,7 +204,7 @@ test('parseNode() should succeed parsing node without site and domain', () => {
         mac: "12:34:56:78:90:AB" as MAC,
         importTimestamp: importTimestamp,
         state: OnlineState.ONLINE,
-        lastSeen: parseTimestamp(TIMESTAMP_VALID_STRING),
+        lastSeen: TIMESTAMP_VALID,
         site: "<unknown-site>" as Site,
         domain: "<unknown-domain>" as Domain,
     };
@@ -253,7 +213,7 @@ test('parseNode() should succeed parsing node without site and domain', () => {
 
 test('parseNode() should succeed parsing node with site and domain', () => {
     // given
-    const importTimestamp = moment();
+    const importTimestamp = now();
     const nodeData = {
         nodeinfo: {
             node_id: "1234567890ab",
@@ -276,7 +236,7 @@ test('parseNode() should succeed parsing node with site and domain', () => {
         mac: "12:34:56:78:90:AB" as MAC,
         importTimestamp: importTimestamp,
         state: OnlineState.ONLINE,
-        lastSeen: parseTimestamp(TIMESTAMP_VALID_STRING),
+        lastSeen: TIMESTAMP_VALID,
         site: "test-site" as Site,
         domain: "test-domain" as Domain,
     };
@@ -388,7 +348,6 @@ test('parseNodesJson() should succeed parsing no nodes', () => {
     const result = parseNodesJson(json);
 
     // then
-    expect(result.importTimestamp.isValid()).toBe(true);
     expect(result.nodes).toEqual([]);
     expect(result.failedNodesCount).toEqual(0);
     expect(result.totalNodesCount).toEqual(0);
@@ -424,7 +383,6 @@ test('parseNodesJson() should skip parsing invalid nodes', () => {
     const result = parseNodesJson(json);
 
     // then
-    expect(result.importTimestamp.isValid()).toBe(true);
     expect(result.nodes).toEqual([]);
     expect(result.failedNodesCount).toEqual(2);
     expect(result.totalNodesCount).toEqual(2);
@@ -463,14 +421,13 @@ test('parseNodesJson() should parse valid nodes', () => {
     // then
     const expectedParsedNode: ParsedNode = {
         mac: "12:34:56:78:90:AB" as MAC,
-        importTimestamp: parseTimestamp(TIMESTAMP_VALID_STRING),
+        importTimestamp: TIMESTAMP_VALID,
         state: OnlineState.ONLINE,
-        lastSeen: parseTimestamp(TIMESTAMP_VALID_STRING),
+        lastSeen: TIMESTAMP_VALID,
         site: "test-site" as Site,
         domain: "test-domain" as Domain,
     };
 
-    expect(result.importTimestamp.isValid()).toBe(true);
     expect(result.nodes).toEqual([expectedParsedNode]);
     expect(result.failedNodesCount).toEqual(1);
     expect(result.totalNodesCount).toEqual(2);

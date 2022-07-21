@@ -3,16 +3,16 @@ import _ from "lodash";
 import CONSTRAINTS from "../validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
 import * as Resources from "../utils/resources";
-import {Entity} from "../utils/resources";
+import {Entity, handleJSONWithData, RequestData} from "../utils/resources";
 import {getTasks, Task, TaskState} from "../jobs/scheduler";
 import {normalizeString} from "../utils/strings";
 import {forConstraint} from "../validation/validator";
 import {Request, Response} from "express";
-import {isTaskSortField} from "../types";
+import {isString, isTaskSortField} from "../types";
 
 const isValidId = forConstraint(CONSTRAINTS.id, false);
 
-interface ExternalTask {
+interface TaskResponse {
     id: number,
     name: string,
     description: string,
@@ -26,7 +26,7 @@ interface ExternalTask {
     enabled: boolean,
 }
 
-function toExternalTask(task: Task): ExternalTask {
+function toTaskResponse(task: Task): TaskResponse {
     return {
         id: task.id,
         name: task.name,
@@ -37,13 +37,16 @@ function toExternalTask(task: Task): ExternalTask {
         lastRunDuration: task.lastRunDuration || null,
         state: task.state,
         result: task.state !== TaskState.RUNNING && task.result ? task.result.state : null,
-        message:task.state !== TaskState.RUNNING &&  task.result ? task.result.message || null : null,
+        message: task.state !== TaskState.RUNNING && task.result ? task.result.message || null : null,
         enabled: task.enabled
     };
 }
 
-async function withValidTaskId(req: Request): Promise<string> {
-    const id = normalizeString(Resources.getData(req).id);
+async function withValidTaskId(data: RequestData): Promise<string> {
+    if (!isString(data.id)) {
+        throw {data: 'Missing task id.', type: ErrorTypes.badRequest};
+    }
+    const id = normalizeString(data.id);
 
     if (!isValidId(id)) {
         throw {data: 'Invalid task id.', type: ErrorTypes.badRequest};
@@ -63,21 +66,18 @@ async function getTask(id: string): Promise<Task> {
     return task;
 }
 
-async function withTask(req: Request): Promise<Task> {
-    const id = await withValidTaskId(req);
+async function withTask(data: RequestData): Promise<Task> {
+    const id = await withValidTaskId(data);
     return await getTask(id);
 }
 
-function setTaskEnabled(req: Request, res: Response, enable: boolean) {
-    withTask(req)
-        .then(task => {
-            task.enabled = enable;
-            Resources.success(res, toExternalTask(task))
-        })
-        .catch(err => Resources.error(res, err))
+async function setTaskEnabled(data: RequestData, enable: boolean): Promise<TaskResponse> {
+    const task = await withTask(data);
+    task.enabled = enable;
+    return toTaskResponse(task);
 }
 
-async function doGetAll(req: Request): Promise<{total: number, pageTasks: Entity[]}> {
+async function doGetAll(req: Request): Promise<{ total: number, pageTasks: Entity[] }> {
     const restParams = await Resources.getValidRestParams('list', null, req);
 
     const tasks = Resources.sort(
@@ -100,33 +100,30 @@ async function doGetAll(req: Request): Promise<{total: number, pageTasks: Entity
     };
 }
 
-export function getAll (req: Request, res: Response): void {
+export function getAll(req: Request, res: Response): void {
     doGetAll(req)
         .then(({total, pageTasks}) => {
             res.set('X-Total-Count', total.toString(10));
-            Resources.success(res, _.map(pageTasks, toExternalTask));
+            Resources.success(res, _.map(pageTasks, toTaskResponse));
         })
         .catch(err => Resources.error(res, err));
 }
 
-export function run (req: Request, res: Response): void {
-    withTask(req)
-        .then(task => {
-            if (task.runningSince) {
-                return Resources.error(res, {data: 'Task already running.', type: ErrorTypes.conflict});
-            }
+export const run = handleJSONWithData(async data => {
+    const task = await withTask(data);
 
-            task.run();
+    if (task.runningSince) {
+        throw {data: 'Task already running.', type: ErrorTypes.conflict};
+    }
 
-            Resources.success(res, toExternalTask(task));
-        })
-        .catch(err => Resources.error(res, err));
-}
+    task.run();
+    return toTaskResponse(task);
+});
 
-export function enable (req: Request, res: Response): void {
-    setTaskEnabled(req, res, true);
-}
+export const enable = handleJSONWithData(async data => {
+    await setTaskEnabled(data, true);
+});
 
-export function disable (req: Request, res: Response): void {
-    setTaskEnabled(req, res, false);
-}
+export const disable = handleJSONWithData(async data => {
+    await setTaskEnabled(data, false);
+});

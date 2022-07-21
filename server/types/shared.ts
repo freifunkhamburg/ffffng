@@ -1,5 +1,4 @@
 import {ArrayField, Field, RawJsonField} from "sparkson";
-import exp from "constants";
 
 // Types shared with the client.
 export type TypeGuard<T> = (arg: unknown) => arg is T;
@@ -140,7 +139,7 @@ export function isNodeStatistics(arg: unknown): arg is NodeStatistics {
     );
 }
 
-export interface Statistics {
+export type Statistics = {
     nodes: NodeStatistics;
 }
 
@@ -324,6 +323,9 @@ export const isFastdKey = isString;
 export type MAC = string & { readonly __tag: unique symbol };
 export const isMAC = isString;
 
+export type DurationSeconds = number & { readonly __tag: unique symbol };
+export const isDurationSeconds = isNumber;
+
 export type UnixTimestampSeconds = number & { readonly __tag: unique symbol };
 export const isUnixTimestampSeconds = isNumber;
 
@@ -355,38 +357,102 @@ export const isNickname = isString;
 export type Coordinates = string & { readonly __tag: unique symbol };
 export const isCoordinates = isString;
 
-// TODO: More Newtypes
-export type Node = {
-    token: Token;
+/**
+ * Basic node data.
+ */
+export type BaseNode = {
     nickname: Nickname;
     email: EmailAddress;
     hostname: Hostname;
     coords?: Coordinates;
     key?: FastdKey;
     mac: MAC;
-    monitoring: boolean;
-    monitoringConfirmed: boolean;
-    monitoringState: MonitoringState;
-    modifiedAt: UnixTimestampSeconds;
-};
+}
 
-export function isNode(arg: unknown): arg is Node {
+export function isBaseNode(arg: unknown): arg is BaseNode {
     if (!isObject(arg)) {
         return false;
     }
-    const node = arg as Node;
+    const node = arg as BaseNode;
     return (
-        isToken(node.token) &&
         isNickname(node.nickname) &&
         isEmailAddress(node.email) &&
         isHostname(node.hostname) &&
         isOptional(node.coords, isCoordinates) &&
         isOptional(node.key, isFastdKey) &&
-        isMAC(node.mac) &&
-        isBoolean(node.monitoring) &&
-        isBoolean(node.monitoringConfirmed) &&
+        isMAC(node.mac)
+    );
+}
+
+/**
+ * Node data used for creating or updating a node.
+ */
+export type CreateOrUpdateNode = BaseNode & {
+    monitoring: boolean;
+}
+
+export function isCreateOrUpdateNode(arg: unknown): arg is CreateOrUpdateNode {
+    if (!isBaseNode(arg)) {
+        return false;
+    }
+    const node = arg as CreateOrUpdateNode;
+    return (
+        isBoolean(node.monitoring)
+    );
+}
+
+/**
+ * Representation of a stored node.
+ */
+export type StoredNode = BaseNode & {
+    token: Token;
+    monitoringState: MonitoringState;
+    modifiedAt: UnixTimestampSeconds;
+}
+
+export function isStoredNode(arg: unknown): arg is StoredNode {
+    if (!isObject(arg)) {
+        return false;
+    }
+    const node = arg as StoredNode;
+    return (
+        isBaseNode(node) &&
+        isToken(node.token) &&
         isMonitoringState(node.monitoringState) &&
         isUnixTimestampSeconds(node.modifiedAt)
+    );
+}
+
+export type NodeResponse = StoredNode & {
+    monitoring: boolean;
+    monitoringConfirmed: boolean;
+}
+
+export function isNodeResponse(arg: unknown): arg is NodeResponse {
+    if (!isStoredNode(arg)) {
+        return false;
+    }
+    const node = arg as NodeResponse;
+    return (
+        isBoolean(node.monitoring) &&
+        isBoolean(node.monitoringConfirmed)
+    );
+}
+
+export type NodeTokenResponse = {
+    token: Token;
+    node: NodeResponse;
+}
+
+export function isNodeTokenResponse(arg: unknown): arg is NodeTokenResponse {
+    if (!isObject(arg)) {
+        return false;
+    }
+    const response = arg as NodeTokenResponse;
+    return (
+        isToken(response.token) &&
+        isNodeResponse(response.node) &&
+        response.token === response.node.token
     );
 }
 
@@ -403,21 +469,46 @@ export const isSite = isString;
 export type Domain = string & { readonly __tag: unique symbol };
 export const isDomain = isString;
 
-export interface EnhancedNode extends Node {
+/**
+ * Represents a node in the context of a Freifunk site and domain.
+ */
+export type DomainSpecificNodeResponse = NodeResponse & {
     site?: Site,
     domain?: Domain,
     onlineState?: OnlineState,
 }
 
-export function isEnhancedNode(arg: unknown): arg is EnhancedNode {
-    if (!isNode(arg)) {
+export function isDomainSpecificNodeResponse(arg: unknown): arg is DomainSpecificNodeResponse {
+    if (!isNodeResponse(arg)) {
         return false;
     }
-    const node = arg as EnhancedNode;
+    const node = arg as DomainSpecificNodeResponse;
     return (
         isOptional(node.site, isSite) &&
         isOptional(node.domain, isDomain) &&
         isOptional(node.onlineState, isOnlineState)
+    );
+}
+
+export type MonitoringResponse = {
+    hostname: Hostname,
+    mac: MAC,
+    email: EmailAddress,
+    monitoring: boolean,
+    monitoringConfirmed: boolean,
+}
+
+export function isMonitoringResponse(arg: unknown): arg is MonitoringResponse {
+    if (!Object(arg)) {
+        return false;
+    }
+    const response = arg as MonitoringResponse;
+    return (
+        isHostname(response.hostname) &&
+        isMAC(response.mac) &&
+        isEmailAddress(response.email) &&
+        isBoolean(response.monitoring) &&
+        isBoolean(response.monitoringConfirmed)
     );
 }
 
@@ -437,7 +528,7 @@ export enum NodeSortField {
 
 export const isNodeSortField = toIsEnum(NodeSortField);
 
-export interface NodesFilter {
+export type NodesFilter = {
     hasKey?: boolean;
     hasCoords?: boolean;
     monitoringState?: MonitoringState;
