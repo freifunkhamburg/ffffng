@@ -7,22 +7,26 @@ import glob from "glob";
 import {config} from "../config";
 import ErrorTypes from "../utils/errorTypes";
 import Logger from "../logger";
+import logger from "../logger";
 import * as MailService from "../services/mailService";
 import {normalizeString} from "../utils/strings";
 import {monitoringConfirmUrl, monitoringDisableUrl} from "../utils/urlBuilder";
 import {
+    BaseNode,
     Coordinates,
+    CreateOrUpdateNode,
     EmailAddress,
     FastdKey,
     Hostname,
+    isStoredNode,
     MAC,
     MailType,
     MonitoringState,
     MonitoringToken,
     Nickname,
-    Node,
     NodeSecrets,
     NodeStatistics,
+    StoredNode,
     Token,
     toUnixTimestampSeconds,
     unhandledEnumField,
@@ -117,7 +121,7 @@ function parseNodeFilename(filename: string): NodeFilenameParsed {
     return parsed;
 }
 
-function isDuplicate(filter: NodeFilter, token: Token | null): boolean {
+function isDuplicate(filter: NodeFilter, token?: Token): boolean {
     const files = findNodeFilesSync(filter);
     if (files.length === 0) {
         return false;
@@ -130,7 +134,7 @@ function isDuplicate(filter: NodeFilter, token: Token | null): boolean {
     return parseNodeFilename(files[0]).token !== token;
 }
 
-function checkNoDuplicates(token: Token | null, node: Node, nodeSecrets: NodeSecrets): void {
+function checkNoDuplicates(token: Token | undefined, node: BaseNode, nodeSecrets: NodeSecrets): void {
     if (isDuplicate({hostname: node.hostname}, token)) {
         throw {data: {msg: 'Already exists.', field: 'hostname'}, type: ErrorTypes.conflict};
     }
@@ -150,7 +154,7 @@ function checkNoDuplicates(token: Token | null, node: Node, nodeSecrets: NodeSec
     }
 }
 
-function toNodeFilename(token: Token, node: Node, nodeSecrets: NodeSecrets): string {
+function toNodeFilename(token: Token, node: BaseNode, nodeSecrets: NodeSecrets): string {
     return config.server.peersPath + '/' +
         (
             (node.hostname || '') + '@' +
@@ -161,7 +165,13 @@ function toNodeFilename(token: Token, node: Node, nodeSecrets: NodeSecrets): str
         ).toLowerCase();
 }
 
-function getNodeValue(prefix: LINE_PREFIX, node: Node, nodeSecrets: NodeSecrets): string {
+function getNodeValue(
+    prefix: LINE_PREFIX,
+    token: Token,
+    node: CreateOrUpdateNode,
+    monitoringState: MonitoringState,
+    nodeSecrets: NodeSecrets
+): string {
     switch (prefix) {
         case LINE_PREFIX.HOSTNAME:
             return node.hostname;
@@ -174,11 +184,11 @@ function getNodeValue(prefix: LINE_PREFIX, node: Node, nodeSecrets: NodeSecrets)
         case LINE_PREFIX.MAC:
             return node.mac;
         case LINE_PREFIX.TOKEN:
-            return node.token;
+            return token;
         case LINE_PREFIX.MONITORING:
-            if (node.monitoring && node.monitoringConfirmed) {
+            if (node.monitoring && monitoringState === MonitoringState.ACTIVE) {
                 return "aktiv";
-            } else if (node.monitoring && !node.monitoringConfirmed) {
+            } else if (node.monitoring && monitoringState === MonitoringState.PENDING) {
                 return "pending";
             }
             return "";
@@ -192,22 +202,22 @@ function getNodeValue(prefix: LINE_PREFIX, node: Node, nodeSecrets: NodeSecrets)
 async function writeNodeFile(
     isUpdate: boolean,
     token: Token,
-    node: Node,
+    node: CreateOrUpdateNode,
+    monitoringState: MonitoringState,
     nodeSecrets: NodeSecrets,
-): Promise<{ token: Token, node: Node }> {
+): Promise<StoredNode> {
     const filename = toNodeFilename(token, node, nodeSecrets);
     let data = '';
 
     for (const prefix of Object.values(LINE_PREFIX)) {
-        data += `${prefix}${getNodeValue(prefix, node, nodeSecrets)}\n`;
+        data += `${prefix}${getNodeValue(prefix, token, node, monitoringState, nodeSecrets)}\n`;
     }
 
     if (node.key) {
         data += `key "${node.key}";\n`;
     }
 
-    // since node.js is single threaded we don't need a lock
-
+    // since node.js is single threaded we don't need a lock when working with synchronous operations
     if (isUpdate) {
         const files = findNodeFilesSync({token: token});
         if (files.length !== 1) {
@@ -224,12 +234,13 @@ async function writeNodeFile(
             throw {data: 'Could not remove old node data.', type: ErrorTypes.internalError};
         }
     } else {
-        checkNoDuplicates(null, node, nodeSecrets);
+        checkNoDuplicates(undefined, node, nodeSecrets);
     }
 
     try {
         oldFs.writeFileSync(filename, data, 'utf8');
-        return {token, node};
+        const {node: storedNode} = await parseNodeFile(filename);
+        return storedNode;
     } catch (error) {
         Logger.tag('node', 'save').error('Could not write node file: ' + filename, error);
         throw {data: 'Could not write node data.', type: ErrorTypes.internalError};
@@ -257,7 +268,7 @@ async function deleteNodeFile(token: Token): Promise<void> {
     }
 }
 
-class NodeBuilder {
+class StoredNodeBuilder {
     public token: Token = "" as Token; // FIXME: Either make token optional in Node or handle this!
     public nickname: Nickname = "" as Nickname;
     public email: EmailAddress = "" as EmailAddress;
@@ -265,8 +276,6 @@ class NodeBuilder {
     public coords?: Coordinates;
     public key?: FastdKey;
     public mac: MAC = "" as MAC; // FIXME: Either make mac optional in Node or handle this!
-    public monitoring: boolean = false;
-    public monitoringConfirmed: boolean = false;
     public monitoringState: MonitoringState = MonitoringState.DISABLED;
 
     constructor(
@@ -274,8 +283,8 @@ class NodeBuilder {
     ) {
     }
 
-    public build(): Node {
-        return {
+    public build(): StoredNode {
+        const node = {
             token: this.token,
             nickname: this.nickname,
             email: this.email,
@@ -283,15 +292,20 @@ class NodeBuilder {
             coords: this.coords,
             key: this.key,
             mac: this.mac,
-            monitoring: this.monitoring,
-            monitoringConfirmed: this.monitoringConfirmed,
             monitoringState: this.monitoringState,
             modifiedAt: this.modifiedAt,
+        };
+
+        if (!isStoredNode(node)) {
+            logger.tag("NodeService").error("Not a valid StoredNode:", node);
+            throw {data: "Could not build StoredNode.", type: ErrorTypes.internalError};
         }
+
+        return node;
     }
 }
 
-function setNodeValue(prefix: LINE_PREFIX, node: NodeBuilder, nodeSecrets: NodeSecrets, value: string) {
+function setNodeValue(prefix: LINE_PREFIX, node: StoredNodeBuilder, nodeSecrets: NodeSecrets, value: string) {
     switch (prefix) {
         case LINE_PREFIX.HOSTNAME:
             node.hostname = value as Hostname;
@@ -314,8 +328,6 @@ function setNodeValue(prefix: LINE_PREFIX, node: NodeBuilder, nodeSecrets: NodeS
         case LINE_PREFIX.MONITORING:
             const active = value === 'aktiv';
             const pending = value === 'pending';
-            node.monitoring = active || pending;
-            node.monitoringConfirmed = active;
             node.monitoringState =
                 active ? MonitoringState.ACTIVE : (pending ? MonitoringState.PENDING : MonitoringState.DISABLED);
             break;
@@ -332,13 +344,13 @@ async function getModifiedAt(file: string): Promise<UnixTimestampSeconds> {
     return toUnixTimestampSeconds(modifiedAtMs);
 }
 
-async function parseNodeFile(file: string): Promise<{ node: Node, nodeSecrets: NodeSecrets }> {
+async function parseNodeFile(file: string): Promise<{ node: StoredNode, nodeSecrets: NodeSecrets }> {
     const contents = await fs.readFile(file);
     const modifiedAt = await getModifiedAt(file);
 
     const lines = contents.toString().split("\n");
 
-    const node = new NodeBuilder(modifiedAt);
+    const node = new StoredNodeBuilder(modifiedAt);
     const nodeSecrets: NodeSecrets = {};
 
     for (const line of lines) {
@@ -361,7 +373,7 @@ async function parseNodeFile(file: string): Promise<{ node: Node, nodeSecrets: N
     };
 }
 
-async function findNodeDataByFilePattern(filter: NodeFilter): Promise<{ node: Node, nodeSecrets: NodeSecrets } | null> {
+async function findNodeDataByFilePattern(filter: NodeFilter): Promise<{ node: StoredNode, nodeSecrets: NodeSecrets } | null> {
     const files = await findNodeFiles(filter);
 
     if (files.length !== 1) {
@@ -372,7 +384,7 @@ async function findNodeDataByFilePattern(filter: NodeFilter): Promise<{ node: No
     return await parseNodeFile(file);
 }
 
-async function getNodeDataByFilePattern(filter: NodeFilter): Promise<{ node: Node, nodeSecrets: NodeSecrets }> {
+async function getNodeDataByFilePattern(filter: NodeFilter): Promise<{ node: StoredNode, nodeSecrets: NodeSecrets }> {
     const result = await findNodeDataByFilePattern(filter);
     if (!result) {
         throw {data: 'Node not found.', type: ErrorTypes.notFound};
@@ -381,7 +393,7 @@ async function getNodeDataByFilePattern(filter: NodeFilter): Promise<{ node: Nod
     return result;
 }
 
-async function sendMonitoringConfirmationMail(node: Node, nodeSecrets: NodeSecrets): Promise<void> {
+async function sendMonitoringConfirmationMail(node: StoredNode, nodeSecrets: NodeSecrets): Promise<void> {
     const monitoringToken = nodeSecrets.monitoringToken;
     if (!monitoringToken) {
         Logger
@@ -405,76 +417,81 @@ async function sendMonitoringConfirmationMail(node: Node, nodeSecrets: NodeSecre
     );
 }
 
-export async function createNode(node: Node): Promise<{ token: Token, node: Node }> {
+export async function createNode(node: CreateOrUpdateNode): Promise<StoredNode> {
     const token: Token = generateToken();
     const nodeSecrets: NodeSecrets = {};
 
-    node.monitoringConfirmed = false;
-
+    const monitoringState = node.monitoring ? MonitoringState.PENDING : MonitoringState.DISABLED;
     if (node.monitoring) {
         nodeSecrets.monitoringToken = generateToken<MonitoringToken>();
     }
 
-    const written = await writeNodeFile(false, token, node, nodeSecrets);
+    const createdNode = await writeNodeFile(false, token, node, monitoringState, nodeSecrets);
 
-    if (written.node.monitoring && !written.node.monitoringConfirmed) {
-        await sendMonitoringConfirmationMail(written.node, nodeSecrets)
+    if (createdNode.monitoringState == MonitoringState.PENDING) {
+        await sendMonitoringConfirmationMail(createdNode, nodeSecrets);
     }
 
-    return written;
+    return createdNode;
 }
 
-export async function updateNode(token: Token, node: Node): Promise<{ token: Token, node: Node }> {
+export async function updateNode(token: Token, node: CreateOrUpdateNode): Promise<StoredNode> {
     const {node: currentNode, nodeSecrets} = await getNodeDataWithSecretsByToken(token);
 
-    let monitoringConfirmed = false;
-    let monitoringToken: MonitoringToken | undefined;
+    let monitoringState = MonitoringState.DISABLED;
+    let monitoringToken: MonitoringToken | undefined = undefined;
 
     if (node.monitoring) {
-        if (!currentNode.monitoring) {
-            // monitoring just has been enabled
-            monitoringConfirmed = false;
-            monitoringToken = generateToken<MonitoringToken>();
-
-        } else {
-            // monitoring is still enabled
-
-            if (currentNode.email !== node.email) {
-                // new email so we need a new token and a reconfirmation
-                monitoringConfirmed = false;
+        switch (currentNode.monitoringState) {
+            case MonitoringState.DISABLED:
+                // monitoring just has been enabled
+                monitoringState = MonitoringState.PENDING;
                 monitoringToken = generateToken<MonitoringToken>();
+            break;
 
-            } else {
-                // email unchanged, keep token (fix if not set) and confirmation state
-                monitoringConfirmed = currentNode.monitoringConfirmed;
-                monitoringToken = nodeSecrets.monitoringToken || generateToken<MonitoringToken>();
-            }
+            case MonitoringState.PENDING:
+            case MonitoringState.ACTIVE:
+                if (currentNode.email !== node.email) {
+                    // new email so we need a new token and a reconfirmation
+                    monitoringState = MonitoringState.PENDING;
+                    monitoringToken = generateToken<MonitoringToken>();
+
+                } else {
+                    // email unchanged, keep token (fix if not set) and confirmation state
+                    monitoringState = currentNode.monitoringState;
+                    monitoringToken = nodeSecrets.monitoringToken || generateToken<MonitoringToken>();
+                }
+            break;
+
+            default:
+                unhandledEnumField(currentNode.monitoringState);
         }
     }
 
-    node.monitoringConfirmed = monitoringConfirmed;
     nodeSecrets.monitoringToken = monitoringToken;
 
-    const written = await writeNodeFile(true, token, node, nodeSecrets);
-    if (written.node.monitoring && !written.node.monitoringConfirmed) {
-        await sendMonitoringConfirmationMail(written.node, nodeSecrets)
+    const storedNode = await writeNodeFile(true, token, node, monitoringState, nodeSecrets);
+    if (storedNode.monitoringState === MonitoringState.PENDING) {
+        await sendMonitoringConfirmationMail(storedNode, nodeSecrets)
     }
 
-    return written;
+    return storedNode;
 }
 
 export async function internalUpdateNode(
     token: Token,
-    node: Node, nodeSecrets: NodeSecrets
-): Promise<{ token: Token, node: Node }> {
-    return await writeNodeFile(true, token, node, nodeSecrets);
+    node: CreateOrUpdateNode,
+    monitoringState: MonitoringState,
+    nodeSecrets: NodeSecrets,
+): Promise<StoredNode> {
+    return await writeNodeFile(true, token, node, monitoringState, nodeSecrets);
 }
 
 export async function deleteNode(token: Token): Promise<void> {
     await deleteNodeFile(token);
 }
 
-export async function getAllNodes(): Promise<Node[]> {
+export async function getAllNodes(): Promise<StoredNode[]> {
     let files;
     try {
         files = await findNodeFiles({});
@@ -483,7 +500,7 @@ export async function getAllNodes(): Promise<Node[]> {
         throw {data: 'Internal error.', type: ErrorTypes.internalError};
     }
 
-    const nodes: Node[] = [];
+    const nodes: StoredNode[] = [];
     for (const file of files) {
         try {
             const {node} = await parseNodeFile(file);
@@ -497,33 +514,33 @@ export async function getAllNodes(): Promise<Node[]> {
     return nodes;
 }
 
-export async function getNodeDataWithSecretsByMac(mac: MAC): Promise<{ node: Node, nodeSecrets: NodeSecrets } | null> {
+export async function findNodeDataWithSecretsByMac(mac: MAC): Promise<{ node: StoredNode, nodeSecrets: NodeSecrets } | null> {
     return await findNodeDataByFilePattern({mac});
 }
 
-export async function getNodeDataByMac(mac: MAC): Promise<Node | null> {
+export async function findNodeDataByMac(mac: MAC): Promise<StoredNode | null> {
     const result = await findNodeDataByFilePattern({mac});
     return result ? result.node : null;
 }
 
-export async function getNodeDataWithSecretsByToken(token: Token): Promise<{ node: Node, nodeSecrets: NodeSecrets }> {
+export async function getNodeDataWithSecretsByToken(token: Token): Promise<{ node: StoredNode, nodeSecrets: NodeSecrets }> {
     return await getNodeDataByFilePattern({token: token});
 }
 
-export async function getNodeDataByToken(token: Token): Promise<Node> {
+export async function getNodeDataByToken(token: Token): Promise<StoredNode> {
     const {node} = await getNodeDataByFilePattern({token: token});
     return node;
 }
 
 export async function getNodeDataWithSecretsByMonitoringToken(
     monitoringToken: MonitoringToken
-): Promise<{ node: Node, nodeSecrets: NodeSecrets }> {
+): Promise<{ node: StoredNode, nodeSecrets: NodeSecrets }> {
     return await getNodeDataByFilePattern({monitoringToken: monitoringToken});
 }
 
 export async function getNodeDataByMonitoringToken(
     monitoringToken: MonitoringToken
-): Promise<Node> {
+): Promise<StoredNode> {
     const {node} = await getNodeDataByFilePattern({monitoringToken: monitoringToken});
     return node;
 }
@@ -547,7 +564,7 @@ export async function fixNodeFilenames(): Promise<void> {
     }
 }
 
-export async function findNodesModifiedBefore(timestamp: UnixTimestampSeconds): Promise<Node[]> {
+export async function findNodesModifiedBefore(timestamp: UnixTimestampSeconds): Promise<StoredNode[]> {
     const nodes = await getAllNodes();
     return _.filter(nodes, node => node.modifiedAt < timestamp);
 }
@@ -565,7 +582,7 @@ export async function getNodeStatistics(): Promise<NodeStatistics> {
         }
     };
 
-    _.each(nodes, function (node: Node): void {
+    for (const node of nodes) {
         if (node.key) {
             nodeStatistics.withVPN += 1;
         }
@@ -589,7 +606,7 @@ export async function getNodeStatistics(): Promise<NodeStatistics> {
             default:
                 unhandledEnumField(monitoringState);
         }
-    });
+    }
 
     return nodeStatistics;
 }

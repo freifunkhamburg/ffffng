@@ -5,7 +5,18 @@ import ErrorTypes from "../utils/errorTypes";
 import Logger from "../logger";
 import {Constraints, forConstraints, isConstraints} from "../validation/validator";
 import {Request, Response} from "express";
-import {EnumTypeGuard, EnumValue, type GenericSortField, SortDirection, TypeGuard} from "../types";
+import {
+    EnumTypeGuard,
+    EnumValue,
+    type GenericSortField,
+    isJSONObject,
+    JSONObject,
+    SortDirection,
+    TypeGuard
+} from "../types";
+
+export type RequestData = JSONObject;
+export type RequestHandler = (request: Request, response: Response) => void;
 
 export type Entity = { [key: string]: any };
 
@@ -110,8 +121,20 @@ function getConstrainedValues(data: { [key: string]: any }, constraints: Constra
     return values;
 }
 
-export function getData(req: Request): any {
-    return _.extend({}, req.body, req.params, req.query);
+function normalize(data: any): JSONObject {
+    return isJSONObject(data) ? data : {};
+}
+
+export function getData(req: Request): RequestData {
+    const body = normalize(req.body);
+    const params = normalize(req.params);
+    const query = normalize(req.query);
+
+    return {
+        ...body,
+        ...params,
+        ...query,
+    };
 }
 
 export async function getValidRestParams(
@@ -197,7 +220,7 @@ export function filter<E>(entities: ArrayLike<E>, allowedFilterFields: string[],
                 return true;
             }
             if (_.startsWith(key, 'has')) {
-                const entityKey = key.substr(3, 1).toLowerCase() + key.substr(4);
+                const entityKey = key.substring(3, 4).toLowerCase() + key.substring(4);
                 return _.isEmpty(entity[entityKey]).toString() !== value;
             }
             return entity[key] === value;
@@ -266,4 +289,20 @@ export function successHtml(res: Response, html: string) {
 
 export function error(res: Response, err: { data: any, type: { code: number } }) {
     respond(res, err.type.code, err.data, 'json');
+}
+
+export function handleJSON<Response>(handler: () => Promise<Response>): RequestHandler {
+    return (request, response) => {
+        handler()
+            .then(data => success(response, data || {}))
+            .catch(error => error(response, error));
+    };
+}
+
+export function handleJSONWithData<Response>(handler: (data: RequestData) => Promise<Response>): RequestHandler {
+    return (request, response) => {
+        handler(getData(request))
+            .then(data => success(response, data || {}))
+            .catch(error => error(response, error));
+    };
 }

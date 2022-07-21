@@ -4,14 +4,15 @@ import CONSTRAINTS from "../validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
 import * as MonitoringService from "../services/monitoringService";
 import * as Resources from "../utils/resources";
+import {handleJSONWithData} from "../utils/resources";
 import {normalizeString} from "../utils/strings";
 import {forConstraint} from "../validation/validator";
 import {Request, Response} from "express";
-import {MonitoringToken} from "../types";
+import {MonitoringResponse, MonitoringToken, toMonitoringResponse} from "../types";
 
 const isValidToken = forConstraint(CONSTRAINTS.token, false);
 
-async function doGetAll(req: Request): Promise<{total: number, result: any}> {
+async function doGetAll(req: Request): Promise<{ total: number, result: any }> {
     const restParams = await Resources.getValidRestParams('list', null, req);
     const {monitoringStates, total} = await MonitoringService.getAll(restParams);
     return {
@@ -32,41 +33,24 @@ export function getAll(req: Request, res: Response): void {
         .catch(err => Resources.error(res, err));
 }
 
-export function confirm(req: Request, res: Response): void {
-    const data = Resources.getData(req);
-
+export const confirm = handleJSONWithData<MonitoringResponse>(async data => {
     const token = normalizeString(data.token);
     if (!isValidToken(token)) {
-        return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
+        throw {data: 'Invalid token.', type: ErrorTypes.badRequest};
     }
     const validatedToken: MonitoringToken = token as MonitoringToken;
 
-    MonitoringService.confirm(validatedToken)
-        .then(node => Resources.success(res, {
-            hostname: node.hostname,
-            mac: node.mac,
-            email: node.email,
-            monitoring: node.monitoring,
-            monitoringConfirmed: node.monitoringConfirmed
-        }))
-        .catch(err => Resources.error(res, err));
-}
+    const node = await MonitoringService.confirm(validatedToken);
+    return toMonitoringResponse(node);
+});
 
-export function disable(req: Request, res: Response): void {
-    const data = Resources.getData(req);
-
+export const disable = handleJSONWithData<MonitoringResponse>(async data => {
     const token = normalizeString(data.token);
     if (!isValidToken(token)) {
-        return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
+        throw {data: 'Invalid token.', type: ErrorTypes.badRequest};
     }
     const validatedToken: MonitoringToken = token as MonitoringToken;
 
-    MonitoringService.disable(validatedToken)
-        .then(node => Resources.success(res, {
-            hostname: node.hostname,
-            mac: node.mac,
-            email: node.email,
-            monitoring: node.monitoring
-        }))
-        .catch(err => Resources.error(res, err));
-}
+    const node = await MonitoringService.disable(validatedToken);
+    return toMonitoringResponse(node);
+});

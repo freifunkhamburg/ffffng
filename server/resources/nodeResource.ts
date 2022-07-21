@@ -1,5 +1,4 @@
 import _ from "lodash";
-import deepExtend from "deep-extend";
 
 import Constraints from "../validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
@@ -8,13 +7,28 @@ import * as NodeService from "../services/nodeService";
 import {normalizeMac, normalizeString} from "../utils/strings";
 import {forConstraint, forConstraints} from "../validation/validator";
 import * as Resources from "../utils/resources";
+import {handleJSONWithData} from "../utils/resources";
 import {Request, Response} from "express";
-import {EnhancedNode, isNodeSortField, MAC, Node, Token} from "../types";
+import {
+    CreateOrUpdateNode,
+    DomainSpecificNodeResponse,
+    isNodeSortField,
+    isToken, JSONObject,
+    MAC,
+    NodeResponse,
+    NodeStateData,
+    NodeTokenResponse,
+    StoredNode,
+    toDomainSpecificNodeResponse,
+    Token,
+    toNodeResponse,
+    toNodeTokenResponse
+} from "../types";
 
 const nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords', 'monitoring'];
 
-function getNormalizedNodeData(reqData: any): Node {
-    const node: {[key: string]: any} = {};
+function getNormalizedNodeData(reqData: any): CreateOrUpdateNode {
+    const node: { [key: string]: any } = {};
     _.each(nodeFields, function (field) {
         let value = normalizeString(reqData[field]);
         if (field === 'mac') {
@@ -22,69 +36,54 @@ function getNormalizedNodeData(reqData: any): Node {
         }
         node[field] = value;
     });
-    return node as Node;
+    return node as CreateOrUpdateNode;
 }
 
 const isValidNode = forConstraints(Constraints.node, false);
 const isValidToken = forConstraint(Constraints.token, false);
 
-export function create (req: Request, res: Response): void {
-    const data = Resources.getData(req);
-
-    const node = getNormalizedNodeData(data);
-    if (!isValidNode(node)) {
-        return Resources.error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
+function getValidatedToken(data: JSONObject): Token {
+    if (!isToken(data.token)) {
+        throw {data: 'Missing token.', type: ErrorTypes.badRequest};
     }
-
-    NodeService.createNode(node)
-        .then(result => Resources.success(res, result))
-        .catch(err => Resources.error(res, err));
-}
-
-export function update (req: Request, res: Response): void {
-    const data = Resources.getData(req);
-
     const token = normalizeString(data.token);
     if (!isValidToken(token)) {
-        return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
+        throw {data: 'Invalid token.', type: ErrorTypes.badRequest};
     }
-    const validatedToken: Token = token as Token;
-
-    const node = getNormalizedNodeData(data);
-    if (!isValidNode(node)) {
-        return Resources.error(res, {data: 'Invalid node data.', type: ErrorTypes.badRequest});
-    }
-
-    NodeService.updateNode(validatedToken, node)
-        .then(result => Resources.success(res, result))
-        .catch(err => Resources.error(res, err));
+    return token as Token;
 }
 
-export function remove(req: Request, res: Response): void {
-    const data = Resources.getData(req);
-
-    const token = normalizeString(data.token);
-    if (!isValidToken(token)) {
-        return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
+export const create = handleJSONWithData<NodeTokenResponse>(async data => {
+    const baseNode = getNormalizedNodeData(data);
+    if (!isValidNode(baseNode)) {
+        throw {data: 'Invalid node data.', type: ErrorTypes.badRequest};
     }
-    const validatedToken: Token = token as Token;
 
-    NodeService.deleteNode(validatedToken)
-        .then(() => Resources.success(res, {}))
-        .catch(err => Resources.error(res, err));
-}
+    const node = await NodeService.createNode(baseNode);
+    return toNodeTokenResponse(node);
+});
 
-export function get(req: Request, res: Response): void {
-    const token = normalizeString(Resources.getData(req).token);
-    if (!isValidToken(token)) {
-        return Resources.error(res, {data: 'Invalid token.', type: ErrorTypes.badRequest});
+export const update = handleJSONWithData<NodeTokenResponse>(async data => {
+    const validatedToken: Token = getValidatedToken(data);
+    const baseNode = getNormalizedNodeData(data);
+    if (!isValidNode(baseNode)) {
+        throw {data: 'Invalid node data.', type: ErrorTypes.badRequest};
     }
-    const validatedToken: Token = token as Token;
 
-    NodeService.getNodeDataByToken(validatedToken)
-        .then(node => Resources.success(res, node))
-        .catch(err => Resources.error(res, err));
-}
+    const node = await NodeService.updateNode(validatedToken, baseNode);
+    return toNodeTokenResponse(node);
+});
+
+export const remove = handleJSONWithData<void>(async data => {
+    const validatedToken = getValidatedToken(data);
+    await NodeService.deleteNode(validatedToken);
+});
+
+export const get = handleJSONWithData<NodeResponse>(async data => {
+    const validatedToken: Token = getValidatedToken(data);
+    const node = await NodeService.getNodeDataByToken(validatedToken);
+    return toNodeResponse(node);
+});
 
 async function doGetAll(req: Request): Promise<{ total: number; pageNodes: any }> {
     const restParams = await Resources.getValidRestParams('list', 'node', req);
@@ -96,24 +95,16 @@ async function doGetAll(req: Request): Promise<{ total: number; pageNodes: any }
         !!node.token
     );
 
-    const macs: MAC[] = _.map(realNodes, (node: Node): MAC => node.mac);
+    const macs: MAC[] = _.map(realNodes, (node: StoredNode): MAC => node.mac);
     const nodeStateByMac = await MonitoringService.getByMacs(macs);
 
-    const enhancedNodes: EnhancedNode[] = _.map(realNodes, (node: Node): EnhancedNode => {
-        const nodeState = nodeStateByMac[node.mac];
-        if (nodeState) {
-            return deepExtend({}, node, {
-                site: nodeState.site,
-                domain: nodeState.domain,
-                onlineState: nodeState.state
-            });
-        }
-
-        return node as EnhancedNode;
+    const domainSpecificNodes: DomainSpecificNodeResponse[] = _.map(realNodes, (node: StoredNode): DomainSpecificNodeResponse => {
+        const nodeState: NodeStateData = nodeStateByMac[node.mac] || {};
+        return toDomainSpecificNodeResponse(node, nodeState);
     });
 
-    const filteredNodes = Resources.filter<EnhancedNode>(
-        enhancedNodes,
+    const filteredNodes = Resources.filter<DomainSpecificNodeResponse>(
+        domainSpecificNodes,
         [
             'hostname',
             'nickname',
@@ -142,7 +133,7 @@ async function doGetAll(req: Request): Promise<{ total: number; pageNodes: any }
 
 export function getAll(req: Request, res: Response): void {
     doGetAll(req)
-        .then((result: {total: number, pageNodes: any[]}) => {
+        .then((result: { total: number, pageNodes: any[] }) => {
             res.set('X-Total-Count', result.total.toString(10));
             return Resources.success(res, result.pageNodes);
         })
