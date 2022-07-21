@@ -8,7 +8,7 @@ import {handleJSONWithData} from "../utils/resources";
 import {normalizeString} from "../utils/strings";
 import {forConstraint} from "../validation/validator";
 import {Request, Response} from "express";
-import {MonitoringResponse, MonitoringToken, toMonitoringResponse} from "../types";
+import {isMonitoringToken, JSONObject, MonitoringResponse, MonitoringToken, toMonitoringResponse} from "../types";
 
 const isValidToken = forConstraint(CONSTRAINTS.token, false);
 
@@ -33,23 +33,26 @@ export function getAll(req: Request, res: Response): void {
         .catch(err => Resources.error(res, err));
 }
 
-export const confirm = handleJSONWithData<MonitoringResponse>(async data => {
+function getValidatedToken(data: JSONObject): MonitoringToken {
+    if (!isMonitoringToken(data.token)) {
+        throw {data: 'Missing token.', type: ErrorTypes.badRequest};
+    }
     const token = normalizeString(data.token);
     if (!isValidToken(token)) {
         throw {data: 'Invalid token.', type: ErrorTypes.badRequest};
     }
-    const validatedToken: MonitoringToken = token as MonitoringToken;
+    return token as MonitoringToken;
+}
+
+export const confirm = handleJSONWithData<MonitoringResponse>(async data => {
+    const validatedToken = getValidatedToken(data);
 
     const node = await MonitoringService.confirm(validatedToken);
     return toMonitoringResponse(node);
 });
 
 export const disable = handleJSONWithData<MonitoringResponse>(async data => {
-    const token = normalizeString(data.token);
-    if (!isValidToken(token)) {
-        throw {data: 'Invalid token.', type: ErrorTypes.badRequest};
-    }
-    const validatedToken: MonitoringToken = token as MonitoringToken;
+    const validatedToken: MonitoringToken = getValidatedToken(data);
 
     const node = await MonitoringService.disable(validatedToken);
     return toMonitoringResponse(node);
