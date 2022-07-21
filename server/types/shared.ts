@@ -337,6 +337,7 @@ export function toUnixTimestampSeconds(ms: UnixTimestampMilliseconds): UnixTimes
 }
 
 export type MonitoringToken = string & { readonly __tag: unique symbol };
+export const isMonitoringToken = isString;
 
 export enum MonitoringState {
     ACTIVE = "active",
