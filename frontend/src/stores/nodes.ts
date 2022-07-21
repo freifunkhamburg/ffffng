@@ -1,9 +1,9 @@
 import {defineStore} from "pinia";
-import {type EnhancedNode, isEnhancedNode, type NodesFilter, NodeSortField, SortDirection} from "@/types";
+import {type DomainSpecificNodeResponse, isDomainSpecificNodeResponse, type NodesFilter, NodeSortField, SortDirection} from "@/types";
 import {internalApi} from "@/utils/Api";
 
 interface NodesStoreState {
-    nodes: EnhancedNode[];
+    nodes: DomainSpecificNodeResponse[];
     page: number;
     nodesPerPage: number;
     totalNodes: number;
@@ -24,7 +24,7 @@ export const useNodesStore = defineStore({
         };
     },
     getters: {
-        getNodes(state: NodesStoreState): EnhancedNode[] {
+        getNodes(state: NodesStoreState): DomainSpecificNodeResponse[] {
             return state.nodes;
         },
 
@@ -55,9 +55,9 @@ export const useNodesStore = defineStore({
             if (searchTerm) {
                 query.q = searchTerm;
             }
-            const result = await internalApi.getPagedList<EnhancedNode, NodeSortField>(
+            const result = await internalApi.getPagedList<DomainSpecificNodeResponse, NodeSortField>(
                 "nodes",
-                isEnhancedNode,
+                isDomainSpecificNodeResponse,
                 page,
                 nodesPerPage,
                 sortDirection,

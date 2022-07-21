@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {useNodesStore} from "@/stores/nodes";
 import {onMounted, ref, watch} from "vue";
-import type {EnhancedNode, MAC, NodesFilter} from "@/types";
+import type {DomainSpecificNodeResponse, MAC, NodesFilter} from "@/types";
 import {NodeSortField, SortDirection} from "@/types";
 import Pager from "@/components/Pager.vue";
 import LoadingContainer from "@/components/LoadingContainer.vue";
@@ -51,7 +51,7 @@ function redactAllFields(shallRedactFields: boolean): void {
     nodesRedactFieldsMap.value = {};
 }
 
-function shallRedactField(node: EnhancedNode, field: NodeRedactField): boolean {
+function shallRedactField(node: DomainSpecificNodeResponse, field: NodeRedactField): boolean {
     const redactFieldsMap = nodesRedactFieldsMap.value[node.mac];
     if (!redactFieldsMap) {
         return redactFieldsByDefault.value;
@@ -60,7 +60,7 @@ function shallRedactField(node: EnhancedNode, field: NodeRedactField): boolean {
     return redactField === undefined ? redactFieldsByDefault.value : redactField;
 }
 
-function setRedactField(node: EnhancedNode, field: NodeRedactField, value: boolean): void {
+function setRedactField(node: DomainSpecificNodeResponse, field: NodeRedactField, value: boolean): void {
     let redactFieldsMap = nodesRedactFieldsMap.value[node.mac];
     if (!redactFieldsMap) {
         redactFieldsMap = {};

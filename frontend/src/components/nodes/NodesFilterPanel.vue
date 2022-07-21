@@ -202,7 +202,7 @@ function buildNodesFilter(): NodesFilter {
     return nodesFilter;
 }
 
-let lastSearchTimestamp: UnixTimestampMilliseconds = 0;
+let lastSearchTimestamp: UnixTimestampMilliseconds = 0 as UnixTimestampMilliseconds;
 let searchTimeout: NodeJS.Timeout | undefined = undefined;
 let lastSearchTerm = "";
 
@@ -221,7 +221,8 @@ function doThrottledSearch(): void {
         return
     }
 
-    const now: UnixTimestampMilliseconds = Date.now();
+    // TODO: Share utils.
+    const now: UnixTimestampMilliseconds = Date.now() as UnixTimestampMilliseconds;
     if (now - SEARCH_THROTTLE_DELAY_MS >= lastSearchTimestamp) {
         lastSearchTimestamp = now;
         doSearch();
