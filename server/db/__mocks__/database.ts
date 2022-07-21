@@ -1,4 +1,4 @@
-import {RunResult, SqlType, Statement, TypedDatabase} from "../database";
+import {RunResult, SqlType, Statement, TypedDatabase} from "../../types";
 import * as sqlite3 from "sqlite3";
 
 export async function init(): Promise<void> {

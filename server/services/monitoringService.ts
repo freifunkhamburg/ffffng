@@ -3,7 +3,7 @@ import moment, {Moment, unitOfTime} from "moment";
 import request from "request";
 
 import {config} from "../config";
-import {db, RunResult} from "../db/database";
+import {db} from "../db/database";
 import * as DatabaseUtil from "../utils/databaseUtil";
 import ErrorTypes from "../utils/errorTypes";
 import Logger from "../logger";
@@ -29,6 +29,7 @@ import {
     NodeId,
     NodeStateData,
     OnlineState,
+    RunResult,
     Site,
     UnixTimestampSeconds
 } from "../types";

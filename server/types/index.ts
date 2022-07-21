@@ -1,6 +1,7 @@
 import {Domain, EmailAddress, JSONObject, MonitoringToken, OnlineState, Site, toIsEnum} from "./shared";
 
 export * from "./config";
+export * from "./database";
 export * from "./logger";
 export * from "./shared";
 
