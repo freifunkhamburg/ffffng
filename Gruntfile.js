@@ -35,7 +35,7 @@ module.exports = function (grunt) {
             },
             compass: {
                 files: ['<%= yeoman.app %>/styles/{,**/}*.{scss,sass}'],
-                tasks: ['compass:server', 'autoprefixer']
+                tasks: ['compass:server']
             },
             gruntfile: {
                 files: ['Gruntfile.js']
@@ -46,8 +46,7 @@ module.exports = function (grunt) {
                 },
                 files: [
                     '<%= yeoman.app %>/{,**/}*.html',
-                    '.tmp/styles/{,**/}*.css',
-                    '<%= yeoman.app %>/images/{,**/}*.{png,jpg,jpeg,gif,webp,svg}'
+                    '.tmp/styles/{,**/}*.css'
                 ]
             }
         },
@@ -136,23 +135,6 @@ module.exports = function (grunt) {
             server: '.tmp'
         },
 
-        // Add vendor prefixed styles
-        autoprefixer: {
-            options: {
-                browsers: ['last 1 version']
-            },
-            dist: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '.tmp/styles/',
-                        src: '{,*/}*.css',
-                        dest: '.tmp/styles/'
-                    }
-                ]
-            }
-        },
-
         wiredep: {
             task: {
                 src: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
@@ -166,7 +148,6 @@ module.exports = function (grunt) {
                 sassDir: '<%= yeoman.app %>/styles',
                 cssDir: '.tmp/styles',
                 generatedImagesDir: '.tmp/images/generated',
-                imagesDir: '<%= yeoman.app %>/images',
                 javascriptsDir: '<%= yeoman.app %>/scripts',
                 fontsDir: '<%= yeoman.app %>/fonts',
                 importPath: '<%= yeoman.app %>/bower_components',
@@ -215,8 +196,7 @@ module.exports = function (grunt) {
                 files: {
                     src: [
                         '<%= yeoman.dist %>/client/scripts/{,*/}*.js',
-                        '<%= yeoman.dist %>/client/styles/{,*/}*.css',
-                        '<%= yeoman.dist %>/client/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
+                        '<%= yeoman.dist %>/client/styles/{,*/}*.css'
                     ]
                 }
             }
@@ -257,32 +237,6 @@ module.exports = function (grunt) {
             }
         },
 
-        imagemin: {
-            dist: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= yeoman.app %>/images',
-                        src: '{,*/}*.{png,jpg,jpeg,gif}',
-                        dest: '<%= yeoman.dist %>/client/images'
-                    }
-                ]
-            }
-        },
-
-        svgmin: {
-            dist: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= yeoman.app %>/images',
-                        src: '{,*/}*.svg',
-                        dest: '<%= yeoman.dist %>/client/images'
-                    }
-                ]
-            }
-        },
-
         htmlmin: {
             dist: {
                 options: {
@@ -297,19 +251,6 @@ module.exports = function (grunt) {
                         cwd: '<%= yeoman.dist %>/client',
                         src: ['*.html', 'views/{,*/}*.html'],
                         dest: '<%= yeoman.dist %>/client'
-                    }
-                ]
-            }
-        },
-
-        ngAnnotate: {
-            dist: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '.tmp/concat/scripts',
-                        src: '*.js',
-                        dest: '.tmp/concat/scripts'
                     }
                 ]
             }
@@ -409,9 +350,7 @@ module.exports = function (grunt) {
                 'compass:server'
             ],
             dist: [
-                'compass:dist',
-                'imagemin',
-                'svgmin'
+                'compass:dist'
             ]
         }
     });
@@ -426,7 +365,6 @@ module.exports = function (grunt) {
             'clean:server',
             'wiredep',
             'concurrent:server',
-            'autoprefixer',
             'configureProxies',
             'connect:livereload',
             'watch'
@@ -444,9 +382,7 @@ module.exports = function (grunt) {
         'html2js',
         'useminPrepare',
         'concurrent:dist',
-        'autoprefixer',
         'concat',
-        'ngAnnotate',
         'copy:dist',
         'replace:dist',
         'cssmin',
