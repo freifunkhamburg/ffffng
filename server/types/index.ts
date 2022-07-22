@@ -63,7 +63,17 @@ export function toNodeTokenResponse(node: StoredNode): NodeTokenResponse {
 
 export function toDomainSpecificNodeResponse(node: StoredNode, nodeStateData: NodeStateData): DomainSpecificNodeResponse {
     return {
-        ...toNodeResponse(node),
+        token: node.token,
+        nickname: node.nickname,
+        email: node.email,
+        hostname: node.hostname,
+        coords: node.coords,
+        key: node.key,
+        mac: node.mac,
+        monitoring: node.monitoringState !== MonitoringState.DISABLED,
+        monitoringConfirmed: node.monitoringState === MonitoringState.ACTIVE,
+        monitoringState: node.monitoringState,
+        modifiedAt: node.modifiedAt,
         site: nodeStateData.site,
         domain: nodeStateData.domain,
         onlineState: nodeStateData.state,
