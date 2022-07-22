@@ -32,7 +32,7 @@ function getNormalizedNodeData(reqData: any): CreateOrUpdateNode {
     _.each(nodeFields, function (field) {
         let value = normalizeString(reqData[field]);
         if (field === 'mac') {
-            value = normalizeMac(value);
+            value = normalizeMac(value as MAC);
         }
         node[field] = value;
     });

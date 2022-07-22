@@ -40,7 +40,7 @@ const CONSTRAINTS = {
         },
         coords: {
             type: 'string',
-            regex: /^(-?[0-9]{1,3}(\.[0-9]{1,15})? -?[0-9]{1,3}(\.[0-9]{1,15})?)$/,
+            regex: /^([a-f0-9]{12}|([a-f0-9]{2}:){5}[a-f0-9]{2}|([a-f0-9]{2}-){5}[a-f0-9]{2})$/i,
             optional: true
         },
         monitoring: {

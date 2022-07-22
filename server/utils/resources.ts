@@ -9,7 +9,7 @@ import {
     EnumTypeGuard,
     EnumValue,
     type GenericSortField,
-    isJSONObject,
+    isJSONObject, isNumber, isString, isUndefined,
     JSONObject,
     SortDirection,
     TypeGuard
@@ -91,17 +91,14 @@ function filterCondition(restParams: RestParams, filterFields: string[]): Filter
         };
     }
 
-    let query = _.join(
-        _.map(filterFields, function (field) {
-            return 'LOWER(' + field + ') LIKE ?';
-        }),
-        ' OR '
-    );
+    let query = filterFields
+        .map(field => 'LOWER(' + field + ') LIKE ?')
+        .join(' OR ');
 
     query += ' ESCAPE \'\\\'';
 
-    const search = '%' + (_.isString(restParams.q) ? escapeForLikePattern(_.toLower(restParams.q.trim())) : '') + '%';
-    const params = _.times(filterFields.length, _.constant(search));
+    const search = '%' + (isString(restParams.q) ? escapeForLikePattern(restParams.q.trim().toLowerCase()) : '') + '%';
+    const params = _.times(filterFields.length, () => search);
 
     return {
         query: query,
@@ -111,13 +108,14 @@ function filterCondition(restParams: RestParams, filterFields: string[]): Filter
 
 function getConstrainedValues(data: { [key: string]: any }, constraints: Constraints): { [key: string]: any } {
     const values: { [key: string]: any } = {};
-    _.each(_.keys(constraints), (key: string): void => {
+    for (const key of Object.keys(constraints)) {
         const value = data[key];
         values[key] =
-            _.isUndefined(value) && key in constraints && !_.isUndefined(constraints[key].default)
+            isUndefined(value) && key in constraints && !isUndefined(constraints[key].default)
                 ? constraints[key].default
                 : value;
-    });
+
+    }
     return values;
 }
 
@@ -176,10 +174,10 @@ export async function getValidRestParams(
     return restParams as RestParams;
 }
 
-export function filter<E>(entities: ArrayLike<E>, allowedFilterFields: string[], restParams: RestParams): E[] {
+export function filter<E>(entities: E[], allowedFilterFields: string[], restParams: RestParams): E[] {
     let query = restParams.q;
     if (query) {
-        query = _.toLower(query.trim());
+        query = query.trim().toLowerCase();
     }
 
     function queryMatches(entity: Entity): boolean {
@@ -191,15 +189,15 @@ export function filter<E>(entities: ArrayLike<E>, allowedFilterFields: string[],
                 return true;
             }
             let value = entity[field];
-            if (_.isNumber(value)) {
+            if (isNumber(value)) {
                 value = value.toString();
             }
 
-            if (!_.isString(value) || _.isEmpty(value)) {
+            if (!isString(value) || _.isEmpty(value)) {
                 return false;
             }
 
-            value = _.toLower(value);
+            value = value.toLowerCase();
             if (field === 'mac') {
                 return _.includes(value.replace(/:/g, ''), query.replace(/:/g, ''));
             }
@@ -216,7 +214,7 @@ export function filter<E>(entities: ArrayLike<E>, allowedFilterFields: string[],
         }
 
         return _.every(filters, (value: any, key: string): boolean => {
-            if (_.isUndefined(value)) {
+            if (isUndefined(value)) {
                 return true;
             }
             if (_.startsWith(key, 'has')) {
@@ -232,25 +230,43 @@ export function filter<E>(entities: ArrayLike<E>, allowedFilterFields: string[],
     });
 }
 
-export function sort<T, S>(entities: ArrayLike<T>, isSortField: TypeGuard<S>, restParams: RestParams): ArrayLike<T> {
+export function sort<T extends Record<S, any>, S extends string>(entities: T[], isSortField: TypeGuard<S>, restParams: RestParams): T[] {
     const sortField: S | undefined = isSortField(restParams._sortField) ? restParams._sortField : undefined;
     if (!sortField) {
         return entities;
     }
 
-    const sorted: T[] = _.sortBy(entities, [sortField]);
-    if (restParams._sortDir === SortDirection.ASCENDING) {
-        return sorted;
-    } else {
-        return _.reverse(sorted);
-    }
+    const sorted = entities.slice(0);
+    sorted.sort((a, b) => {
+        let as = a[sortField];
+        let bs = b[sortField];
+
+        if (isString(as)) {
+            as = as.toLowerCase();
+        }
+        if (isString(bs)) {
+            bs = bs.toLowerCase();
+        }
+
+        let order = 0;
+        if (as < bs) {
+            order = -1;
+        }
+        else if (bs > as) {
+            order = 1;
+        }
+
+        return restParams._sortDir === SortDirection.DESCENDING ? -order : order;
+    });
+
+    return sorted;
 }
 
-export function getPageEntities(entities: ArrayLike<Entity>, restParams: RestParams) {
+export function getPageEntities(entities: Entity[], restParams: RestParams) {
     const page = restParams._page;
     const perPage = restParams._perPage;
 
-    return _.slice(entities, (page - 1) * perPage, page * perPage);
+    return entities.slice((page - 1) * perPage, page * perPage);
 }
 
 export {filterCondition as whereCondition};

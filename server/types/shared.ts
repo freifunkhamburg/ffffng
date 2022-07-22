@@ -93,6 +93,14 @@ export function isBoolean(arg: unknown): arg is boolean {
     return typeof arg === "boolean"
 }
 
+export function isUndefined(arg: unknown): arg is undefined {
+    return arg === undefined;
+}
+
+export function isNull(arg: unknown): arg is null {
+    return arg === null;
+}
+
 export function toIsArray<T>(isT: TypeGuard<T>): TypeGuard<T[]> {
     return (arg): arg is T[] => isArray(arg, isT);
 }
@@ -473,7 +481,7 @@ export const isDomain = isString;
 /**
  * Represents a node in the context of a Freifunk site and domain.
  */
-export type DomainSpecificNodeResponse = NodeResponse & {
+export type DomainSpecificNodeResponse = Record<NodeSortField, any> & NodeResponse & {
     site?: Site,
     domain?: Domain,
     onlineState?: OnlineState,
