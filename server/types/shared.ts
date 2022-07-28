@@ -116,6 +116,10 @@ export function toIsEnum<E>(enumDef: E): EnumTypeGuard<E> {
     return (arg): arg is EnumValue<E> => Object.values(enumDef).includes(arg as [keyof E]);
 }
 
+export function isRegExp(arg: unknown): arg is RegExp {
+    return isObject(arg) && arg instanceof RegExp;
+}
+
 export function isOptional<T>(arg: unknown, isT: TypeGuard<T>): arg is (T | undefined) {
     return arg === undefined || isT(arg);
 }

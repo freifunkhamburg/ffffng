@@ -19,10 +19,13 @@ import {
     Domain,
     DurationSeconds,
     Hostname,
+    isBoolean,
     isDomain,
     isMonitoringSortField,
     isOnlineState,
     isSite,
+    isString,
+    isUndefined,
     MAC,
     MailType,
     MonitoringSortField,
@@ -164,7 +167,7 @@ async function storeNodeInformation(nodeData: ParsedNode, node: StoredNode): Pro
 
     const row = await db.get('SELECT * FROM node_state WHERE mac = ?', [node.mac]);
 
-    if (_.isUndefined(row)) {
+    if (isUndefined(row)) {
         return await insertNodeInformation(nodeData, node);
     } else {
         return await updateNodeInformation(nodeData, node, row);
@@ -188,7 +191,7 @@ export function parseNode(importTimestamp: UnixTimestampSeconds, nodeData: any):
     }
 
     const nodeId = nodeData.nodeinfo.node_id;
-    if (!nodeId || !_.isString(nodeId)) {
+    if (!nodeId || !isString(nodeId)) {
         throw new Error(
             `Invalid node id of type "${typeof nodeId}": ${nodeId}`
         );
@@ -212,7 +215,7 @@ export function parseNode(importTimestamp: UnixTimestampSeconds, nodeData: any):
             'Node ' + nodeId + ': Unexpected flags type: ' + (typeof nodeData.flags)
         );
     }
-    if (!_.isBoolean(nodeData.flags.online)) {
+    if (!isBoolean(nodeData.flags.online)) {
         throw new Error(
             'Node ' + nodeId + ': Unexpected flags.online type: ' + (typeof nodeData.flags.online)
         );
@@ -558,6 +561,7 @@ async function retrieveNodeInformationForUrls(urls: string[]): Promise<RetrieveN
     }
 }
 
+// FIXME: Replace any[] by type.
 export async function getAll(restParams: RestParams): Promise<{ total: number, monitoringStates: any[] }> {
     const filterFields = [
         'hostname',
@@ -571,7 +575,7 @@ export async function getAll(restParams: RestParams): Promise<{ total: number, m
 
     const row = await db.get<{ total: number }>(
         'SELECT count(*) AS total FROM node_state WHERE ' + where.query,
-        _.concat([], where.params),
+        where.params,
     );
 
     const total = row?.total || 0;
@@ -585,7 +589,7 @@ export async function getAll(restParams: RestParams): Promise<{ total: number, m
 
     const monitoringStates = await db.all(
         'SELECT * FROM node_state WHERE ' + filter.query,
-        _.concat([], filter.params),
+        filter.params,
     );
 
     return {monitoringStates, total};
@@ -603,7 +607,7 @@ export async function getByMacs(macs: MAC[]): Promise<Record<MAC, NodeStateData>
 
         const rows = await db.all<NodeStateRow>(
             'SELECT * FROM node_state WHERE ' + inCondition.query,
-            _.concat([], inCondition.params),
+            inCondition.params,
         );
 
         for (const row of rows) {
@@ -734,7 +738,7 @@ async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestampSeconds):
             deletionCandidates.length
         );
 
-    const deletionCandidateMacs: MAC[] = _.map(deletionCandidates, node => node.mac);
+    const deletionCandidateMacs: MAC[] = deletionCandidates.map(node => node.mac);
     const chunks: MAC[][] = _.chunk(deletionCandidateMacs, NEVER_ONLINE_NODES_DELETION_CHUNK_SIZE);
 
     Logger
@@ -753,10 +757,7 @@ async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestampSeconds):
                 ' MACs for deletion.'
             );
 
-        const placeholders = _.join(
-            _.map(macs, () => '?'),
-            ','
-        );
+        const placeholders = macs.map(() => '?').join(',');
 
         const rows: { mac: MAC }[] = await db.all(
             `SELECT * FROM node_state WHERE mac IN (${placeholders})`,
@@ -773,7 +774,7 @@ async function deleteNeverOnlineNodesBefore(deleteBefore: UnixTimestampSeconds):
                 ' nodes found in monitoring database. Those should be skipped.'
             );
 
-        const seenMacs: MAC[] = _.map(rows, (row: { mac: MAC }) => row.mac as MAC);
+        const seenMacs: MAC[] = rows.map(row => row.mac);
         const neverSeenMacs = _.difference(macs, seenMacs);
 
         Logger

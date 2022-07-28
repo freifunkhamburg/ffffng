@@ -1,7 +1,6 @@
-import _ from "lodash";
-
 import {parseInteger} from "../utils/strings";
 import Logger from "../logger";
+import {isArray, isBoolean, isNumber, isObject, isRegExp, isString, isUndefined} from "../types";
 
 export interface Constraint {
     type: string,
@@ -18,52 +17,48 @@ export interface Constraint {
     regex?: RegExp,
 }
 
-export type Constraints = {[key: string]: Constraint};
-export type Values = {[key: string]: any};
-
-function isStringArray(arr: any): arr is string[] {
-    return _.isArray(arr) && _.every(arr, (val: any) => _.isString(val));
-}
+export type Constraints = { [key: string]: Constraint };
+export type Values = { [key: string]: any };
 
 export function isConstraint(val: any): val is Constraint {
-    if (!_.isObject(val)) {
+    if (!isObject(val)) {
         return false;
     }
 
-    const constraint = val as {[key: string]: any};
+    const constraint = val as { [key: string]: any };
 
-    if (!("type" in constraint) || !_.isString(constraint.type)) {
+    if (!("type" in constraint) || !isString(constraint.type)) {
         return false;
     }
 
     if ("optional" in constraint
-        && !_.isUndefined(constraint.optional)
-        && !_.isBoolean(constraint.optional)) {
+        && !isUndefined(constraint.optional)
+        && !isBoolean(constraint.optional)) {
         return false;
     }
 
     if ("allowed" in constraint
-        && !_.isUndefined(constraint.allowed)
-        && !isStringArray(constraint.allowed)) {
+        && !isUndefined(constraint.allowed)
+        && !isArray(constraint.allowed, isString)) {
         return false;
     }
 
     if ("min" in constraint
-        && !_.isUndefined(constraint.min)
-        && !_.isNumber(constraint.min)) {
+        && !isUndefined(constraint.min)
+        && !isNumber(constraint.min)) {
         return false;
     }
 
     if ("max" in constraint
-        && !_.isUndefined(constraint.max)
-        && !_.isNumber(constraint.max)) {
+        && !isUndefined(constraint.max)
+        && !isNumber(constraint.max)) {
         return false;
     }
 
     // noinspection RedundantIfStatementJS
     if ("regex" in constraint
-        && !_.isUndefined(constraint.regex)
-        && !_.isRegExp(constraint.regex)) {
+        && !isUndefined(constraint.regex)
+        && !isRegExp(constraint.regex)) {
         return false;
     }
 
@@ -71,41 +66,38 @@ export function isConstraint(val: any): val is Constraint {
 }
 
 export function isConstraints(constraints: any): constraints is Constraints {
-    if (!_.isObject(constraints)) {
+    if (!isObject(constraints)) {
         return false;
     }
 
-    return _.every(
-        constraints,
-        (constraint: any, key: any) => _.isString(key) && isConstraint(constraint)
-    );
+    return Object.entries(constraints).every(([key, constraint]) => isString(key) && isConstraint(constraint));
 }
 
 // TODO: sanitize input for further processing as specified by constraints (correct types, trimming, etc.)
 
 function isValidBoolean(value: any): boolean {
-    return _.isBoolean(value) || value === 'true' || value === 'false';
+    return isBoolean(value) || value === 'true' || value === 'false';
 }
 
 function isValidNumber(constraint: Constraint, value: any): boolean {
-    if (_.isString(value)) {
+    if (isString(value)) {
         value = parseInteger(value);
     }
 
-    if (!_.isNumber(value)) {
+    if (!isNumber(value)) {
         return false;
     }
 
-    if (_.isNaN(value) || !_.isFinite(value)) {
+    if (isNaN(value) || !isFinite(value)) {
         return false;
     }
 
-    if (_.isNumber(constraint.min) && value < constraint.min) {
+    if (isNumber(constraint.min) && value < constraint.min) {
         return false;
     }
 
     // noinspection RedundantIfStatementJS
-    if (_.isNumber(constraint.max) && value > constraint.max) {
+    if (isNumber(constraint.max) && value > constraint.max) {
         return false;
     }
 
@@ -113,11 +105,12 @@ function isValidNumber(constraint: Constraint, value: any): boolean {
 }
 
 function isValidEnum(constraint: Constraint, value: any): boolean {
-    if (!_.isString(value)) {
+    if (!isString(value)) {
         return false;
     }
 
-    return _.indexOf(constraint.allowed, value) >= 0;
+    const allowed = constraint.allowed || [];
+    return allowed.indexOf(value) >= 0;
 }
 
 function isValidString(constraint: Constraint, value: any): boolean {
@@ -125,7 +118,7 @@ function isValidString(constraint: Constraint, value: any): boolean {
         throw new Error("String constraints must have regex set: " + constraint);
     }
 
-    if (!_.isString(value)) {
+    if (!isString(value)) {
         return false;
     }
 
@@ -174,10 +167,10 @@ function areValid(constraints: Constraints, acceptUndefined: boolean, values: Va
     return true;
 }
 
-export function forConstraint (constraint: Constraint, acceptUndefined: boolean): (value: any) => boolean {
+export function forConstraint(constraint: Constraint, acceptUndefined: boolean): (value: any) => boolean {
     return ((value: any): boolean => isValid(constraint, acceptUndefined, value));
 }
 
-export function forConstraints (constraints: Constraints, acceptUndefined: boolean): (values: Values) => boolean {
+export function forConstraints(constraints: Constraints, acceptUndefined: boolean): (values: Values) => boolean {
     return ((values: Values): boolean => areValid(constraints, acceptUndefined, values));
 }

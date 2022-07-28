@@ -1,6 +1,5 @@
-import {LogLevel, LogLevels, isLogLevel} from "./types";
+import {isLogLevel, LogLevel, LogLevels} from "./types";
 import {ActivatableLoggerImpl} from "./logger";
-import _ from "lodash";
 
 class TestableLogger extends ActivatableLoggerImpl {
     private logs: any[][] = [];
@@ -35,13 +34,13 @@ function parseLogEntry(logEntry: any[]): ParsedLogEntry {
             `Empty log entry. Should always start with log message: ${logEntry}`
         );
     }
-    
+
     const logMessage = logEntry[0];
     if (typeof logMessage !== "string") {
         throw new Error(
             `Expected log entry to start with string, but got: ${logMessage}`
         );
-    } 
+    }
 
     const regexp = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} ([A-Z]+) - (\[[^\]]*\])? *(.*)$/;
     const groups = logMessage.match(regexp);
@@ -59,13 +58,13 @@ function parseLogEntry(logEntry: any[]): ParsedLogEntry {
     }
 
     const tagsStr = groups[2].substring(1, groups[2].length - 1);
-    const tags = tagsStr ? _.split(tagsStr, ", ") : [];
+    const tags = tagsStr ? tagsStr.split(", "): [];
     const message = groups[3];
     const args = logEntry.slice(1);
 
     return {
         level: level as LogLevel,
-        tags, 
+        tags,
         message,
         args,
     };
@@ -158,7 +157,7 @@ for (const level of LogLevels) {
             message: "%s %d %f %o %%",
             args: [],
         }]);
-    }); 
+    });
 
     test(`should not escape ${level} message arguments`, () => {
         // given
@@ -174,7 +173,7 @@ for (const level of LogLevels) {
             message: "message",
             args: [1, "%s", "%d", "%f", "%o", "%"],
         }]);
-    }); 
+    });
 
     test(`should not log ${level} message on disabled logger`, () => {
         // given
@@ -185,6 +184,6 @@ for (const level of LogLevels) {
 
         // then
         expect(parseLogs(logger.getLogs())).toEqual([]);
-    }); 
+    });
 }
 

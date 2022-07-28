@@ -1,5 +1,3 @@
-import _ from "lodash";
-
 import CONSTRAINTS from "../validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
 import * as MonitoringService from "../services/monitoringService";
@@ -17,8 +15,8 @@ async function doGetAll(req: Request): Promise<{ total: number, result: any }> {
     const {monitoringStates, total} = await MonitoringService.getAll(restParams);
     return {
         total,
-        result: _.map(monitoringStates, function (state) {
-            state.mapId = _.toLower(state.mac).replace(/:/g, '');
+        result: monitoringStates.map(state => {
+            state.mapId = state.mac.toLowerCase().replace(/:/g, "");
             return state;
         })
     };

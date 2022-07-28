@@ -184,7 +184,7 @@ export function filter<E>(entities: E[], allowedFilterFields: string[], restPara
         if (!query) {
             return true;
         }
-        return _.some(allowedFilterFields, (field: string): boolean => {
+        return allowedFilterFields.some((field: string): boolean => {
             if (!query) {
                 return true;
             }
@@ -209,15 +209,15 @@ export function filter<E>(entities: E[], allowedFilterFields: string[], restPara
     const filters = restParams.filters;
 
     function filtersMatch(entity: Entity): boolean {
-        if (_.isEmpty(filters)) {
+        if (isUndefined(filters) || _.isEmpty(filters)) {
             return true;
         }
 
-        return _.every(filters, (value: any, key: string): boolean => {
+        return Object.entries(filters).every(([key, value]) => {
             if (isUndefined(value)) {
                 return true;
             }
-            if (_.startsWith(key, 'has')) {
+            if (key.startsWith('has')) {
                 const entityKey = key.substring(3, 4).toLowerCase() + key.substring(4);
                 return _.isEmpty(entity[entityKey]).toString() !== value;
             }
@@ -225,9 +225,7 @@ export function filter<E>(entities: E[], allowedFilterFields: string[], restPara
         });
     }
 
-    return _.filter(entities, function (entity) {
-        return queryMatches(entity) && filtersMatch(entity);
-    });
+    return entities.filter(entity => queryMatches(entity) && filtersMatch(entity));
 }
 
 export function sort<T extends Record<S, any>, S extends string>(entities: T[], isSortField: TypeGuard<S>, restParams: RestParams): T[] {
@@ -262,7 +260,7 @@ export function sort<T extends Record<S, any>, S extends string>(entities: T[], 
     return sorted;
 }
 
-export function getPageEntities(entities: Entity[], restParams: RestParams) {
+export function getPageEntities<Entity>(entities: Entity[], restParams: RestParams): Entity[] {
     const page = restParams._page;
     const perPage = restParams._perPage;
 
@@ -291,7 +289,7 @@ export function filterClause<S>(
 
     return {
         query: filter.query + ' ' + orderBy.query + ' ' + limitOffset.query,
-        params: _.concat(filter.params, orderBy.params, limitOffset.params)
+        params: [...filter.params, ...orderBy.params, ...limitOffset.params]
     };
 }
 

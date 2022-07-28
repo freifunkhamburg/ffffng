@@ -97,7 +97,7 @@ export async function render(mailOptions: Mail): Promise<{subject: string, body:
 
     try {
         return {
-            subject: _.trim(_.template(subject.toString())(data)),
+            subject: _.template(subject.toString())(data).trim(),
             body: _.template(body.toString())(data)
         };
     } catch (error) {

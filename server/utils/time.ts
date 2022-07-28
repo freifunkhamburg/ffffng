@@ -1,5 +1,4 @@
-import {DurationSeconds, UnixTimestampSeconds} from "../types";
-import _ from "lodash";
+import {DurationSeconds, isString, UnixTimestampSeconds} from "../types";
 import moment, {Moment} from "moment";
 
 export function now(): UnixTimestampSeconds {
@@ -45,7 +44,7 @@ export function formatTimestamp(timestamp: UnixTimestampSeconds): string {
 }
 
 export function parseTimestamp(timestamp: any): UnixTimestampSeconds | null {
-    if (!_.isString(timestamp)) {
+    if (!isString(timestamp)) {
         return null;
     }
     const parsed = moment.utc(timestamp);

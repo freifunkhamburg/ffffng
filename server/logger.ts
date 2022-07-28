@@ -1,6 +1,5 @@
-import {Logger, TaggedLogger, LogLevel} from './types';
+import {isString, Logger, LogLevel, TaggedLogger} from './types';
 import moment from 'moment';
-import _ from 'lodash';
 
 export type LoggingFunction = (...args: any[]) => void;
 
@@ -36,15 +35,15 @@ export class ActivatableLoggerImpl implements ActivatableLogger {
                 log(level: LogLevel, ...args: any[]): void {
                     const timeStr = moment().format('YYYY-MM-DD HH:mm:ss');
                     const levelStr = level.toUpperCase();
-                    const tagsStr = tags ? '[' + _.join(tags, ', ') + ']' : '';
+                    const tagsStr = tags ? '[' + tags.join(', ') + ']' : '';
                     const messagePrefix = `${timeStr} ${levelStr} - ${tagsStr}`;
 
                     // Make sure to only replace %s, etc. in real log message
                     // but not in tags.
                     const escapedMessagePrefix = messagePrefix.replace(/%/g, '%%');
-                    
+
                     let message = '';
-                    if (args && _.isString(args[0])) {
+                    if (args && isString(args[0])) {
                         message = args[0];
                         args.shift();
                     }

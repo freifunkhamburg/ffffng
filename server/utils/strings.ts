@@ -1,8 +1,8 @@
 import _ from "lodash"
-import {MAC} from "../types";
+import {isString, MAC} from "../types";
 
 export function normalizeString(str: string): string {
-    return _.isString(str) ? str.trim().replace(/\s+/g, ' ') : str;
+    return isString(str) ? str.trim().replace(/\s+/g, ' ') : str;
 }
 
 export function normalizeMac(mac: MAC): MAC {

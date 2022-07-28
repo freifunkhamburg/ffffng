@@ -108,15 +108,15 @@ async function findFilesInPeersPath(): Promise<string[]> {
 }
 
 function parseNodeFilename(filename: string): NodeFilenameParsed {
-    const parts = _.split(filename, '@', filenameParts.length);
+    const parts = filename.split('@', filenameParts.length);
     const parsed: { [key: string]: string | undefined } = {};
     const zippedParts = _.zip<string, string>(filenameParts, parts);
-    _.each(zippedParts, part => {
+    for (const part of zippedParts) {
         const key = part[0];
         if (key) {
             parsed[key] = part[1];
         }
-    });
+    }
     return parsed;
 }
 
@@ -565,14 +565,14 @@ export async function fixNodeFilenames(): Promise<void> {
 
 export async function findNodesModifiedBefore(timestamp: UnixTimestampSeconds): Promise<StoredNode[]> {
     const nodes = await getAllNodes();
-    return _.filter(nodes, node => node.modifiedAt < timestamp);
+    return nodes.filter(node => node.modifiedAt < timestamp);
 }
 
 export async function getNodeStatistics(): Promise<NodeStatistics> {
     const nodes = await getAllNodes();
 
     const nodeStatistics: NodeStatistics = {
-        registered: _.size(nodes),
+        registered: nodes.length,
         withVPN: 0,
         withCoords: 0,
         monitoring: {

@@ -170,7 +170,7 @@ export async function getPendingMails(restParams: RestParams): Promise<{ mails: 
 
     const mails = await db.all(
         'SELECT * FROM email_queue WHERE ' + filter.query,
-        _.concat([], filter.params),
+        filter.params,
     );
 
     return {

@@ -1,9 +1,7 @@
-import _ from "lodash";
-
 import CONSTRAINTS from "../validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
 import * as Resources from "../utils/resources";
-import {Entity, handleJSONWithData, RequestData} from "../utils/resources";
+import {handleJSONWithData, RequestData} from "../utils/resources";
 import {getTasks, Task, TaskState} from "../jobs/scheduler";
 import {normalizeString} from "../utils/strings";
 import {forConstraint} from "../validation/validator";
@@ -77,11 +75,11 @@ async function setTaskEnabled(data: RequestData, enable: boolean): Promise<TaskR
     return toTaskResponse(task);
 }
 
-async function doGetAll(req: Request): Promise<{ total: number, pageTasks: Entity[] }> {
+async function doGetAll(req: Request): Promise<{ total: number, pageTasks: Task[] }> {
     const restParams = await Resources.getValidRestParams('list', null, req);
 
     const tasks = Resources.sort(
-        _.values(getTasks()),
+        Object.values(getTasks()),
         isTaskSortField,
         restParams
     );
@@ -104,7 +102,7 @@ export function getAll(req: Request, res: Response): void {
     doGetAll(req)
         .then(({total, pageTasks}) => {
             res.set('X-Total-Count', total.toString(10));
-            Resources.success(res, _.map(pageTasks, toTaskResponse));
+            Resources.success(res, pageTasks.map(toTaskResponse));
         })
         .catch(err => Resources.error(res, err));
 }
