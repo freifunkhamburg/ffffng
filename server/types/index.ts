@@ -23,8 +23,8 @@ export * from "./logger";
 export * from "./shared";
 
 export type NodeStateData = {
-    site: Site,
-    domain: Domain,
+    site?: Site,
+    domain?: Domain,
     state: OnlineState,
 }
 

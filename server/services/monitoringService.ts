@@ -19,8 +19,10 @@ import {
     Domain,
     DurationSeconds,
     Hostname,
+    isDomain,
     isMonitoringSortField,
     isOnlineState,
+    isSite,
     MAC,
     MailType,
     MonitoringSortField,
@@ -71,8 +73,8 @@ export type ParsedNode = {
     importTimestamp: UnixTimestampSeconds,
     state: OnlineState,
     lastSeen: UnixTimestampSeconds,
-    site: Site,
-    domain: Domain,
+    site?: Site,
+    domain?: Domain,
 };
 
 export type NodesParsingResult = {
@@ -224,14 +226,14 @@ export function parseNode(importTimestamp: UnixTimestampSeconds, nodeData: any):
         );
     }
 
-    let site = "<unknown-site>" as Site; // FIXME: Handle this
-    if (_.isPlainObject(nodeData.nodeinfo.system) && _.isString(nodeData.nodeinfo.system.site_code)) {
-        site = nodeData.nodeinfo.system.site_code as Site;
+    let site: Site | undefined;
+    if (_.isPlainObject(nodeData.nodeinfo.system) && isSite(nodeData.nodeinfo.system.site_code)) {
+        site = nodeData.nodeinfo.system.site_code;
     }
 
-    let domain = "<unknown-domain>" as Domain; // FIXME: Handle this
-    if (_.isPlainObject(nodeData.nodeinfo.system) && _.isString(nodeData.nodeinfo.system.domain_code)) {
-        domain = nodeData.nodeinfo.system.domain_code as Domain;
+    let domain: Domain | undefined;
+    if (_.isPlainObject(nodeData.nodeinfo.system) && isDomain(nodeData.nodeinfo.system.domain_code)) {
+        domain = nodeData.nodeinfo.system.domain_code;
     }
 
     return {
@@ -611,8 +613,8 @@ export async function getByMacs(macs: MAC[]): Promise<Record<MAC, NodeStateData>
             }
 
             nodeStateByMac[row.mac] = {
-                site: row.site || "<unknown-site>" as Site, // FIXME: Handle this
-                domain: row.domain || "<unknown-domain>" as Domain, // FIXME: Handle this
+                site: row.site || undefined,
+                domain: row.domain || undefined,
                 state: onlineState,
             };
         }
