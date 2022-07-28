@@ -38,8 +38,7 @@ import util from "util";
 const pglob = util.promisify(glob);
 
 type NodeFilter = {
-    // TODO: Newtype
-    hostname?: string,
+    hostname?: Hostname,
     mac?: MAC,
     key?: FastdKey,
     token?: Token,
