@@ -85,6 +85,13 @@ export function isString(arg: unknown): arg is string {
     return typeof arg === "string"
 }
 
+export function toIsNewtype<
+    Type extends Value & { readonly __tag: symbol },
+    Value,
+>(isValue: TypeGuard<Value>, _example: Type): TypeGuard<Type> {
+    return (arg: unknown): arg is Type => isValue(arg);
+}
+
 export function isNumber(arg: unknown): arg is number {
     return typeof arg === "number"
 }
@@ -109,18 +116,22 @@ export function toIsEnum<E>(enumDef: E): EnumTypeGuard<E> {
     return (arg): arg is EnumValue<E> => Object.values(enumDef).includes(arg as [keyof E]);
 }
 
+export function isRegExp(arg: unknown): arg is RegExp {
+    return isObject(arg) && arg instanceof RegExp;
+}
+
 export function isOptional<T>(arg: unknown, isT: TypeGuard<T>): arg is (T | undefined) {
     return arg === undefined || isT(arg);
 }
 
 export type Url = string & { readonly __tag: unique symbol };
-export const isUrl = isString;
+export const isUrl = toIsNewtype(isString, "" as Url);
 
 export type Version = string & { readonly __tag: unique symbol };
-export const isVersion = isString;
+export const isVersion = toIsNewtype(isString, "" as Version);
 
 export type EmailAddress = string & { readonly __tag: unique symbol };
-export const isEmailAddress = isString;
+export const isEmailAddress = toIsNewtype(isString, "" as EmailAddress);
 
 export type NodeStatistics = {
     registered: number;
@@ -321,31 +332,33 @@ export function isClientConfig(arg: unknown): arg is ClientConfig {
     );
 }
 
-// TODO: Token type.
 export type Token = string & { readonly __tag: unique symbol };
-export const isToken = isString;
+export const isToken = toIsNewtype(isString, "" as Token);
 
 export type FastdKey = string & { readonly __tag: unique symbol };
-export const isFastdKey = isString;
+export const isFastdKey = toIsNewtype(isString, "" as FastdKey);
 
 export type MAC = string & { readonly __tag: unique symbol };
-export const isMAC = isString;
+export const isMAC = toIsNewtype(isString, "" as MAC);
 
 export type DurationSeconds = number & { readonly __tag: unique symbol };
-export const isDurationSeconds = isNumber;
+export const isDurationSeconds = toIsNewtype(isNumber, NaN as DurationSeconds);
+
+export type DurationMilliseconds = number & { readonly __tag: unique symbol };
+export const isDurationMilliseconds = toIsNewtype(isNumber, NaN as DurationMilliseconds);
 
 export type UnixTimestampSeconds = number & { readonly __tag: unique symbol };
-export const isUnixTimestampSeconds = isNumber;
+export const isUnixTimestampSeconds = toIsNewtype(isNumber, NaN as UnixTimestampSeconds);
 
 export type UnixTimestampMilliseconds = number & { readonly __tag: unique symbol };
-export const isUnixTimestampMilliseconds = isNumber;
+export const isUnixTimestampMilliseconds = toIsNewtype(isNumber, NaN as UnixTimestampMilliseconds);
 
 export function toUnixTimestampSeconds(ms: UnixTimestampMilliseconds): UnixTimestampSeconds {
     return Math.floor(ms) as UnixTimestampSeconds;
 }
 
 export type MonitoringToken = string & { readonly __tag: unique symbol };
-export const isMonitoringToken = isString;
+export const isMonitoringToken = toIsNewtype(isString, "" as MonitoringToken);
 
 export enum MonitoringState {
     ACTIVE = "active",
@@ -356,15 +369,16 @@ export enum MonitoringState {
 export const isMonitoringState = toIsEnum(MonitoringState);
 
 export type NodeId = string & { readonly __tag: unique symbol };
+export const isNodeId = toIsNewtype(isString, "" as NodeId);
 
-export type Hostname = string & { readonly __tag: unique symbol };
-export const isHostname = isString;
+export type Hostname = string & { readonly __tag: unique symbol }
+export const isHostname = toIsNewtype(isString, "" as Hostname);
 
 export type Nickname = string & { readonly __tag: unique symbol };
-export const isNickname = isString;
+export const isNickname = toIsNewtype(isString, "" as Nickname);
 
 export type Coordinates = string & { readonly __tag: unique symbol };
-export const isCoordinates = isString;
+export const isCoordinates = toIsNewtype(isString, "" as Coordinates);
 
 /**
  * Basic node data.
@@ -473,10 +487,10 @@ export enum OnlineState {
 export const isOnlineState = toIsEnum(OnlineState);
 
 export type Site = string & { readonly __tag: unique symbol };
-export const isSite = isString;
+export const isSite = toIsNewtype(isString, "" as Site);
 
 export type Domain = string & { readonly __tag: unique symbol };
-export const isDomain = isString;
+export const isDomain = toIsNewtype(isString, "" as Domain);
 
 /**
  * Represents a node in the context of a Freifunk site and domain.

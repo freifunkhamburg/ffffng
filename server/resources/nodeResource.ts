@@ -1,5 +1,3 @@
-import _ from "lodash";
-
 import Constraints from "../validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
 import * as MonitoringService from "../services/monitoringService";
@@ -12,13 +10,17 @@ import {Request, Response} from "express";
 import {
     CreateOrUpdateNode,
     DomainSpecificNodeResponse,
+    isCreateOrUpdateNode,
     isNodeSortField,
-    isToken, JSONObject,
+    isString,
+    isToken,
+    isUndefined,
+    JSONObject,
+    JSONValue,
     MAC,
     NodeResponse,
     NodeStateData,
     NodeTokenResponse,
-    StoredNode,
     toDomainSpecificNodeResponse,
     Token,
     toNodeResponse,
@@ -27,16 +29,27 @@ import {
 
 const nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords', 'monitoring'];
 
-function getNormalizedNodeData(reqData: any): CreateOrUpdateNode {
+function getNormalizedNodeData(reqData: JSONObject): CreateOrUpdateNode {
     const node: { [key: string]: any } = {};
-    _.each(nodeFields, function (field) {
-        let value = normalizeString(reqData[field]);
-        if (field === 'mac') {
-            value = normalizeMac(value as MAC);
+    for (const field of nodeFields) {
+        let value: JSONValue | undefined = reqData[field];
+        if (isString(value)) {
+            value = normalizeString(value);
+            if (field === 'mac') {
+                value = normalizeMac(value as MAC);
+            }
         }
-        node[field] = value;
-    });
-    return node as CreateOrUpdateNode;
+
+        if (!isUndefined(value)) {
+            node[field] = value;
+        }
+    }
+
+    if (isCreateOrUpdateNode(node)) {
+        return node;
+    }
+
+    throw {data: "Invalid node data.", type: ErrorTypes.badRequest};
 }
 
 const isValidNode = forConstraints(Constraints.node, false);
@@ -90,15 +103,15 @@ async function doGetAll(req: Request): Promise<{ total: number; pageNodes: any }
 
     const nodes = await NodeService.getAllNodes();
 
-    const realNodes = _.filter(nodes, node =>
+    const realNodes = nodes.filter(node =>
         // We ignore nodes without tokens as those are only manually added ones like gateways.
-        !!node.token
+        !!node.token // FIXME: As node.token may not be undefined or null here, handle this when loading!
     );
 
-    const macs: MAC[] = _.map(realNodes, (node: StoredNode): MAC => node.mac);
+    const macs: MAC[] = realNodes.map(node => node.mac);
     const nodeStateByMac = await MonitoringService.getByMacs(macs);
 
-    const domainSpecificNodes: DomainSpecificNodeResponse[] = _.map(realNodes, (node: StoredNode): DomainSpecificNodeResponse => {
+    const domainSpecificNodes: DomainSpecificNodeResponse[] = realNodes.map(node => {
         const nodeState: NodeStateData = nodeStateByMac[node.mac] || {};
         return toDomainSpecificNodeResponse(node, nodeState);
     });

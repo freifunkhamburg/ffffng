@@ -3,6 +3,7 @@ import {
     Domain,
     DomainSpecificNodeResponse,
     EmailAddress,
+    isNumber,
     JSONObject,
     MonitoringResponse,
     MonitoringState,
@@ -13,6 +14,7 @@ import {
     Site,
     StoredNode,
     toIsEnum,
+    toIsNewtype,
 } from "./shared";
 
 export * from "./config";
@@ -21,8 +23,8 @@ export * from "./logger";
 export * from "./shared";
 
 export type NodeStateData = {
-    site: Site,
-    domain: Domain,
+    site?: Site,
+    domain?: Domain,
     state: OnlineState,
 }
 
@@ -90,12 +92,13 @@ export function toMonitoringResponse(node: StoredNode): MonitoringResponse {
     };
 }
 
-// TODO: Complete interface / class declaration.
 export type NodeSecrets = {
     monitoringToken?: MonitoringToken,
 };
 
 export type MailId = number & { readonly __tag: unique symbol };
+export const isMailId = toIsNewtype(isNumber, NaN as MailId);
+
 export type MailData = JSONObject;
 
 export enum MailType {
@@ -108,12 +111,11 @@ export enum MailType {
 
 export const isMailType = toIsEnum(MailType);
 
-export interface Mail {
-    id: MailId,
-    email: MailType,
-    sender: EmailAddress,
-    recipient: EmailAddress,
-    data: MailData,
-    failures: number,
+export type Mail = {
+    id: MailId;
+    email: MailType;
+    sender: EmailAddress;
+    recipient: EmailAddress;
+    data: MailData;
+    failures: number;
 }
-

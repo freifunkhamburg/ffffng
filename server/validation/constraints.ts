@@ -1,6 +1,7 @@
 // ATTENTION: Those constraints are no longer the same file as for the client / admin interface.
 //            Make sure changes are also reflected in /shared/validation/constraints.js.
 
+// noinspection RegExpSimplifiable
 const CONSTRAINTS = {
     id:{
         type: 'string',

@@ -1,48 +1,51 @@
-import {Logger, TaggedLogger, LogLevel} from './types';
+import {isString, Logger, LoggingConfig, LogLevel, TaggedLogger} from './types';
 import moment from 'moment';
-import _ from 'lodash';
 
 export type LoggingFunction = (...args: any[]) => void;
 
 const noopTaggedLogger: TaggedLogger = {
-    log(level: LogLevel, ...args: any[]): void {},
-    debug(...args: any[]): void {},
-    info(...args: any[]): void {},
-    warn(...args: any[]): void {},
-    error(...args: any[]): void {},
-    profile(...args: any[]): void {},
+    log(_level: LogLevel, ..._args: any[]): void {},
+    debug(..._args: any[]): void {},
+    info(..._args: any[]): void {},
+    warn(..._args: any[]): void {},
+    error(..._args: any[]): void {},
+    profile(..._args: any[]): void {},
 };
 
 export interface ActivatableLogger extends Logger {
-    init(enabled: boolean, loggingFunction?: LoggingFunction): void;
+    init(config: LoggingConfig, loggingFunction?: LoggingFunction): void;
 }
 
+/**
+ * TODO: Check if LoggingConfig.debug and LoggingConfig.profile are handled.
+ */
 export class ActivatableLoggerImpl implements ActivatableLogger {
-    private enabled: boolean = false;
+    private config: LoggingConfig = new LoggingConfig(false, false, false);
     private loggingFunction: LoggingFunction = console.info;
 
-    init(enabled: boolean, loggingFunction?: LoggingFunction): void {
-        const config = require('./config').config;
-        this.enabled = enabled;
+    init(config: LoggingConfig, loggingFunction?: LoggingFunction): void {
+        this.config = config;
         this.loggingFunction = loggingFunction || console.info;
     }
 
     tag(...tags: string[]): TaggedLogger {
-        if (this.enabled) {
+        if (this.config.enabled) {
+            const debug = this.config.debug;
+            const profile = this.config.profile;
             const loggingFunction = this.loggingFunction;
             return {
                 log(level: LogLevel, ...args: any[]): void {
                     const timeStr = moment().format('YYYY-MM-DD HH:mm:ss');
                     const levelStr = level.toUpperCase();
-                    const tagsStr = tags ? '[' + _.join(tags, ', ') + ']' : '';
+                    const tagsStr = tags ? '[' + tags.join(', ') + ']' : '';
                     const messagePrefix = `${timeStr} ${levelStr} - ${tagsStr}`;
 
                     // Make sure to only replace %s, etc. in real log message
                     // but not in tags.
                     const escapedMessagePrefix = messagePrefix.replace(/%/g, '%%');
-                    
+
                     let message = '';
-                    if (args && _.isString(args[0])) {
+                    if (args && isString(args[0])) {
                         message = args[0];
                         args.shift();
                     }
@@ -53,7 +56,9 @@ export class ActivatableLoggerImpl implements ActivatableLogger {
                     loggingFunction(logStr, ...args);
                 },
                 debug(...args: any[]): void {
-                    this.log('debug', ...args);
+                    if (debug) {
+                        this.log('debug', ...args);
+                    }
                 },
                 info(...args: any[]): void {
                     this.log('info', ...args);
@@ -65,7 +70,9 @@ export class ActivatableLoggerImpl implements ActivatableLogger {
                     this.log('error', ...args);
                 },
                 profile(...args: any[]): void {
-                    this.log('profile', ...args);
+                    if (profile) {
+                        this.log('profile', ...args);
+                    }
                 },
             }
         } else {

@@ -1,17 +1,15 @@
 import _ from "lodash";
-import deepExtend from "deep-extend";
 import moment, {Moment} from "moment";
-import {createTransport, Transporter} from "nodemailer";
-
-import {config} from "../config";
 import {db} from "../db/database";
 import Logger from "../logger";
 import * as MailTemplateService from "./mailTemplateService";
 import * as Resources from "../utils/resources";
 import {RestParams} from "../utils/resources";
 import {
-    EmailAddress, isJSONObject,
-    isMailSortField, isMailType, JSONObject,
+    EmailAddress,
+    isJSONObject,
+    isMailSortField,
+    isMailType,
     Mail,
     MailData,
     MailId,
@@ -21,6 +19,7 @@ import {
     UnixTimestampSeconds
 } from "../types";
 import ErrorTypes from "../utils/errorTypes";
+import {send} from "../mail";
 
 type EmaiQueueRow = {
     id: MailId,
@@ -34,26 +33,6 @@ type EmaiQueueRow = {
 };
 
 const MAIL_QUEUE_DB_BATCH_SIZE = 50;
-
-// TODO: Extract transporter into own module and initialize during main().
-let transporterSingleton: Transporter | null = null;
-
-function transporter() {
-    if (!transporterSingleton) {
-        transporterSingleton = createTransport(deepExtend(
-            {},
-            config.server.email.smtp,
-            {
-                transport: 'smtp',
-                pool: true
-            } as JSONObject
-        ));
-
-        MailTemplateService.configureTransporter(transporterSingleton);
-    }
-
-    return transporterSingleton;
-}
 
 async function sendMail(options: Mail): Promise<void> {
     Logger
@@ -73,7 +52,7 @@ async function sendMail(options: Mail): Promise<void> {
         html: renderedTemplate.body
     };
 
-    await transporter().sendMail(mailOptions);
+    await send(mailOptions);
 
     Logger.tag('mail', 'queue').info('Mail[%d] has been send.', options.id);
 }
@@ -170,7 +149,7 @@ export async function getPendingMails(restParams: RestParams): Promise<{ mails: 
 
     const mails = await db.all(
         'SELECT * FROM email_queue WHERE ' + filter.query,
-        _.concat([], filter.params),
+        filter.params,
     );
 
     return {

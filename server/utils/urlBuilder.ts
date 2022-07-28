@@ -1,4 +1,3 @@
-import _ from "lodash"
 import {config} from "../config"
 import {MonitoringToken, Url} from "../types"
 
@@ -12,15 +11,10 @@ function formUrl(route: string, queryParams?: { [key: string]: string }): Url {
     }
     if (queryParams) {
         url += '?';
-        url += _.join(
-            _.map(
-                queryParams,
-                function (value, key) {
-                    return encodeURIComponent(key) + '=' + encodeURIComponent(value);
-                }
-            ),
-            '&'
-        );
+        url +=
+            Object.entries(queryParams)
+                .map(([key, value]) => encodeURIComponent(key) + '=' + encodeURIComponent(value))
+                .join("&");
     }
     return url as Url;
 }

@@ -9,8 +9,12 @@ import {
     EnumTypeGuard,
     EnumValue,
     type GenericSortField,
-    isJSONObject, isNumber, isString, isUndefined,
+    isJSONObject,
+    isNumber,
+    isString,
+    isUndefined,
     JSONObject,
+    JSONValue,
     SortDirection,
     TypeGuard
 } from "../types";
@@ -36,7 +40,9 @@ export type OrderByClause = { query: string, params: any[] };
 export type LimitOffsetClause = { query: string, params: any[] };
 export type FilterClause = { query: string, params: any[] };
 
-function respond(res: Response, httpCode: number, data: any, type: string): void {
+function respond(res: Response, httpCode: number, data: string, type: "html"): void;
+function respond(res: Response, httpCode: number, data: JSONValue, type: "json"): void;
+function respond(res: Response, httpCode: number, data: JSONValue, type: "html" | "json"): void {
     switch (type) {
         case 'html':
             res.writeHead(httpCode, {'Content-Type': 'text/html'});
@@ -184,7 +190,7 @@ export function filter<E>(entities: E[], allowedFilterFields: string[], restPara
         if (!query) {
             return true;
         }
-        return _.some(allowedFilterFields, (field: string): boolean => {
+        return allowedFilterFields.some((field: string): boolean => {
             if (!query) {
                 return true;
             }
@@ -209,15 +215,15 @@ export function filter<E>(entities: E[], allowedFilterFields: string[], restPara
     const filters = restParams.filters;
 
     function filtersMatch(entity: Entity): boolean {
-        if (_.isEmpty(filters)) {
+        if (isUndefined(filters) || _.isEmpty(filters)) {
             return true;
         }
 
-        return _.every(filters, (value: any, key: string): boolean => {
+        return Object.entries(filters).every(([key, value]) => {
             if (isUndefined(value)) {
                 return true;
             }
-            if (_.startsWith(key, 'has')) {
+            if (key.startsWith('has')) {
                 const entityKey = key.substring(3, 4).toLowerCase() + key.substring(4);
                 return _.isEmpty(entity[entityKey]).toString() !== value;
             }
@@ -225,9 +231,7 @@ export function filter<E>(entities: E[], allowedFilterFields: string[], restPara
         });
     }
 
-    return _.filter(entities, function (entity) {
-        return queryMatches(entity) && filtersMatch(entity);
-    });
+    return entities.filter(entity => queryMatches(entity) && filtersMatch(entity));
 }
 
 export function sort<T extends Record<S, any>, S extends string>(entities: T[], isSortField: TypeGuard<S>, restParams: RestParams): T[] {
@@ -251,8 +255,7 @@ export function sort<T extends Record<S, any>, S extends string>(entities: T[], 
         let order = 0;
         if (as < bs) {
             order = -1;
-        }
-        else if (bs > as) {
+        } else if (bs > as) {
             order = 1;
         }
 
@@ -262,7 +265,7 @@ export function sort<T extends Record<S, any>, S extends string>(entities: T[], 
     return sorted;
 }
 
-export function getPageEntities(entities: Entity[], restParams: RestParams) {
+export function getPageEntities<Entity>(entities: Entity[], restParams: RestParams): Entity[] {
     const page = restParams._page;
     const perPage = restParams._perPage;
 
@@ -291,11 +294,11 @@ export function filterClause<S>(
 
     return {
         query: filter.query + ' ' + orderBy.query + ' ' + limitOffset.query,
-        params: _.concat(filter.params, orderBy.params, limitOffset.params)
+        params: [...filter.params, ...orderBy.params, ...limitOffset.params]
     };
 }
 
-export function success(res: Response, data: any) {
+export function success(res: Response, data: JSONValue) {
     respond(res, 200, data, 'json');
 }
 
@@ -303,7 +306,7 @@ export function successHtml(res: Response, html: string) {
     respond(res, 200, html, 'html');
 }
 
-export function error(res: Response, err: { data: any, type: { code: number } }) {
+export function error(res: Response, err: { data: JSONValue, type: { code: number } }) {
     respond(res, err.type.code, err.data, 'json');
 }
 

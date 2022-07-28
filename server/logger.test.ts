@@ -1,14 +1,25 @@
-import {LogLevel, LogLevels, isLogLevel} from "./types";
+import {isLogLevel, isUndefined, LoggingConfig, LogLevel, LogLevels} from "./types";
 import {ActivatableLoggerImpl} from "./logger";
-import _ from "lodash";
+
+function withDefault<T>(value: T | undefined, defaultValue: T): T {
+    return isUndefined(value) ? defaultValue : value;
+}
 
 class TestableLogger extends ActivatableLoggerImpl {
     private logs: any[][] = [];
 
-    constructor(enabled?: boolean) {
+    constructor(
+        enabled?: boolean,
+        debug?: boolean,
+        profile?: boolean,
+    ) {
         super();
         this.init(
-            enabled === false ? false : true, // default is true
+            new LoggingConfig(
+                withDefault(enabled, true),
+                withDefault(debug, true),
+                withDefault(profile, true),
+            ),
             (...args: any[]): void => this.doLog(...args)
         );
     }
@@ -35,14 +46,15 @@ function parseLogEntry(logEntry: any[]): ParsedLogEntry {
             `Empty log entry. Should always start with log message: ${logEntry}`
         );
     }
-    
+
     const logMessage = logEntry[0];
     if (typeof logMessage !== "string") {
         throw new Error(
             `Expected log entry to start with string, but got: ${logMessage}`
         );
-    } 
+    }
 
+    // noinspection RegExpRedundantEscape
     const regexp = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} ([A-Z]+) - (\[[^\]]*\])? *(.*)$/;
     const groups = logMessage.match(regexp);
     if (groups === null || groups.length < 4) {
@@ -59,13 +71,13 @@ function parseLogEntry(logEntry: any[]): ParsedLogEntry {
     }
 
     const tagsStr = groups[2].substring(1, groups[2].length - 1);
-    const tags = tagsStr ? _.split(tagsStr, ", ") : [];
+    const tags = tagsStr ? tagsStr.split(", "): [];
     const message = groups[3];
     const args = logEntry.slice(1);
 
     return {
         level: level as LogLevel,
-        tags, 
+        tags,
         message,
         args,
     };
@@ -158,7 +170,7 @@ for (const level of LogLevels) {
             message: "%s %d %f %o %%",
             args: [],
         }]);
-    }); 
+    });
 
     test(`should not escape ${level} message arguments`, () => {
         // given
@@ -174,7 +186,7 @@ for (const level of LogLevels) {
             message: "message",
             args: [1, "%s", "%d", "%f", "%o", "%"],
         }]);
-    }); 
+    });
 
     test(`should not log ${level} message on disabled logger`, () => {
         // given
@@ -185,6 +197,59 @@ for (const level of LogLevels) {
 
         // then
         expect(parseLogs(logger.getLogs())).toEqual([]);
-    }); 
+    });
 }
 
+test(`should not log debug message with disabled debugging`, () => {
+    // given
+    const logger = new TestableLogger(true, false, true);
+
+    // when
+    logger.tag("tag").debug("message");
+
+    // then
+    expect(parseLogs(logger.getLogs())).toEqual([]);
+});
+
+test(`should log profile message with disabled debugging`, () => {
+    // given
+    const logger = new TestableLogger(true, false, true);
+
+    // when
+    logger.tag("tag").profile("message");
+
+    // then
+    expect(parseLogs(logger.getLogs())).toEqual([{
+        level: "profile",
+        tags: ["tag"],
+        message: "message",
+        args: [],
+    }]);
+});
+
+test(`should not log profile message with disabled profiling`, () => {
+    // given
+    const logger = new TestableLogger(true, true, false);
+
+    // when
+    logger.tag("tag").profile("message");
+
+    // then
+    expect(parseLogs(logger.getLogs())).toEqual([]);
+});
+
+test(`should log debug message with disabled profiling`, () => {
+    // given
+    const logger = new TestableLogger(true, true, false);
+
+    // when
+    logger.tag("tag").debug("message");
+
+    // then
+    expect(parseLogs(logger.getLogs())).toEqual([{
+        level: "debug",
+        tags: ["tag"],
+        message: "message",
+        args: [],
+    }]);
+});
