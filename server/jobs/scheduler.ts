@@ -85,7 +85,7 @@ export class Task {
 
         this.job.run().then(result => {
             done(TaskState.IDLE, result);
-        }).catch((err: any) => {
+        }).catch(err => {
             Logger.tag('jobs').error("Job %s failed: %s", this.name, err);
             done(TaskState.FAILED, null);
         });

@@ -10,18 +10,18 @@ import {isString, isTaskSortField} from "../types";
 
 const isValidId = forConstraint(CONSTRAINTS.id, false);
 
-interface TaskResponse {
-    id: number,
-    name: string,
-    description: string,
-    schedule: string,
-    runningSince: number | null,
-    lastRunStarted: number | null,
-    lastRunDuration: number | null,
-    state: string,
-    result: string | null,
-    message: string | null,
-    enabled: boolean,
+type TaskResponse = {
+    id: number;
+    name: string;
+    description: string;
+    schedule: string;
+    runningSince: number | null;
+    lastRunStarted: number | null;
+    lastRunDuration: number | null;
+    state: string;
+    result: string | null;
+    message: string | null;
+    enabled: boolean;
 }
 
 function toTaskResponse(task: Task): TaskResponse {

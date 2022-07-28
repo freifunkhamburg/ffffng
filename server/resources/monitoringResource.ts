@@ -10,6 +10,7 @@ import {isMonitoringToken, JSONObject, MonitoringResponse, MonitoringToken, toMo
 
 const isValidToken = forConstraint(CONSTRAINTS.token, false);
 
+// FIXME: Get rid of any
 async function doGetAll(req: Request): Promise<{ total: number, result: any }> {
     const restParams = await Resources.getValidRestParams('list', null, req);
     const {monitoringStates, total} = await MonitoringService.getAll(restParams);

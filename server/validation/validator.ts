@@ -1,6 +1,6 @@
 import {parseInteger} from "../utils/strings";
 import Logger from "../logger";
-import {isArray, isBoolean, isNumber, isObject, isRegExp, isString, isUndefined} from "../types";
+import {isBoolean, isNumber, isObject, isOptional, isRegExp, isString, toIsArray} from "../types";
 
 export interface Constraint {
     type: string,
@@ -20,52 +20,24 @@ export interface Constraint {
 export type Constraints = { [key: string]: Constraint };
 export type Values = { [key: string]: any };
 
-export function isConstraint(val: any): val is Constraint {
-    if (!isObject(val)) {
+export function isConstraint(arg: unknown): arg is Constraint {
+    if (!isObject(arg)) {
         return false;
     }
 
-    const constraint = val as { [key: string]: any };
-
-    if (!("type" in constraint) || !isString(constraint.type)) {
-        return false;
-    }
-
-    if ("optional" in constraint
-        && !isUndefined(constraint.optional)
-        && !isBoolean(constraint.optional)) {
-        return false;
-    }
-
-    if ("allowed" in constraint
-        && !isUndefined(constraint.allowed)
-        && !isArray(constraint.allowed, isString)) {
-        return false;
-    }
-
-    if ("min" in constraint
-        && !isUndefined(constraint.min)
-        && !isNumber(constraint.min)) {
-        return false;
-    }
-
-    if ("max" in constraint
-        && !isUndefined(constraint.max)
-        && !isNumber(constraint.max)) {
-        return false;
-    }
-
-    // noinspection RedundantIfStatementJS
-    if ("regex" in constraint
-        && !isUndefined(constraint.regex)
-        && !isRegExp(constraint.regex)) {
-        return false;
-    }
-
-    return true;
+    const constraint = arg as Constraint;
+    return (
+        isString(constraint.type) &&
+        // default?: any
+        isOptional(constraint.optional, isBoolean) &&
+        isOptional(constraint.allowed, toIsArray(isString)) &&
+        isOptional(constraint.min, isNumber) &&
+        isOptional(constraint.max, isNumber) &&
+        isOptional(constraint.regex, isRegExp)
+    );
 }
 
-export function isConstraints(constraints: any): constraints is Constraints {
+export function isConstraints(constraints: unknown): constraints is Constraints {
     if (!isObject(constraints)) {
         return false;
     }
@@ -75,11 +47,11 @@ export function isConstraints(constraints: any): constraints is Constraints {
 
 // TODO: sanitize input for further processing as specified by constraints (correct types, trimming, etc.)
 
-function isValidBoolean(value: any): boolean {
+function isValidBoolean(value: unknown): boolean {
     return isBoolean(value) || value === 'true' || value === 'false';
 }
 
-function isValidNumber(constraint: Constraint, value: any): boolean {
+function isValidNumber(constraint: Constraint, value: unknown): boolean {
     if (isString(value)) {
         value = parseInteger(value);
     }
@@ -104,7 +76,7 @@ function isValidNumber(constraint: Constraint, value: any): boolean {
     return true;
 }
 
-function isValidEnum(constraint: Constraint, value: any): boolean {
+function isValidEnum(constraint: Constraint, value: unknown): boolean {
     if (!isString(value)) {
         return false;
     }
@@ -113,7 +85,7 @@ function isValidEnum(constraint: Constraint, value: any): boolean {
     return allowed.indexOf(value) >= 0;
 }
 
-function isValidString(constraint: Constraint, value: any): boolean {
+function isValidString(constraint: Constraint, value: unknown): boolean {
     if (!constraint.regex) {
         throw new Error("String constraints must have regex set: " + constraint);
     }
@@ -126,7 +98,7 @@ function isValidString(constraint: Constraint, value: any): boolean {
     return (trimmed === '' && constraint.optional) || constraint.regex.test(trimmed);
 }
 
-function isValid(constraint: Constraint, acceptUndefined: boolean, value: any): boolean {
+function isValid(constraint: Constraint, acceptUndefined: boolean, value: unknown): boolean {
     if (value === undefined) {
         return acceptUndefined || constraint.optional === true;
     }
@@ -167,8 +139,8 @@ function areValid(constraints: Constraints, acceptUndefined: boolean, values: Va
     return true;
 }
 
-export function forConstraint(constraint: Constraint, acceptUndefined: boolean): (value: any) => boolean {
-    return ((value: any): boolean => isValid(constraint, acceptUndefined, value));
+export function forConstraint(constraint: Constraint, acceptUndefined: boolean): (value: unknown) => boolean {
+    return ((value: unknown): boolean => isValid(constraint, acceptUndefined, value));
 }
 
 export function forConstraints(constraints: Constraints, acceptUndefined: boolean): (values: Values) => boolean {

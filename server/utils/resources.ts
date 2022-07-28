@@ -9,8 +9,12 @@ import {
     EnumTypeGuard,
     EnumValue,
     type GenericSortField,
-    isJSONObject, isNumber, isString, isUndefined,
+    isJSONObject,
+    isNumber,
+    isString,
+    isUndefined,
     JSONObject,
+    JSONValue,
     SortDirection,
     TypeGuard
 } from "../types";
@@ -36,7 +40,9 @@ export type OrderByClause = { query: string, params: any[] };
 export type LimitOffsetClause = { query: string, params: any[] };
 export type FilterClause = { query: string, params: any[] };
 
-function respond(res: Response, httpCode: number, data: any, type: string): void {
+function respond(res: Response, httpCode: number, data: string, type: "html"): void;
+function respond(res: Response, httpCode: number, data: JSONValue, type: "json"): void;
+function respond(res: Response, httpCode: number, data: JSONValue, type: "html" | "json"): void {
     switch (type) {
         case 'html':
             res.writeHead(httpCode, {'Content-Type': 'text/html'});
@@ -249,8 +255,7 @@ export function sort<T extends Record<S, any>, S extends string>(entities: T[], 
         let order = 0;
         if (as < bs) {
             order = -1;
-        }
-        else if (bs > as) {
+        } else if (bs > as) {
             order = 1;
         }
 
@@ -293,7 +298,7 @@ export function filterClause<S>(
     };
 }
 
-export function success(res: Response, data: any) {
+export function success(res: Response, data: JSONValue) {
     respond(res, 200, data, 'json');
 }
 
@@ -301,7 +306,7 @@ export function successHtml(res: Response, html: string) {
     respond(res, 200, html, 'html');
 }
 
-export function error(res: Response, err: { data: any, type: { code: number } }) {
+export function error(res: Response, err: { data: JSONValue, type: { code: number } }) {
     respond(res, err.type.code, err.data, 'json');
 }
 

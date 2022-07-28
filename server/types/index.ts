@@ -111,12 +111,11 @@ export enum MailType {
 
 export const isMailType = toIsEnum(MailType);
 
-export interface Mail {
-    id: MailId,
-    email: MailType,
-    sender: EmailAddress,
-    recipient: EmailAddress,
-    data: MailData,
-    failures: number,
+export type Mail = {
+    id: MailId;
+    email: MailType;
+    sender: EmailAddress;
+    recipient: EmailAddress;
+    data: MailData;
+    failures: number;
 }
-
