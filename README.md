@@ -146,7 +146,7 @@ Dann die `config.json` anpassen nach belieben. Es gibt die folgenden Konfigurati
 
 * **`server.email.from`** Absender für versendete E-Mails, z. B.: `"Freifunk Knotenformular <no-reply@musterstadt.freifunk.net>"`
 * **`server.email.smtp`** Konfiguration des SMTP-Servers für den E-Mail-Versand entsprechend der Dokumentation unter
-  [https://nodemailer.com/2-0-0-beta/setup-smtp/](https://nodemailer.com/2-0-0-beta/setup-smtp/), z. B.:
+  [https://nodemailer.com/smtp/](https://nodemailer.com/smtp/), z. B.:
 
 ```
 {

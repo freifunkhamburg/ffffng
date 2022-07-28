@@ -344,6 +344,9 @@ export const isMAC = toIsNewtype(isString, "" as MAC);
 export type DurationSeconds = number & { readonly __tag: unique symbol };
 export const isDurationSeconds = toIsNewtype(isNumber, NaN as DurationSeconds);
 
+export type DurationMilliseconds = number & { readonly __tag: unique symbol };
+export const isDurationMilliseconds = toIsNewtype(isNumber, NaN as DurationMilliseconds);
+
 export type UnixTimestampSeconds = number & { readonly __tag: unique symbol };
 export const isUnixTimestampSeconds = toIsNewtype(isNumber, NaN as UnixTimestampSeconds);
 
