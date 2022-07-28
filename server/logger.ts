@@ -5,24 +5,26 @@ import _ from 'lodash';
 export type LoggingFunction = (...args: any[]) => void;
 
 const noopTaggedLogger: TaggedLogger = {
-    log(level: LogLevel, ...args: any[]): void {},
-    debug(...args: any[]): void {},
-    info(...args: any[]): void {},
-    warn(...args: any[]): void {},
-    error(...args: any[]): void {},
-    profile(...args: any[]): void {},
+    log(_level: LogLevel, ..._args: any[]): void {},
+    debug(..._args: any[]): void {},
+    info(..._args: any[]): void {},
+    warn(..._args: any[]): void {},
+    error(..._args: any[]): void {},
+    profile(..._args: any[]): void {},
 };
 
 export interface ActivatableLogger extends Logger {
     init(enabled: boolean, loggingFunction?: LoggingFunction): void;
 }
 
+/**
+ * TODO: Check if LoggingConfig.debug and LoggingConfig.profile are handled.
+ */
 export class ActivatableLoggerImpl implements ActivatableLogger {
     private enabled: boolean = false;
     private loggingFunction: LoggingFunction = console.info;
 
     init(enabled: boolean, loggingFunction?: LoggingFunction): void {
-        const config = require('./config').config;
         this.enabled = enabled;
         this.loggingFunction = loggingFunction || console.info;
     }
