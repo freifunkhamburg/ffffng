@@ -1,13 +1,25 @@
-import {isLogLevel, LogLevel, LogLevels} from "./types";
+import {isLogLevel, isUndefined, LoggingConfig, LogLevel, LogLevels} from "./types";
 import {ActivatableLoggerImpl} from "./logger";
+
+function withDefault<T>(value: T | undefined, defaultValue: T): T {
+    return isUndefined(value) ? defaultValue : value;
+}
 
 class TestableLogger extends ActivatableLoggerImpl {
     private logs: any[][] = [];
 
-    constructor(enabled?: boolean) {
+    constructor(
+        enabled?: boolean,
+        debug?: boolean,
+        profile?: boolean,
+    ) {
         super();
         this.init(
-            enabled === false ? false : true, // default is true
+            new LoggingConfig(
+                withDefault(enabled, true),
+                withDefault(debug, true),
+                withDefault(profile, true),
+            ),
             (...args: any[]): void => this.doLog(...args)
         );
     }
@@ -42,6 +54,7 @@ function parseLogEntry(logEntry: any[]): ParsedLogEntry {
         );
     }
 
+    // noinspection RegExpRedundantEscape
     const regexp = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} ([A-Z]+) - (\[[^\]]*\])? *(.*)$/;
     const groups = logMessage.match(regexp);
     if (groups === null || groups.length < 4) {
@@ -187,3 +200,56 @@ for (const level of LogLevels) {
     });
 }
 
+test(`should not log debug message with disabled debugging`, () => {
+    // given
+    const logger = new TestableLogger(true, false, true);
+
+    // when
+    logger.tag("tag").debug("message");
+
+    // then
+    expect(parseLogs(logger.getLogs())).toEqual([]);
+});
+
+test(`should log profile message with disabled debugging`, () => {
+    // given
+    const logger = new TestableLogger(true, false, true);
+
+    // when
+    logger.tag("tag").profile("message");
+
+    // then
+    expect(parseLogs(logger.getLogs())).toEqual([{
+        level: "profile",
+        tags: ["tag"],
+        message: "message",
+        args: [],
+    }]);
+});
+
+test(`should not log profile message with disabled profiling`, () => {
+    // given
+    const logger = new TestableLogger(true, true, false);
+
+    // when
+    logger.tag("tag").profile("message");
+
+    // then
+    expect(parseLogs(logger.getLogs())).toEqual([]);
+});
+
+test(`should log debug message with disabled profiling`, () => {
+    // given
+    const logger = new TestableLogger(true, true, false);
+
+    // when
+    logger.tag("tag").debug("message");
+
+    // then
+    expect(parseLogs(logger.getLogs())).toEqual([{
+        level: "debug",
+        tags: ["tag"],
+        message: "message",
+        args: [],
+    }]);
+});

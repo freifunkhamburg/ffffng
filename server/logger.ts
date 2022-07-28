@@ -1,4 +1,4 @@
-import {isString, Logger, LogLevel, TaggedLogger} from './types';
+import {isString, Logger, LoggingConfig, LogLevel, TaggedLogger} from './types';
 import moment from 'moment';
 
 export type LoggingFunction = (...args: any[]) => void;
@@ -13,23 +13,25 @@ const noopTaggedLogger: TaggedLogger = {
 };
 
 export interface ActivatableLogger extends Logger {
-    init(enabled: boolean, loggingFunction?: LoggingFunction): void;
+    init(config: LoggingConfig, loggingFunction?: LoggingFunction): void;
 }
 
 /**
  * TODO: Check if LoggingConfig.debug and LoggingConfig.profile are handled.
  */
 export class ActivatableLoggerImpl implements ActivatableLogger {
-    private enabled: boolean = false;
+    private config: LoggingConfig = new LoggingConfig(false, false, false);
     private loggingFunction: LoggingFunction = console.info;
 
-    init(enabled: boolean, loggingFunction?: LoggingFunction): void {
-        this.enabled = enabled;
+    init(config: LoggingConfig, loggingFunction?: LoggingFunction): void {
+        this.config = config;
         this.loggingFunction = loggingFunction || console.info;
     }
 
     tag(...tags: string[]): TaggedLogger {
-        if (this.enabled) {
+        if (this.config.enabled) {
+            const debug = this.config.debug;
+            const profile = this.config.profile;
             const loggingFunction = this.loggingFunction;
             return {
                 log(level: LogLevel, ...args: any[]): void {
@@ -54,7 +56,9 @@ export class ActivatableLoggerImpl implements ActivatableLogger {
                     loggingFunction(logStr, ...args);
                 },
                 debug(...args: any[]): void {
-                    this.log('debug', ...args);
+                    if (debug) {
+                        this.log('debug', ...args);
+                    }
                 },
                 info(...args: any[]): void {
                     this.log('info', ...args);
@@ -66,7 +70,9 @@ export class ActivatableLoggerImpl implements ActivatableLogger {
                     this.log('error', ...args);
                 },
                 profile(...args: any[]): void {
-                    this.log('profile', ...args);
+                    if (profile) {
+                        this.log('profile', ...args);
+                    }
                 },
             }
         } else {

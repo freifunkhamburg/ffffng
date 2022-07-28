@@ -8,7 +8,7 @@ import * as app from "./app"
 import * as mail from "./mail";
 
 app.init();
-Logger.init(config.server.logging.enabled);
+Logger.init(config.server.logging);
 Logger.tag('main', 'startup').info('Server starting up...');
 
 async function main() {
