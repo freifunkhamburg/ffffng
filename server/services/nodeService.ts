@@ -1,4 +1,3 @@
-import _ from "lodash";
 import async from "async";
 import crypto from "crypto";
 import oldFs, {promises as fs} from "graceful-fs";
@@ -18,7 +17,12 @@ import {
     EmailAddress,
     FastdKey,
     Hostname,
+    isFastdKey,
+    isHostname,
+    isMAC,
+    isMonitoringToken,
     isStoredNode,
+    isToken,
     MAC,
     MailType,
     MonitoringState,
@@ -29,6 +33,7 @@ import {
     StoredNode,
     Token,
     toUnixTimestampSeconds,
+    TypeGuard,
     unhandledEnumField,
     UnixTimestampMilliseconds,
     UnixTimestampSeconds
@@ -45,13 +50,12 @@ type NodeFilter = {
     monitoringToken?: MonitoringToken,
 }
 
-// TODO: Newtypes?
 type NodeFilenameParsed = {
-    hostname?: string,
-    mac?: string,
-    key?: string,
-    token?: string,
-    monitoringToken?: string,
+    hostname?: Hostname,
+    mac?: MAC,
+    key?: FastdKey,
+    token?: Token,
+    monitoringToken?: MonitoringToken,
 }
 
 enum LINE_PREFIX {
@@ -65,7 +69,6 @@ enum LINE_PREFIX {
     MONITORING_TOKEN = "# Monitoring-Token: ",
 }
 
-const filenameParts = ['hostname', 'mac', 'key', 'token', 'monitoringToken'];
 
 function generateToken<Type extends string & { readonly __tag: symbol } = never>(): Type {
     return crypto.randomBytes(8).toString('hex') as Type;
@@ -108,16 +111,20 @@ async function findFilesInPeersPath(): Promise<string[]> {
 }
 
 function parseNodeFilename(filename: string): NodeFilenameParsed {
-    const parts = filename.split('@', filenameParts.length);
-    const parsed: { [key: string]: string | undefined } = {};
-    const zippedParts = _.zip<string, string>(filenameParts, parts);
-    for (const part of zippedParts) {
-        const key = part[0];
-        if (key) {
-            parsed[key] = part[1];
-        }
+    const parts = filename.split('@', 5);
+
+    function get<T>(isT: TypeGuard<T>, index: number): T | undefined {
+        const value = index >= 0 && index < parts.length ? parts[index] : undefined;
+        return isT(value) ? value : undefined;
     }
-    return parsed;
+
+    return {
+        hostname: get(isHostname, 0),
+        mac: get(isMAC, 1),
+        key: get(isFastdKey, 2),
+        token: get(isToken, 3),
+        monitoringToken: get(isMonitoringToken, 4),
+    };
 }
 
 function isDuplicate(filter: NodeFilter, token?: Token): boolean {
@@ -446,7 +453,7 @@ export async function updateNode(token: Token, node: CreateOrUpdateNode): Promis
                 // monitoring just has been enabled
                 monitoringState = MonitoringState.PENDING;
                 monitoringToken = generateToken<MonitoringToken>();
-            break;
+                break;
 
             case MonitoringState.PENDING:
             case MonitoringState.ACTIVE:
@@ -460,7 +467,7 @@ export async function updateNode(token: Token, node: CreateOrUpdateNode): Promis
                     monitoringState = currentNode.monitoringState;
                     monitoringToken = nodeSecrets.monitoringToken || generateToken<MonitoringToken>();
                 }
-            break;
+                break;
 
             default:
                 unhandledEnumField(currentNode.monitoringState);

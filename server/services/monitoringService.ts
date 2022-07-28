@@ -176,7 +176,6 @@ async function storeNodeInformation(nodeData: ParsedNode, node: StoredNode): Pro
 
 const isValidMac = forConstraint(CONSTRAINTS.node.mac, false);
 
-// TODO: Use sparkson for JSON parsing.
 export function parseNode(importTimestamp: UnixTimestampSeconds, nodeData: any): ParsedNode {
     if (!_.isPlainObject(nodeData)) {
         throw new Error(
@@ -249,7 +248,6 @@ export function parseNode(importTimestamp: UnixTimestampSeconds, nodeData: any):
     };
 }
 
-// TODO: Use sparkson for JSON parsing.
 export function parseNodesJson(body: string): NodesParsingResult {
     Logger.tag('monitoring', 'information-retrieval').debug('Parsing nodes.json...');
 
