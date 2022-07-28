@@ -10,9 +10,13 @@ import {Request, Response} from "express";
 import {
     CreateOrUpdateNode,
     DomainSpecificNodeResponse,
+    isCreateOrUpdateNode,
     isNodeSortField,
+    isString,
     isToken,
+    isUndefined,
     JSONObject,
+    JSONValue,
     MAC,
     NodeResponse,
     NodeStateData,
@@ -25,19 +29,27 @@ import {
 
 const nodeFields = ['hostname', 'key', 'email', 'nickname', 'mac', 'coords', 'monitoring'];
 
-// TODO: Rename
-function getNormalizedNodeData(reqData: any): CreateOrUpdateNode {
+function getNormalizedNodeData(reqData: JSONObject): CreateOrUpdateNode {
     const node: { [key: string]: any } = {};
     for (const field of nodeFields) {
-        let value = normalizeString(reqData[field]);
-        if (field === 'mac') {
-            value = normalizeMac(value as MAC);
+        let value: JSONValue | undefined = reqData[field];
+        if (isString(value)) {
+            value = normalizeString(value);
+            if (field === 'mac') {
+                value = normalizeMac(value as MAC);
+            }
         }
-        node[field] = value;
+
+        if (!isUndefined(value)) {
+            node[field] = value;
+        }
     }
 
-    // TODO: Add typeguard before cast.
-    return node as CreateOrUpdateNode;
+    if (isCreateOrUpdateNode(node)) {
+        return node;
+    }
+
+    throw {data: "Invalid node data.", type: ErrorTypes.badRequest};
 }
 
 const isValidNode = forConstraints(Constraints.node, false);
