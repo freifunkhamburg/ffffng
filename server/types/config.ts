@@ -1,11 +1,14 @@
 import {ArrayField, Field, RawJsonField} from "sparkson"
-import {ClientConfig, JSONObject, Url} from "./shared";
-
-// TODO: Replace string types by more specific types like URL, Password, etc.
+import {ClientConfig, isSite, isString, JSONObject, toIsNewtype, Url} from "./shared";
 
 export type Username = string & { readonly __tag: unique symbol };
+export const isUsername = toIsNewtype(isString, "" as Username);
+
 export type CleartextPassword = string & { readonly __tag: unique symbol };
+export const isCleartextPassword = toIsNewtype(isString, "" as CleartextPassword);
+
 export type PasswordHash = string & { readonly __tag: unique symbol };
+export const isPasswordHash = toIsNewtype(isString, "" as PasswordHash);
 
 export class UsersConfig {
     constructor(
