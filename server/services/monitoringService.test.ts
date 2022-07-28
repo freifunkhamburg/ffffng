@@ -1,4 +1,3 @@
-import moment from 'moment';
 import {ParsedNode, parseNode, parseNodesJson} from "./monitoringService";
 import {Domain, MAC, OnlineState, Site, UnixTimestampSeconds} from "../types";
 import Logger from '../logger';
@@ -205,8 +204,8 @@ test('parseNode() should succeed parsing node without site and domain', () => {
         importTimestamp: importTimestamp,
         state: OnlineState.ONLINE,
         lastSeen: TIMESTAMP_VALID,
-        site: "<unknown-site>" as Site,
-        domain: "<unknown-domain>" as Domain,
+        site: undefined,
+        domain: undefined,
     };
     expect(parseNode(importTimestamp, nodeData)).toEqual(expectedParsedNode);
 });
