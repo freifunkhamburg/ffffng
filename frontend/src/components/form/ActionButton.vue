@@ -29,8 +29,6 @@ function onClick() {
 @import "../../scss/variables";
 
 button {
-    margin: 0.3em;
-
     padding: $button-padding;
     border-radius: $button-border-radius;
     border-width: $button-border-width;

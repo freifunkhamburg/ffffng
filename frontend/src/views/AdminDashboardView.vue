@@ -67,6 +67,7 @@ refresh();
 
 .statistics {
     display: grid;
+    justify-content: center;
 }
 
 @each $breakpoint, $width in $statistics-card-widths {

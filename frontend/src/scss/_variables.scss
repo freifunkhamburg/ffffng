@@ -33,20 +33,22 @@ $variant-color-info: map-get($variant-colors, info);
 // Page
 $page-breakpoints: (
     // first value is <=, second <
-    xs: (0px, 576px),
-    sm: (576px, 768px),
-    md: (768px, 992px),
-    lg: (992px, 1200px),
-    xl: (1200px, 1400px),
-    xxl: (1400px, null),
+    smallest: (0px, 375px),
+    smaller: (375px, 576px),
+    small: (576px, 768px),
+    medium: (768px, 992px),
+    large: (992px, 1200px),
+    larger: (1200px, 1400px),
+    largest: (1400px, null),
 );
 $page-container-widths: (
-    xs: 100%,
-    sm: 100%,
-    md: 768px,
-    lg: 992px,
-    xl: 992px,
-    xxl: 992px,
+    smallest: 100%,
+    smaller: 100%,
+    small: 100%,
+    medium: 768px,
+    large: 992px,
+    larger: 992px,
+    largest: 992px,
 );
 $page-background-color: $gray-darkest;
 $page-text-color: $gray-lighter;
@@ -90,12 +92,13 @@ $nav-footer-padding: 0.75em;
 
 // Statistics
 $statistics-card-widths: (
-    xs: 100%,
-    sm: 50%,
-    md: 50%,
-    lg: 33.3333%,
-    xl: 33.3333%,
-    xxl: 33.3333%,
+    smallest: 100%,
+    smaller: 80%,
+    small: 50%,
+    medium: 50%,
+    large: 33.3333%,
+    larger: 33.3333%,
+    largest: 33.3333%,
 );
 $statistics-card-height: 4.5em;
 $statistics-card-margin: 0.5em;

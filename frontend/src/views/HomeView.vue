@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import ActionButton from "@/components/form/ActionButton.vue";
+import ButtonGroup from "@/components/form/ButtonGroup.vue";
 import PageContainer from "@/components/page/PageContainer.vue";
-import {ButtonSize, ComponentVariant} from "@/types";
-</script>
+import {ButtonSize, ComponentVariant} from "@/types";</script>
 
 <template>
     <PageContainer>
@@ -12,7 +12,7 @@ import {ButtonSize, ComponentVariant} from "@/types";
             Knoten in Betrieb und möchtest seine Daten ändern? Oder Du möchtest einen Knoten, der nicht mehr in Betrieb
             ist löschen? Dann bist Du hier richtig!</p>
 
-        <div class="actions">
+        <ButtonGroup :button-size="ButtonSize.LARGE">
             <ActionButton
                 :variant="ComponentVariant.INFO"
                 :size="ButtonSize.LARGE"
@@ -31,9 +31,13 @@ import {ButtonSize, ComponentVariant} from "@/types";
                 icon="trash">
                 Knoten löschen
             </ActionButton>
-        </div>
+        </ButtonGroup>
     </PageContainer>
 </template>
 
 <style lang="scss" scoped>
+@import "../scss/variables";
+@import "../scss/mixins";
+
+
 </style>

@@ -15,3 +15,24 @@
         }
     }
 }
+
+@mixin min-page-breakpoint($name) {
+    $breakpoint: map-get($page-breakpoints, $name);
+    $lower-bound: nth($breakpoint, 1);
+    @media ($lower-bound <= width) {
+        @content;
+    }
+}
+
+@mixin max-page-breakpoint($name) {
+    $breakpoint: map-get($page-breakpoints, $name);
+    $upper-bound: nth($breakpoint, 2);
+    @if ($upper-bound == null) {
+        @error "Breakpoint #{$name} has no upper bound.";
+    }
+    @else {
+        @media (width < $upper-bound) {
+            @content;
+        }
+    }
+}
