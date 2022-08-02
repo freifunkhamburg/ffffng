@@ -1,3 +1,84 @@
+4.6.7
+ - [Fix] `parseInt`, `String#trim`: properly consider Mongolian Vowel Separator
+ - [Robustness] `substr`: call-bind original substr method
+ - [Tests] ensure only the actual shims are included in tests
+
+4.6.6
+ - [Fix] `splice`: IE 8: upgrade ES5 impls to ES6 default argument behavior
+ - [Fix] `toExponential`: IE 6 native toExponential does not throw with infinite fractionDigits
+ - [Fix] `Date`: fix a bug in modern Safari (#481)
+ - [Fix] ensure `parseInt` replacements are not constructible
+ - [readme] add standalone shims
+ - [readme] add `Array.prototype.splice` and standalone shim
+ - [Tests] fix a test failure with a custom matcher in IE 6
+ - [Tests] pave over Firefox’s increased getMinutes precision
+ - [Dev Deps] update `eslint`, `@ljharb/eslint-config`
+
+4.6.5
+ - [Fix] IE 8 has a broken `Object.defineProperty`
+ - [patch] replace dead link in comment with archive.org link
+ - [Docs] update all possible http: links to https:
+ - [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`
+
+4.6.4
+ - [Fix] `Object.defineProperty`: when shimmed in Chrome <= 36, properly handle writability
+ - [Tests] add some additional tests
+
+4.6.3
+ - [Fix] `Object.defineProperty`: Chrome <= 36 has a broken dP when setting "prototype" while changing writability
+ - [Fix] `toExponential`: use `thisNumberValue` instead of `Number()`
+ - [readme] fix badges
+ - [readme] add standalone shims
+ - [actions] reuse common workflows
+ - [actions] update codecov uploader
+ - [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `safe-publish-latest`
+ - [Tests] avoid loading coverage data when running tests
+
+4.6.2
+  - [Fix] IE 6-8 fails to throw on infinite fractional digits
+
+4.6.1
+  - [Fix] `Math.log10` does not exist in older engines, oops
+  - [Fix] `toExponential`: start from 16 instead of 22
+  - [Fix] `toExponential`: ensure ToNumber is only called once on the receiver
+  - [Robustness] `toExponential`, `toPrecision`: ensure things do not break with later builtin modification
+
+4.6.0
+  - [New] detect and patch `Number#toExponential` in Edge 15-18, which rounds incorrectly
+  - [Fix] `parseInt`: fails to throw on boxed Symbols in Edge 15-18
+  - [eslint] ensure autofix makes no further changes
+  - [readme] remove travis badge
+  - [meta] use `prepublishOnly`, for npm 7+
+  - [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`
+  - [tests] use `ljharb/actions/node/install` instead of `ljharb/actions/node/run`; use codecov action
+  - [actions] update workflows
+
+4.5.15
+  - [Fix] `es5-sham`: `getPrototypeOf`: avoid infinite loop in pre-`__proto__` browsers
+  - [Fix] `split`: add a function name to the "broken capturing groups" shim
+  - [Robustness] cache Math methods
+  - [readme] add standalone shims
+  - [meta] add `in-publish` to avoid running the minifier on install
+  - [meta] run `aud` in `posttest`
+  - [Tests] migrate tests to Github Actions (#474)
+  - [Tests] run `nyc` on all tests
+  - [actions] add "Allow Edits" workflow
+  - [actions] switch Automatic Rebase workflow to `pull_request_target` event
+  - [Dev Deps] update `eslint`, `@ljharb/eslint-config`
+
+4.5.14
+  - [Fix] handle no `deleteCount` to `splice()` in Opera (#465)
+  - [Refactor] remove unnecessary comparison
+  - [meta] remove unused Makefile and associated utilities
+  - [meta] add `funding` field
+  - [meta] Rename CHANGES to CHANGELOG.md
+  - [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `replace`, `semver`; add `safe-publish-latest`
+  - [Tests] fix negative Date tests to handle TZData
+  - [Tests] use shared travis-ci configs
+  - [Tests] remove `jscs`
+  - [Tests] clarify toPrecision's range increased in ES2018
+  - [actions] add automatic rebasing / merge commit blocking
+
 4.5.13
   - [Fix] exclude deprecated Firefox keys (#460)
   - [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `jasmine-node`, `replace`, `semver`
@@ -70,7 +151,7 @@
 4.5.0
   - [New] `parseFloat('-0')` should return -0 in Opera 12 (#371)
   - [New] Provide and replace Date UTC methods (#360)
-  - [Robustness] cache `Date` getUTC* methods so that `Date#toISOString` doesn’t observably look them up on the receiver
+  - [Robustness] cache `Date` getUTC methods so that `Date#toISOString` doesn’t observably look them up on the receiver
   - [Robustness] use a cached and shimmed `String#trim`
   - [Tests] up to `node` `v5.5`
   - [Tests] add `parallelshell` and use it in a few tasks
@@ -409,7 +490,7 @@
 
 0.0.4
  - Revised Object.getPrototypeOf to work in more cases
-   in response to http://ejohn.org/blog/objectgetprototypeof/
+   in response to https://johnresig.com/blog/objectgetprototypeof/
    [issue #2] (fschaefer)
 
 0.0.3

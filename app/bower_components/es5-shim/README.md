@@ -1,10 +1,13 @@
-# es5-shim <sup>[![Version Badge][npm-version-svg]][npm-url]</sup>
+# es5-shim <sup>[![Version Badge][npm-version-svg]][package-url]</sup>
 
-[![npm badge][npm-badge-png]][npm-url]
-
-[![Build Status][travis-svg]][travis-url]
+[![github actions][actions-image]][actions-url]
+[![coverage][codecov-image]][codecov-url]
 [![dependency status][deps-svg]][deps-url]
 [![dev dependency status][dev-deps-svg]][dev-deps-url]
+[![License][license-image]][license-url]
+[![Downloads][downloads-image]][downloads-url]
+
+[![npm badge][npm-badge-png]][package-url]
 
 `es5-shim.js` and `es5-shim.min.js` monkey-patch a JavaScript context to
 contain all EcmaScript 5 methods that can be faithfully emulated with a
@@ -20,7 +23,6 @@ In many cases, this means that these shams cause many ES5 methods to
 silently fail.  Decide carefully whether this is what you want.
 **Note:** `es5-sham.js` requires `es5-shim.js` to be able to work properly.
 
-
 ## Tests
 
 The tests are written with the Jasmine BDD test framework.
@@ -31,19 +33,20 @@ simply `npm install` and `npm test`.
 
 ### Complete tests ###
 
-* Array.prototype.every
-* Array.prototype.filter
-* Array.prototype.forEach
-* Array.prototype.indexOf
-* Array.prototype.lastIndexOf
-* Array.prototype.map
+* Array.prototype.every ([standalone shim](https://www.npmjs.com/package/array.prototype.every))
+* Array.prototype.filter ([standalone shim](https://www.npmjs.com/package/array.prototype.filter))
+* Array.prototype.forEach ([standalone shim](https://www.npmjs.com/package/array.prototype.foreach))
+* Array.prototype.indexOf ([standalone shim](https://www.npmjs.com/package/array.prototype.indexof))
+* Array.prototype.lastIndexOf ([standalone shim](https://www.npmjs.com/package/array.prototype.lastindexof))
+* Array.prototype.map ([standalone shim](https://www.npmjs.com/package/array.prototype.map))
 * Array.prototype.slice
-* Array.prototype.some
+* Array.prototype.some ([standalone shim](https://www.npmjs.com/package/array.prototype.some))
 * Array.prototype.sort
-* Array.prototype.reduce
-* Array.prototype.reduceRight
-* Array.prototype.push
+* Array.prototype.reduce ([standalone shim](https://www.npmjs.com/package/array.prototype.reduce))
+* Array.prototype.reduceRight ([standalone shim](https://www.npmjs.com/package/array.prototype.reduceright))
+* Array.prototype.push ([standalone shim](https://www.npmjs.com/package/array.prototype.push))
 * Array.prototype.join
+* Array.prototype.splice ([standalone shim](https://www.npmjs.com/package/array.prototype.splice))
 * Array.isArray
 * Date.now
 * Date.prototype.toJSON
@@ -53,12 +56,13 @@ simply `npm install` and `npm test`.
       from manipulating their ``arguments`` and ``caller`` properties.
     * :warning: Caveat: bound functions don't have checks in ``call`` and
       ``apply`` to avoid executing as a constructor.
+* Number.prototype.toExponential ([standalone shim](https://www.npmjs.com/package/number.prototype.toexponential))
 * Number.prototype.toFixed
 * Number.prototype.toPrecision
-* Object.keys
-* String.prototype.split
-* String.prototype.trim
-* String.prototype.lastIndexOf
+* Object.keys ([standalone shim](https://www.npmjs.com/package/object-keys))
+* String.prototype.split ([standalone shim](https://www.npmjs.com/package/string.prototype.split))
+* String.prototype.trim ([standalone shim](https://www.npmjs.com/package/string.prototype.trim))
+* String.prototype.lastIndexOf ([standalone shim](https://string.prototype.lastindexof))
 * String.prototype.replace
     * Firefox (through v29) natively handles capturing groups incorrectly.
 * Date.parse (for ISO parsing)
@@ -168,23 +172,29 @@ simply `npm install` and `npm test`.
     provisions of this method, which you cannot possibly
     obtain in legacy engines.
 
-### Example of applying ES compatability shims in a browser project
+### Example of applying ES compatibility shims in a browser project
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.14/es5-shim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.14/es5-sham.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.34.2/es6-shim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.34.2/es6-sham.min.js"></script>
-<script src="https://wzrd.in/standalone/es7-shim@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.5/es6-shim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.5/es6-sham.min.js"></script>
 <script src="other-libs.js"></script>
 ```
-[npm-url]: https://npmjs.org/package/es5-shim
-[npm-version-svg]: http://versionbadg.es/es-shims/es5-shim.svg
-[travis-svg]: https://travis-ci.org/es-shims/es5-shim.svg
-[travis-url]: https://travis-ci.org/es-shims/es5-shim
+
+[package-url]: https://npmjs.org/package/es5-shim
+[npm-version-svg]: https://versionbadg.es/es-shims/es5-shim.svg
 [deps-svg]: https://david-dm.org/es-shims/es5-shim.svg
 [deps-url]: https://david-dm.org/es-shims/es5-shim
 [dev-deps-svg]: https://david-dm.org/es-shims/es5-shim/dev-status.svg
 [dev-deps-url]: https://david-dm.org/es-shims/es5-shim#info=devDependencies
 [npm-badge-png]: https://nodei.co/npm/es5-shim.png?downloads=true&stars=true
+[license-image]: https://img.shields.io/npm/l/es5-shim.svg
+[license-url]: LICENSE
+[downloads-image]: https://img.shields.io/npm/dm/es5-shim.svg
+[downloads-url]: https://npm-stat.com/charts.html?package=es5-shim
+[codecov-image]: https://codecov.io/gh/es-shims/es5-shim/branch/main/graphs/badge.svg
+[codecov-url]: https://app.codecov.io/gh/es-shims/es5-shim/
+[actions-image]: https://img.shields.io/endpoint?url=https://github-actions-badge-u3jn4tfpocch.runkit.sh/es-shims/es5-shim
+[actions-url]: https://github.com/es-shims/es5-shim/actions

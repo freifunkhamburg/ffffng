@@ -1,133 +1,115 @@
 /*global module:false*/
 module.exports = function(grunt) {
 
-	require('time-grunt')(grunt);
+  grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-qunit');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-text-replace');
 
-	require('load-grunt-tasks')(grunt);
+  var fs = require('fs');
 
-	// Project configuration.
-	grunt.initConfig({
-		pkg: grunt.file.readJSON('package.json'),
-		banner: '/*! <%= pkg.name %> <%= pkg.version %> by <%= pkg.author.name %>\n'+
-		'* Library to provide geo functions like distance calculation,\n' +
-		'* conversion of decimal coordinates to sexagesimal and vice versa, etc.\n' +
-		'* WGS 84 (World Geodetic System 1984)\n' +
-		'* \n' + 
-		'* @author <%= pkg.author.name %>\n' + 
-		'* @url <%= pkg.author.url %>\n' + 
-		'* @version <%= pkg.version %>\n' +
-		'* @license <%= _.pluck(pkg.licenses, "type").join(", ") %> \n**/',
-		lint: {
-			files: ['src/geolib.js']
+  // Project configuration.
+  grunt.initConfig({
+    pkg: grunt.file.readJSON('package.json'),
+	banner: '/*! <%= pkg.name %> <%= pkg.version %> by <%= pkg.author.name %>\n'+
+	'* A growing library to provide some basic geo functions like distance calculation,\n' +
+	'* conversion of decimal coordinates to sexagesimal and vice versa, etc.\n' +
+	'* WGS 84 (World Geodetic System 1984)\n' +
+	'* \n' + 
+	'* @author <%= pkg.author.name %>\n' + 
+	'* @url <%= pkg.author.url %>\n' + 
+	'* @version <%= pkg.version %>\n' +
+	'* @license <%= _.pluck(pkg.licenses, "type").join(", ") %> \n**/',
+    lint: {
+      files: ['src/geolib.js']
+    },
+    qunit: {
+      files: ['tests/*.html']
+    },
+	concat: {
+		options: {
+			banner: '<%= banner %>',
+			report: false
 		},
-		qunit: {
-			files: ['tests/*.html']
-		},
-		concat: {
-			main: {
-				options: {
-					banner: '<%= banner %>',
-					report: false
-				},
-				src: ['src/geolib.js'],
-				dest: 'dist/geolib.js'
-			}
-		},
-		copy: {
-			component: {
-				files: [{
-					src: "package.json",
-					dest: "component.json"
-				}]
-			},
-			elev: {
-				files: [{
-					src: ['src/geolib.elevation.js'],
-					dest: 'dist/geolib.elevation.js'
-				}]
-			},
-			pointInside: {
-				files: [{
-					src: ['src/geolib.isPointInsideRobust.js'],
-					dest: 'dist/geolib.isPointInsideRobust.js'
-				}]
-			},
-		},
-		replace: {
-			version: {
-				src: ['dist/*.js', 'bower.json', 'README.md'],
-				overwrite: true,
-				replacements: [
-					{
-						from: '$version$',
-						to: '<%= pkg.version %>'
-					}, {
-						from: /"version": "([0-9a-zA-Z\-\.\+]*)",/,
-						to: '"version": "<%= pkg.version %>",'
-					}, {
-						from: /v[0-9]+\.[0-9]{1,2}\.[0-9]{1,}/,
-						to: 'v<%= pkg.version %>'
-					}
-				]
-			}
-		},
-		uglify: {
-			options: {
-				preserveComments: 'some'
-			},
-			main: {
-				files: {
-					'dist/geolib.min.js': ['dist/geolib.js']
-				}
-			},
-			elev: {
-				files: {
-					'dist/geolib.elevation.min.js': ['dist/geolib.elevation.js']
-				}
-			},
-			pointInside: {
-				files: {
-					'dist/geolib.isPointInsideRobust.min.js': ['dist/geolib.isPointInsideRobust.js']
-				}
-			},
-		},
-		watch: {
-			all: {
-				files: '<%= jshint.all %>',
-				tasks: ['default']
-			}
-		},
-		jshint: {
-			all: [
-				'src/geolib.js',
-				'src/geolib.elevation.js',
-				'src/geolib.isPointInsideRobust.js',
-			],
-			options: {
-				curly: true,
-				eqeqeq: false,
-				immed: true,
-				latedef: true,
-				newcap: false,
-				noarg: true,
-				sub: true,
-				undef: true,
-				evil: true,
-				boss: true,
-				eqnull: true,
-				globals: {
-					module: true,
-					define: true,
-					require: true,
-					elevationResult: true
-				}
-			}
+		full: {
+			src: ['src/geolib.js'],
+			dest: 'geolib.js'
 		}
-	});
+	},
+    copy: {
+      component: {
+        files: [{
+          src: "package.json",
+          dest: "component.json"
+        }]
+      }
+    },
+	replace: {
+		noelevation: {
+			src: 'geolib.js',
+			dest: 'geolib.js',
+			replacements: [{
+				from: '/* %ELEVATION% */',
+				to: ''
+			}]
+		},
+		full: {
+			src: 'geolib.js',
+			dest: 'geolib.js',
+			replacements: [{
+				from: '/* %ELEVATION% */',
+				to: fs.readFileSync('src/geolib.elevation.js', 'utf-8')
+			}]
+		}
+	},
+    uglify: {
+      options: {
+        banner: "<%= banner %>"
+      },
+      full: {
+        files: {
+			'geolib.min.js': ['geolib.js']
+        }
+      }
+    },
+    watch: {
+      files: '<config:lint.files>',
+      tasks: 'lint test'
+    },
+    jshint: {
+	  all: [
+	    'src/geolib.js'
+	  ],
+      options: {
+        curly: true,
+        eqeqeq: false,
+        immed: true,
+        latedef: true,
+        newcap: false,
+        noarg: true,
+        sub: true,
+        undef: true,
+        boss: true,
+        eqnull: true,
+        globals: {
+	      module: true,
+	      define: true
+        }
+      }
+    }
+  });
 
-	// Default task.
-	grunt.registerTask('default', ['concat:main', 'copy', 'replace', 'uglify']);
-	grunt.registerTask('travis', ['jshint','qunit']);
-	grunt.registerTask('test', ['qunit']);
+  // Default task.
+  //grunt.registerTask('default', 'lint test concat min');
+  //grunt.registerTask('default', 'lint qunit clean concat:full min copy');
+ 
+  grunt.registerTask('default', ['concat:full', 'copy', 'replace:full', 'uglify']);
+  grunt.registerTask('travis', ['jshint','qunit']);
+  grunt.registerTask('test', ['qunit']);
+  //grunt.registerTask('no-elevation', 'lint qunit concat:noelevation min');
+  grunt.registerTask('no-elevation', ['concat:full', 'replace:noelevation', 'uglify']);
 
 };
