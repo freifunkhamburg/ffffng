@@ -1,20 +1,20 @@
 /*!
  * https://github.com/es-shims/es5-shim
- * @license es5-shim Copyright 2009-2015 by contributors, MIT License
+ * @license es5-shim Copyright 2009-2020 by contributors, MIT License
  * see https://github.com/es-shims/es5-shim/blob/master/LICENSE
  */
 
 // vim: ts=4 sts=4 sw=4 expandtab
 
 // Add semicolon to prevent IIFE from being passed as argument to concatenated code.
-;
+; // eslint-disable-line no-extra-semi
 
 // UMD (Universal Module Definition)
 // see https://github.com/umdjs/umd/blob/master/templates/returnExports.js
 (function (root, factory) {
     'use strict';
 
-    /* global define, exports, module */
+    /* global define */
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define(factory);
@@ -25,7 +25,7 @@
         module.exports = factory();
     } else {
         // Browser globals (root is window)
-        root.returnExports = factory();
+        root.returnExports = factory(); // eslint-disable-line no-param-reassign
     }
 }(this, function () {
 
@@ -55,10 +55,10 @@
     };
 
     // ES5 15.2.3.2
-    // http://es5.github.com/#x15.2.3.2
+    // https://es5.github.io/#x15.2.3.2
     if (!Object.getPrototypeOf) {
         // https://github.com/es-shims/es5-shim/issues#issue/2
-        // http://ejohn.org/blog/objectgetprototypeof/
+        // https://johnresig.com/blog/objectgetprototypeof/
         // recommended by fschaefer on github
         //
         // sure, and webreflection says ^_^
@@ -67,36 +67,35 @@
         Object.getPrototypeOf = function getPrototypeOf(object) {
             // eslint-disable-next-line no-proto
             var proto = object.__proto__;
-            if (proto || proto === null) {
+            if (proto || proto == null) { // `undefined` is for pre-proto browsers
                 return proto;
             } else if (toStr(object.constructor) === '[object Function]') {
                 return object.constructor.prototype;
             } else if (object instanceof Object) {
                 return prototypeOfObject;
-            } else {
-                // Correctly return null for Objects created with `Object.create(null)`
-                // (shammed or native) or `{ __proto__: null}`.  Also returns null for
-                // cross-realm objects on browsers that lack `__proto__` support (like
-                // IE <11), but that's the best we can do.
-                return null;
             }
+            // Correctly return null for Objects created with `Object.create(null)`
+            // (shammed or native) or `{ __proto__: null}`.  Also returns null for
+            // cross-realm objects on browsers that lack `__proto__` support (like
+            // IE <11), but that's the best we can do.
+            return null;
+
         };
     }
 
     // ES5 15.2.3.3
-    // http://es5.github.com/#x15.2.3.3
-
-    var doesGetOwnPropertyDescriptorWork = function doesGetOwnPropertyDescriptorWork(object) {
-        try {
-            object.sentinel = 0;
-            return Object.getOwnPropertyDescriptor(object, 'sentinel').value === 0;
-        } catch (exception) {
-            return false;
-        }
-    };
+    // https://es5.github.io/#x15.2.3.3
 
     // check whether getOwnPropertyDescriptor works if it's given. Otherwise, shim partially.
     if (Object.defineProperty) {
+        var doesGetOwnPropertyDescriptorWork = function doesGetOwnPropertyDescriptorWork(object) {
+            try {
+                object.sentinel = 0; // eslint-disable-line no-param-reassign
+                return Object.getOwnPropertyDescriptor(object, 'sentinel').value === 0;
+            } catch (exception) {
+                return false;
+            }
+        };
         var getOwnPropertyDescriptorWorksOnObject = doesGetOwnPropertyDescriptorWork({});
         var getOwnPropertyDescriptorWorksOnDom = typeof document === 'undefined'
             || doesGetOwnPropertyDescriptorWork(document.createElement('div'));
@@ -152,7 +151,7 @@
                 // Object.getOwnPropertyDescriptor(Object.prototype, 'toString')
                 // or any other Object.prototype accessor
                 if (notPrototypeOfObject) {
-                    object.__proto__ = prototypeOfObject;
+                    object.__proto__ = prototypeOfObject; // eslint-disable-line no-param-reassign
                 }
 
                 var getter = lookupGetter(object, property);
@@ -160,7 +159,7 @@
 
                 if (notPrototypeOfObject) {
                     // Once we have getter and setter we can put values back.
-                    object.__proto__ = prototype;
+                    object.__proto__ = prototype; // eslint-disable-line no-param-reassign
                 }
 
                 if (getter || setter) {
@@ -186,7 +185,7 @@
     }
 
     // ES5 15.2.3.4
-    // http://es5.github.com/#x15.2.3.4
+    // https://es5.github.io/#x15.2.3.4
     if (!Object.getOwnPropertyNames) {
         Object.getOwnPropertyNames = function getOwnPropertyNames(object) {
             return Object.keys(object);
@@ -194,7 +193,7 @@
     }
 
     // ES5 15.2.3.5
-    // http://es5.github.com/#x15.2.3.5
+    // https://es5.github.io/#x15.2.3.5
     if (!Object.create) {
 
         // Contributed by Brandon Benvie, October, 2012
@@ -302,15 +301,14 @@
 
             if (prototype === null) {
                 object = createEmpty();
+            } else if (isPrimitive(prototype)) {
+                // In the native implementation `parent` can be `null`
+                // OR *any* `instanceof Object`  (Object|Function|Array|RegExp|etc)
+                // Use `typeof` tho, b/c in old IE, DOM elements are not `instanceof Object`
+                // like they are in modern browsers. Using `Object.create` on DOM elements
+                // is...err...probably inappropriate, but the native version allows for it.
+                throw new TypeError('Object prototype may only be an Object or null'); // same msg as Chrome
             } else {
-                if (prototype !== null && isPrimitive(prototype)) {
-                    // In the native implementation `parent` can be `null`
-                    // OR *any* `instanceof Object`  (Object|Function|Array|RegExp|etc)
-                    // Use `typeof` tho, b/c in old IE, DOM elements are not `instanceof Object`
-                    // like they are in modern browsers. Using `Object.create` on DOM elements
-                    // is...err...probably inappropriate, but the native version allows for it.
-                    throw new TypeError('Object prototype may only be an Object or null'); // same msg as Chrome
-                }
                 Type.prototype = prototype;
                 object = new Type();
                 // IE has no built-in implementation of `Object.getPrototypeOf`
@@ -330,14 +328,14 @@
     }
 
     // ES5 15.2.3.6
-    // http://es5.github.com/#x15.2.3.6
+    // https://es5.github.io/#x15.2.3.6
 
     // Patch for WebKit and IE8 standard mode
     // Designed by hax <hax.github.com>
     // related issue: https://github.com/es-shims/es5-shim/issues#issue/5
     // IE8 Reference:
-    //     http://msdn.microsoft.com/en-us/library/dd282900.aspx
-    //     http://msdn.microsoft.com/en-us/library/dd229916.aspx
+    //     https://msdn.microsoft.com/en-us/library/dd282900.aspx
+    //     https://msdn.microsoft.com/en-us/library/dd229916.aspx
     // WebKit Bugs:
     //     https://bugs.webkit.org/show_bug.cgi?id=36423
 
@@ -405,7 +403,7 @@
                     // `__proto__` we can safely override `__proto__` while defining
                     // a property to make sure that we don't hit an inherited
                     // accessor.
-                    /* eslint-disable no-proto */
+                    /* eslint-disable no-proto, no-param-reassign */
                     var prototype = object.__proto__;
                     object.__proto__ = prototypeOfObject;
                     // Deleting a property anyway since getter / setter may be
@@ -414,9 +412,9 @@
                     object[property] = descriptor.value;
                     // Setting original `__proto__` back now.
                     object.__proto__ = prototype;
-                    /* eslint-enable no-proto */
+                    /* eslint-enable no-proto, no-param-reassign */
                 } else {
-                    object[property] = descriptor.value;
+                    object[property] = descriptor.value; // eslint-disable-line no-param-reassign
                 }
             } else {
                 var hasGetter = 'get' in descriptor;
@@ -437,7 +435,7 @@
     }
 
     // ES5 15.2.3.7
-    // http://es5.github.com/#x15.2.3.7
+    // https://es5.github.io/#x15.2.3.7
     if (!Object.defineProperties || definePropertiesFallback) {
         Object.defineProperties = function defineProperties(object, properties) {
             // make a valiant attempt to use the real defineProperties
@@ -459,7 +457,7 @@
     }
 
     // ES5 15.2.3.8
-    // http://es5.github.com/#x15.2.3.8
+    // https://es5.github.io/#x15.2.3.8
     if (!Object.seal) {
         Object.seal = function seal(object) {
             if (Object(object) !== object) {
@@ -473,7 +471,7 @@
     }
 
     // ES5 15.2.3.9
-    // http://es5.github.com/#x15.2.3.9
+    // https://es5.github.io/#x15.2.3.9
     if (!Object.freeze) {
         Object.freeze = function freeze(object) {
             if (Object(object) !== object) {
@@ -494,15 +492,15 @@
             return function freeze(object) {
                 if (typeof object === 'function') {
                     return object;
-                } else {
-                    return freezeObject(object);
                 }
+                return freezeObject(object);
+
             };
         }(Object.freeze));
     }
 
     // ES5 15.2.3.10
-    // http://es5.github.com/#x15.2.3.10
+    // https://es5.github.io/#x15.2.3.10
     if (!Object.preventExtensions) {
         Object.preventExtensions = function preventExtensions(object) {
             if (Object(object) !== object) {
@@ -516,7 +514,7 @@
     }
 
     // ES5 15.2.3.11
-    // http://es5.github.com/#x15.2.3.11
+    // https://es5.github.io/#x15.2.3.11
     if (!Object.isSealed) {
         Object.isSealed = function isSealed(object) {
             if (Object(object) !== object) {
@@ -527,7 +525,7 @@
     }
 
     // ES5 15.2.3.12
-    // http://es5.github.com/#x15.2.3.12
+    // https://es5.github.io/#x15.2.3.12
     if (!Object.isFrozen) {
         Object.isFrozen = function isFrozen(object) {
             if (Object(object) !== object) {
@@ -538,7 +536,7 @@
     }
 
     // ES5 15.2.3.13
-    // http://es5.github.com/#x15.2.3.13
+    // https://es5.github.io/#x15.2.3.13
     if (!Object.isExtensible) {
         Object.isExtensible = function isExtensible(object) {
             // 1. If Type(O) is not Object throw a TypeError exception.
@@ -550,9 +548,9 @@
             while (owns(object, name)) {
                 name += '?';
             }
-            object[name] = true;
+            object[name] = true; // eslint-disable-line no-param-reassign
             var returnValue = owns(object, name);
-            delete object[name];
+            delete object[name]; // eslint-disable-line no-param-reassign
             return returnValue;
         };
     }

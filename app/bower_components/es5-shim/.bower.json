@@ -7,11 +7,11 @@
   },
   "homepage": "https://github.com/es-shims/es5-shim",
   "authors": [
-    "Kris Kowal <kris@cixar.com> (http://github.com/kriskowal/)",
-    "Sami Samhuri <sami.samhuri@gmail.com> (http://samhuri.net/)",
-    "Florian Schäfer <florian.schaefer@gmail.com> (http://github.com/fschaefer)",
-    "Irakli Gozalishvili <rfobic@gmail.com> (http://jeditoolkit.com)",
-    "Kit Cambridge <kitcambridge@gmail.com> (http://kitcambridge.github.com)",
+    "Kris Kowal <kris@cixar.com> (https://github.com/kriskowal/)",
+    "Sami Samhuri <sami.samhuri@gmail.com> (https://samhuri.net/)",
+    "Florian Schäfer <florian.schaefer@gmail.com> (https://github.com/fschaefer)",
+    "Irakli Gozalishvili <rfobic@gmail.com> (https://gozala.io)",
+    "Kit Cambridge <kitcambridge@gmail.com> (https://github.com/kitcambridge)",
     "Jordan Harband <ljharb@gmail.com> (https://github.com/ljharb/)"
   ],
   "description": "ECMAScript 5 compatibility shims for legacy JavaScript engines",
@@ -30,14 +30,14 @@
     "bower_components",
     "tests"
   ],
-  "version": "4.5.13",
-  "_release": "4.5.13",
+  "version": "4.6.7",
+  "_release": "4.6.7",
   "_resolution": {
     "type": "version",
-    "tag": "v4.5.13",
-    "commit": "d5297adf9a9ca5669b3d43153fa2d8092e879f9c"
+    "tag": "v4.6.7",
+    "commit": "0d171c717a51e177eea2261c8443fec0c9e913bc"
   },
   "_source": "https://github.com/es-shims/es5-shim.git",
-  "_target": "4.5.13",
+  "_target": "4.6.7",
   "_originalSource": "es5-shim"
 }

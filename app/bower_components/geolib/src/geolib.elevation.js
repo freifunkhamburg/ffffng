@@ -1,190 +1,135 @@
-/*! geolib.elevation $version$ by Manuel Bieh
-*
-* Elevation Addon for Geolib.js
-* 
-* @author Manuel Bieh
-* @url http://www.manuelbieh.com/
-* @version $version$
-* @license MIT
-*/
-;(function(global, geolib, undefined) {
+	/* Optional elevation addon requires Googlemaps API JS */
 
-	var elevation = {
-
-		/*global google:true geolib:true require:true module:true elevationResult:true */
-
-		/**
-		*  @param      Array Collection of coords [{latitude: 51.510, longitude: 7.1321}, {latitude: 49.1238, longitude: "8° 30' W"}, ...]
-		*  @return     Array [{lat:#lat, lng:#lng, elev:#elev},....]}
-		*/
-		getElevation: function() {
-			if (typeof global.navigator !== 'undefined') {
-				this.getElevationClient.apply(this, arguments);
-			} else {
-				this.getElevationServer.apply(this, arguments);
-			}
-		},
-
-
-		/* Optional elevation addon requires Googlemaps API JS */
-		getElevationClient: function(coords, cb) {
-
-			if (!global.google) {
-				throw new Error("Google maps api not loaded");
-			}
-
-			if (coords.length === 0) {
-				return cb(null, null);
-			}
-
-			if (coords.length === 1) {
-				return cb(new Error("getElevation requires at least 2 points."));
-			}
-
-			var path  = [];
-
-			for(var i = 0; i < coords.length; i++) {
-				path.push(new google.maps.LatLng(
-					this.latitude(coords[i]),
-					this.longitude(coords[i])
-				));
-			}
-
-			var positionalRequest = {
-				'path': path,
-				'samples': path.length
-			};
-
-			var elevationService = new google.maps.ElevationService();
-			var geolib = this;
-
-			elevationService.getElevationAlongPath(positionalRequest, function (results, status) {
-				geolib.elevationHandler(results, status, coords, cb);
-			});
-
-		},
-
-
-		getElevationServer: function(coords, cb) {
-
-			if (coords.length === 0) {
-				return cb(null, null);
-			}
-
-			if (coords.length === 1) {
-				return cb(new Error("getElevation requires at least 2 points."));
-			}
-
-			var gm = require('googlemaps');
-			var path  = [];
-
-			for(var i = 0; i < coords.length; i++) {
-				path.push(
-					this.latitude(coords[i]) + ',' + this.longitude(coords[i])
-				);
-			}
-
-			var geolib = this;
-
-			gm.elevationFromPath(path.join('|'), path.length, function(err, results) {
-				geolib.elevationHandler(results.results, results.status, coords, cb);
-			});
-
-		},
-
-
-		elevationHandler: function(results, status, coords, cb) {
-
-			var latsLngsElevs = [];
-
-			if (status == "OK" ) {
-
-				for (var i = 0; i < results.length; i++) {
-					latsLngsElevs.push({
-						"lat": this.latitude(coords[i]),
-						"lng": this.longitude(coords[i]),
-						"elev":results[i].elevation
-					});
-				}
-
-				cb(null, latsLngsElevs);
-
-			} else {
-
-				cb(new Error("Could not get elevation using Google's API"), elevationResult.status);
-
-			}
-
-		},
-
-
-		/**
-		*  @param      Array [{lat:#lat, lng:#lng, elev:#elev},....]}
-		*  @return     Number % grade
-		*/
-		getGrade: function(coords) {
-
-			var rise = Math.abs(
-				this.elevation(coords[coords.length-1]) - this.elevation(coords[0])
-			);
-
-			var run = this.getPathLength(coords);
-
-			return Math.floor((rise/run)*100);
-
-		},
-
-
-		/**
-		*  @param      Array [{lat:#lat, lng:#lng, elev:#elev},....]}
-		*  @return     Object {gain:#gain, loss:#loss}
-		*/
-		getTotalElevationGainAndLoss: function(coords) {
-
-			var gain = 0;
-			var loss = 0;
-
-			for(var i = 0; i < coords.length - 1; i++) {
-
-				var deltaElev = this.elevation(coords[i]) - this.elevation(coords[i + 1]);
-
-				if (deltaElev > 0) {
-					loss += deltaElev;
-				} else {
-					gain += Math.abs(deltaElev);
-				}
-
-			}
-
-			return {
-				"gain": gain,
-				"loss": loss
-			};
-
+	/*global google:true geolib:true require:true module:true elevationResult*/
+	/**
+	*  @param      Array Collection of coords [{latitude: 51.510, longitude: 7.1321}, {latitude: 49.1238, longitude: "8° 30' W"}, ...]
+	*
+	*  @return     Array [{lat:#lat, lng:#lng, elev:#elev},....]}
+	*/
+	geolib.getElevation = function() {
+		if (typeof window.navigator !== 'undefined') {
+			geolib.getElevationClient.apply(this, arguments);
+		} else {
+			geolib.getElevationServer.apply(this, arguments);
 		}
+	};
+
+	geolib.getElevationClient = function(coords, cb) {
+
+		if (!window.google) {
+			throw new Error("Google maps api not loaded");
+		}
+
+		if (coords.length === 0) {
+			return cb(null, null);
+		}
+
+		if (coords.length === 1) {
+			return cb(new Error("getElevation requires at least 2 points."));
+		}
+
+		var path  = [];
+		var keys = geolib.getKeys(coords[0]);
+		var latitude = keys.latitude;
+		var longitude = keys.longitude;
+
+		for(var i = 0; i < coords.length; i++) {
+			path.push(new google.maps.LatLng(
+				geolib.useDecimal(coords[i][latitude]),
+				geolib.useDecimal(coords[i][longitude])
+			));
+		}
+
+		var positionalRequest = {
+			'path': path,
+			'samples': path.length
+		};
+		var elevationService = new google.maps.ElevationService();
+		elevationService.getElevationAlongPath(positionalRequest,function (results, status) {
+			geolib.elevationHandler(results, status, coords, keys, cb);
+		});
 
 	};
 
-	// Node module
-	if (typeof module !== 'undefined' && 
-		typeof module.exports !== 'undefined') {
+	geolib.getElevationServer = function(coords, cb) {
 
-		geolib = require('geolib');
-		geolib.extend(elevation);
+		if (coords.length === 0) {
+			return cb(null, null);
+		}
 
-	// AMD module
-	} else if (typeof define === "function" && define.amd) {
+		if (coords.length === 1) {
+			return cb(new Error("getElevation requires at least 2 points."));
+		}
 
-		define(["geolib"], function (geolib) {
-			geolib.extend(elevation);
-			return geolib;
+		var gm = require('googlemaps');
+		var path  = [];
+		var keys = geolib.getKeys(coords[0]);
+		//coords[0]
+		var latitude = keys.latitude;
+		var longitude = keys.longitude;
+
+		for(var i = 0; i < coords.length; i++) {
+			path.push(geolib.useDecimal(coords[i][latitude]) + ',' +
+			  geolib.useDecimal(coords[i][longitude]));
+		}
+
+		gm.elevationFromPath(path.join('|'), path.length, function(err, results) {
+			geolib.elevationHandler(results.results, results.status, coords, keys, cb);
 		});
 
-	// we're in a browser
-	} else {
+	},
 
-		geolib.extend(elevation);
+	geolib.elevationHandler = function(results, status, coords, keys, cb){
+		var latsLngsElevs = [];
+		var latitude = keys.latitude;
+		var longitude = keys.longitude;
+		if (status == "OK" ) {
+			for (var i = 0; i < results.length; i++) {
+				latsLngsElevs.push({
+					"lat":coords[i][latitude],
+					"lng":coords[i][longitude],
+					"elev":results[i].elevation
+				});
+			}
+			cb(null, latsLngsElevs);
+		} else {
+			cb(new Error("Could not get elevation using Google's API"), elevationResult.status);
+		}
+	};
 
-	}
+	/**
+	*  @param      Array [{lat:#lat, lng:#lng, elev:#elev},....]}
+	*
+	*  @return     Number % grade
+	*/
+	geolib.getGrade = function(coords){
+		var keys = geolib.getKeys(coords[0]);
+		var elevation = keys.elevation;
+		var rise = Math.abs(coords[coords.length-1][elevation] - coords[0][elevation]);
+		var run = geolib.getPathLength(coords);
+		return Math.floor((rise/run)*100);
+	};
 
-}(this, this.geolib));
+	/**
+	*  @param      Array [{lat:#lat, lng:#lng, elev:#elev},....]}
+	*
+	*  @return     Object {gain:#gain, loss:#loss}
+	*/
+	geolib.getTotalElevationGainAndLoss = function(coords){
+		var keys = geolib.getKeys(coords[0]);
+		var elevation = keys.elevation;
+		var gain = 0;
+		var loss = 0;
+		for(var i = 0; i < coords.length - 1; i++){
+			var deltaElev = coords[i][elevation] - coords[i + 1][elevation];
+			if (deltaElev > 0) {
+				loss += deltaElev;
+			} else {
+				gain += Math.abs(deltaElev);
+			}
+		}
+		return {
+			"gain": gain,
+			"loss": loss
+		};
+	};
