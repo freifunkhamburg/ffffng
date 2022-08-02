@@ -17,11 +17,11 @@ $variant-colors: (
     info: #0097c4,
 );
 $variant-text-colors: (
-    // primary: do not use, contrast too low
-    success: $gray-darkest,
-    warning: $gray-darkest,
-    danger: $gray-darkest,
-    info: $gray-darkest,
+    primary: $black,
+    success: $black,
+    warning: $black,
+    danger: $black,
+    info: $black,
 );
 
 $variant-color-primary: map-get($variant-colors, primary);
@@ -48,10 +48,17 @@ $input-border: 0.1em solid $page-background-color;
 $input-border-radius: 0.5em;
 $input-focus-outline: 0.1em solid $variant-color-info;
 
+$button-margin: 0.3em;
 $button-padding: 0.25em 0.5em;
 $button-border-radius: $input-border-radius;
-$button-border-width: 0.1em;
+$button-border-width: 0.15em;
 $button-border-style: solid;
+$button-outline-width: 0.15em;
+$button-sizes: (
+    small: 0.8em,
+    medium: 1em,
+    large: 1.15em,
+);
 
 // Navigation
 $nav-bar-background-color: $gray-dark;

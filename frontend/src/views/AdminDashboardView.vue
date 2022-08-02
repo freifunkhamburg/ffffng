@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import StatisticsCard from "@/components/admin/StatisticsCard.vue";
 import {useStatisticsStore} from "@/stores/statistics";
-import {MonitoringState} from "@/types";
+import {ComponentVariant, MonitoringState} from "@/types";
 
 const statistics = useStatisticsStore();
 
@@ -20,14 +20,14 @@ refresh();
             <StatisticsCard
                 title="Registrierte Knoten"
                 icon="circle-o"
-                variant="info"
+                :variant="ComponentVariant.INFO"
                 :value="statistics.getStatistics.nodes.registered"
                 link="/admin/nodes"
                 />
             <StatisticsCard
                 title="Mit hinterlegtem fastd-Key"
                 icon="lock"
-                variant="warning"
+                :variant="ComponentVariant.WARNING"
                 :value="statistics.getStatistics.nodes.withVPN"
                 link="/admin/nodes"
                 :filter="{hasKey: true}"
@@ -35,7 +35,7 @@ refresh();
             <StatisticsCard
                 title="Mit Koordinaten"
                 icon="map-marker"
-                variant="success"
+                :variant="ComponentVariant.SUCCESS"
                 :value="statistics.getStatistics.nodes.withCoords"
                 link="/admin/nodes"
                 :filter="{hasCoords: true}"
@@ -43,7 +43,7 @@ refresh();
             <StatisticsCard
                 title="Monitoring aktiv"
                 icon="heartbeat"
-                variant="success"
+                :variant="ComponentVariant.SUCCESS"
                 :value="statistics.getStatistics.nodes.monitoring.active"
                 link="/admin/nodes"
                 :filter="{monitoringState: MonitoringState.ACTIVE}"
@@ -51,7 +51,7 @@ refresh();
             <StatisticsCard
                 title="Monitoring noch nicht bestätigt"
                 icon="envelope"
-                variant="danger"
+                :variant="ComponentVariant.DANGER"
                 :value="statistics.getStatistics.nodes.monitoring.pending"
                 link="/admin/nodes"
                 :filter="{monitoringState: MonitoringState.PENDING}"

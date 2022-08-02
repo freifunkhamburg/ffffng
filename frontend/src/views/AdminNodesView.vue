@@ -2,27 +2,13 @@
 import {useNodesStore} from "@/stores/nodes";
 import {onMounted, type PropType, ref, watch} from "vue";
 import type {DomainSpecificNodeResponse, MAC, NodesFilter, SearchTerm} from "@/types";
-import {NodeSortField, SortDirection} from "@/types";
+import {ButtonSize, ComponentVariant, NodeSortField, SortDirection} from "@/types";
 import Pager from "@/components/Pager.vue";
+import ActionButton from "@/components/form/ActionButton.vue";
 import LoadingContainer from "@/components/LoadingContainer.vue";
 import NodesFilterPanel from "@/components/nodes/NodesFilterPanel.vue";
 import {SortTH} from "@/components/table/SortTH.vue";
 import router from "@/router";
-
-function debug(...args: any[]): void {
-    console.debug("==================================================================");
-    console.debug("AdminNodesVue:", ...args);
-    console.table({
-        filter: JSON.stringify(props.filter),
-        searchTerm: props.searchTerm,
-        sortDirection: props.sortDirection,
-        sortField: props.sortField,
-    });
-    console.debug("==================================================================");
-    console.debug();
-}
-
-debug("init page");
 
 const NODE_PER_PAGE = 50;
 
@@ -145,18 +131,22 @@ watch(props, async () => {
         @changePage="refresh"/>
 
     <div class="actions">
-        <button
+        <ActionButton
             v-if="redactFieldsByDefault"
-            class="warning"
+            :variant="ComponentVariant.WARNING"
+            :size="ButtonSize.SMALL"
+            icon="eye"
             @click="redactAllFields(false)">
             Sensible Daten einblenden
-        </button>
-        <button
+        </ActionButton>
+        <ActionButton
             v-if="!redactFieldsByDefault"
-            class="success"
+            :variant="ComponentVariant.SUCCESS"
+            :size="ButtonSize.SMALL"
+            icon="eye-slash"
             @click="redactAllFields(true)">
             Sensible Daten ausblenden
-        </button>
+        </ActionButton>
     </div>
 
     <LoadingContainer :loading="loading">

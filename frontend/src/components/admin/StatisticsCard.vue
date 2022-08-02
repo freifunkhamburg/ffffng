@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import {computed, defineProps} from "vue";
-import type {NodesFilter} from "@/types";
+import type {ComponentVariant, NodesFilter} from "@/types";
 
 interface Props {
     title: string;
     icon: string;
-    variant: string;
+    variant: ComponentVariant;
     value: number;
     link: string;
     filter?: NodesFilter;
@@ -29,7 +29,7 @@ const linkTarget = computed(() => {
 
 <template>
     <RouterLink :to="linkTarget" :class="['statistics-card', 'statistics-card-' + variant]">
-        <i :class="['fa', 'fa-' + icon]" aria-hidden="true" />
+        <i :class="['fa', 'fa-' + icon]" aria-hidden="true"/>
         <dl>
             <dt>{{ title }}</dt>
             <dd>{{ value }}</dd>
