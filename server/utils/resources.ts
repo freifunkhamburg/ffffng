@@ -314,7 +314,7 @@ export function handleJSON<Response>(handler: () => Promise<Response>): RequestH
     return (request, response) => {
         handler()
             .then(data => success(response, data || {}))
-            .catch(error => error(response, error));
+            .catch(e => error(response, e));
     };
 }
 
@@ -322,6 +322,6 @@ export function handleJSONWithData<Response>(handler: (data: RequestData) => Pro
     return (request, response) => {
         handler(getData(request))
             .then(data => success(response, data || {}))
-            .catch(error => error(response, error));
+            .catch(e => error(response, e));
     };
 }
