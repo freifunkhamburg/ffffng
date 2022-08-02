@@ -36,12 +36,12 @@ const CONSTRAINTS = {
         },
         mac: {
             type: 'string',
-            regex: /^([a-f0-9]{12}|([a-f0-9]{2}:){5}[a-f0-9]{2})$/i,
+            regex: /^([a-f0-9]{12}|([a-f0-9]{2}:){5}[a-f0-9]{2}|([a-f0-9]{2}-){5}[a-f0-9]{2})$/i,
             optional: false
         },
         coords: {
             type: 'string',
-            regex: /^([a-f0-9]{12}|([a-f0-9]{2}:){5}[a-f0-9]{2}|([a-f0-9]{2}-){5}[a-f0-9]{2})$/i,
+            regex: /^(-?[0-9]{1,3}(\.[0-9]{1,15})? -?[0-9]{1,3}(\.[0-9]{1,15})?)$/,
             optional: true
         },
         monitoring: {
