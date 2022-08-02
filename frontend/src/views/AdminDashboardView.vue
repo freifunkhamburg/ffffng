@@ -2,6 +2,7 @@
 import StatisticsCard from "@/components/admin/StatisticsCard.vue";
 import {useStatisticsStore} from "@/stores/statistics";
 import {ComponentVariant, MonitoringState} from "@/types";
+import PageContainer from "@/components/page/PageContainer.vue";
 
 const statistics = useStatisticsStore();
 
@@ -13,7 +14,7 @@ refresh();
 </script>
 
 <template>
-    <div v-if="statistics.getStatistics">
+    <PageContainer v-if="statistics.getStatistics">
         <h2>Knotenstatistik</h2>
 
         <div class="statistics">
@@ -23,7 +24,7 @@ refresh();
                 :variant="ComponentVariant.INFO"
                 :value="statistics.getStatistics.nodes.registered"
                 link="/admin/nodes"
-                />
+            />
             <StatisticsCard
                 title="Mit hinterlegtem fastd-Key"
                 icon="lock"
@@ -31,7 +32,7 @@ refresh();
                 :value="statistics.getStatistics.nodes.withVPN"
                 link="/admin/nodes"
                 :filter="{hasKey: true}"
-                />
+            />
             <StatisticsCard
                 title="Mit Koordinaten"
                 icon="map-marker"
@@ -39,7 +40,7 @@ refresh();
                 :value="statistics.getStatistics.nodes.withCoords"
                 link="/admin/nodes"
                 :filter="{hasCoords: true}"
-                />
+            />
             <StatisticsCard
                 title="Monitoring aktiv"
                 icon="heartbeat"
@@ -47,7 +48,7 @@ refresh();
                 :value="statistics.getStatistics.nodes.monitoring.active"
                 link="/admin/nodes"
                 :filter="{monitoringState: MonitoringState.ACTIVE}"
-                />
+            />
             <StatisticsCard
                 title="Monitoring noch nicht bestätigt"
                 icon="envelope"
@@ -55,15 +56,25 @@ refresh();
                 :value="statistics.getStatistics.nodes.monitoring.pending"
                 link="/admin/nodes"
                 :filter="{monitoringState: MonitoringState.PENDING}"
-                />
+            />
         </div>
-    </div>
+    </PageContainer>
 </template>
 
 <style lang="scss" scoped>
+@import "../scss/variables";
+@import "../scss/mixins";
+
 .statistics {
     display: grid;
-    // TODO: Responsive sizes
-    grid-template-columns: repeat(auto-fill, minmax(25%, 100%));
 }
+
+@each $breakpoint, $width in $statistics-card-widths {
+    @include page-breakpoint($breakpoint) {
+        .statistics {
+            grid-template-columns: repeat(auto-fill, $width);
+        }
+    }
+}
+
 </style>

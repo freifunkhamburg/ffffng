@@ -89,6 +89,14 @@ $nav-header-logo-margin: 0 0.5em 0 0;
 $nav-footer-padding: 0.75em;
 
 // Statistics
+$statistics-card-widths: (
+    xs: 100%,
+    sm: 50%,
+    md: 50%,
+    lg: 33.3333%,
+    xl: 33.3333%,
+    xxl: 33.3333%,
+);
 $statistics-card-height: 4.5em;
 $statistics-card-margin: 0.5em;
 $statistics-card-padding: 0.3em 0.5em;
