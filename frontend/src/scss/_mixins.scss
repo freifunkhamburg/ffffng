@@ -1,0 +1,17 @@
+@import "variables";
+
+@mixin page-breakpoint($name) {
+    $breakpoint: map-get($page-breakpoints, $name);
+    $lower-bound: nth($breakpoint, 1);
+    $upper-bound: nth($breakpoint, 2);
+    @if ($upper-bound == null) {
+        @media ($lower-bound <= width) {
+            @content;
+        }
+    }
+    @else {
+        @media ($lower-bound <= width < $upper-bound) {
+            @content;
+        }
+    }
+}

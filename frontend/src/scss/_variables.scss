@@ -31,6 +31,23 @@ $variant-color-danger: map-get($variant-colors, danger);
 $variant-color-info: map-get($variant-colors, info);
 
 // Page
+$page-breakpoints: (
+    // first value is <=, second <
+    xs: (0px, 576px),
+    sm: (576px, 768px),
+    md: (768px, 992px),
+    lg: (992px, 1200px),
+    xl: (1200px, 1400px),
+    xxl: (1400px, null),
+);
+$page-container-widths: (
+    xs: 100%,
+    sm: 100%,
+    md: 768px,
+    lg: 992px,
+    xl: 992px,
+    xxl: 992px,
+);
 $page-background-color: $gray-darkest;
 $page-text-color: $gray-lighter;
 $page-padding: 0.5em 0.5em 4.5em 0.5em;

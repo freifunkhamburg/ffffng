@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import ActionButton from "@/components/form/ActionButton.vue";
+import PageContainer from "@/components/page/PageContainer.vue";
 import {ButtonSize, ComponentVariant} from "@/types";
 </script>
 
 <template>
-    <div>
+    <PageContainer>
         <h2>Willkommen!</h2>
 
         <p>Du hast einen neuen Freifunk Hamburg Router (Knoten), den Du in Betrieb nehmen möchtest? Du hast schon einen
@@ -31,7 +32,7 @@ import {ButtonSize, ComponentVariant} from "@/types";
                 Knoten löschen
             </ActionButton>
         </div>
-    </div>
+    </PageContainer>
 </template>
 
 <style lang="scss" scoped>
