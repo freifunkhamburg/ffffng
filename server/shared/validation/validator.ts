@@ -1,5 +1,4 @@
 import {parseInteger} from "../utils/strings";
-import Logger from "../logger";
 import {isBoolean, isNumber, isObject, isOptional, isRegExp, isString, toIsArray} from "../types";
 
 export interface Constraint {
@@ -117,7 +116,6 @@ function isValid(constraint: Constraint, acceptUndefined: boolean, value: unknow
             return isValidString(constraint, value);
     }
 
-    Logger.tag('validation').error('No validation method for constraint type: {}', constraint.type);
     return false;
 }
 
@@ -131,7 +129,6 @@ function areValid(constraints: Constraints, acceptUndefined: boolean, values: Va
 
     for (const field of Object.keys(values)) {
         if (!fields.has(field)) {
-            Logger.tag('validation').error('Validation failed: No constraint for field: {}', field);
             return false;
         }
     }

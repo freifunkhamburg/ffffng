@@ -8,7 +8,7 @@ import ErrorTypes from "../utils/errorTypes";
 import Logger from "../logger";
 import logger from "../logger";
 import * as MailService from "../services/mailService";
-import {normalizeString} from "../utils/strings";
+import {normalizeString} from "../shared/utils/strings";
 import {monitoringConfirmUrl, monitoringDisableUrl} from "../utils/urlBuilder";
 import {
     BaseNode,

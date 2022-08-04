@@ -3,8 +3,8 @@ import ErrorTypes from "../utils/errorTypes";
 import * as Resources from "../utils/resources";
 import {handleJSONWithData, RequestData} from "../utils/resources";
 import {getTasks, Task, TaskState} from "../jobs/scheduler";
-import {normalizeString} from "../utils/strings";
-import {forConstraint} from "../validation/validator";
+import {normalizeString} from "../shared/utils/strings";
+import {forConstraint} from "../shared/validation/validator";
 import {Request, Response} from "express";
 import {isString, isTaskSortField} from "../types";
 

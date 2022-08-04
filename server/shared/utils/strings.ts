@@ -1,4 +1,3 @@
-import _ from "lodash"
 import {isString, MAC} from "../types";
 
 export function normalizeString(str: string): string {
@@ -19,7 +18,7 @@ export function normalizeMac(mac: MAC): MAC {
 }
 
 export function parseInteger(str: string): number {
-    const parsed = _.parseInt(str, 10);
+    const parsed = parseInt(str, 10);
     if (parsed.toString() === str) {
         return parsed;
     } else {
