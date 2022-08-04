@@ -36,10 +36,10 @@
     "eslint-plugin-vue": "^9.3.0",
     "jsdom": "^20.0.0",
     "prettier": "^2.7.1",
-    "sass": "^1.54.0",
+    "sass": "^1.54.2",
     "typescript": "~4.7.4",
     "vite": "^3.0.4",
-    "vitest": "^0.20.2",
+    "vitest": "^0.20.3",
     "vue-tsc": "^0.39.4"
   }
 }
