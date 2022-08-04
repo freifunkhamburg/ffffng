@@ -3,8 +3,8 @@ import ErrorTypes from "../utils/errorTypes";
 import * as MonitoringService from "../services/monitoringService";
 import * as Resources from "../utils/resources";
 import {handleJSONWithData} from "../utils/resources";
-import {normalizeString} from "../utils/strings";
-import {forConstraint} from "../validation/validator";
+import {normalizeString} from "../shared/utils/strings";
+import {forConstraint} from "../shared/validation/validator";
 import {Request, Response} from "express";
 import {isMonitoringToken, JSONObject, MonitoringResponse, MonitoringToken, toMonitoringResponse} from "../types";
 
