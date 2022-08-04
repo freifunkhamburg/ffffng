@@ -1,5 +1,5 @@
 import {ArrayField, Field, RawJsonField} from "sparkson"
-import {ClientConfig, DurationMilliseconds, isString, toIsNewtype, Url} from "./shared";
+import {ClientConfig, DurationMilliseconds, isString, toIsNewtype, Url} from "../shared/types";
 
 export type Username = string & { readonly __tag: unique symbol };
 export const isUsername = toIsNewtype(isString, "" as Username);

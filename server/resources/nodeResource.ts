@@ -1,4 +1,4 @@
-import Constraints from "../validation/constraints";
+import Constraints from "../shared/validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
 import * as MonitoringService from "../services/monitoringService";
 import * as NodeService from "../services/nodeService";

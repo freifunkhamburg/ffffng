@@ -13,7 +13,7 @@ import * as Resources from "../utils/resources";
 import {RestParams} from "../utils/resources";
 import {normalizeMac, parseInteger} from "../utils/strings";
 import {monitoringDisableUrl} from "../utils/urlBuilder";
-import CONSTRAINTS from "../validation/constraints";
+import CONSTRAINTS from "../shared/validation/constraints";
 import {forConstraint} from "../validation/validator";
 import {
     Domain,

@@ -15,12 +15,12 @@ import {
     StoredNode,
     toIsEnum,
     toIsNewtype,
-} from "./shared";
+} from "../shared/types";
 
 export * from "./config";
 export * from "./database";
 export * from "./logger";
-export * from "./shared";
+export * from "../shared/types";
 
 export type NodeStateData = {
     site?: Site,

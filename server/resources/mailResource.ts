@@ -1,4 +1,4 @@
-import CONSTRAINTS from "../validation/constraints";
+import CONSTRAINTS from "../shared/validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
 import * as MailService from "../services/mailService";
 import * as Resources from "../utils/resources";

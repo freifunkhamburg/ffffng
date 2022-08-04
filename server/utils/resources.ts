@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-import CONSTRAINTS from "../validation/constraints";
+import CONSTRAINTS from "../shared/validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
 import Logger from "../logger";
 import {Constraints, forConstraints, isConstraints} from "../validation/validator";
