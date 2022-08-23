@@ -17,16 +17,28 @@ import PageFooter from "@/components/page/PageFooter.vue";
 <style lang="scss">
 @import "fork-awesome";
 @import "scss/variables";
+@import "scss/mixins";
 
 body {
     background-color: $page-background-color;
     color: $page-text-color;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: $page-font-size;
+    font-family: $page-font-family;
     margin: 0;
 }
 
 main {
-    padding: $page-padding;
+    padding-top: $page-padding-top;
+    padding-bottom: $page-padding-bottom;
+
+    @each $breakpoint, $padding in $page-paddings-horizontal {
+        @include page-breakpoint($breakpoint) {
+            & {
+                padding-left: $padding;
+                padding-right: $padding;
+            }
+        }
+    }
 }
 
 a {

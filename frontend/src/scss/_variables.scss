@@ -53,9 +53,21 @@ $page-container-widths: (
     larger: 992px,
     largest: 992px,
 );
+$page-font-size: 0.9em;
+$page-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 $page-background-color: $gray-darkest;
 $page-text-color: $gray-lighter;
-$page-padding: 0.5em 0.5em 4.5em 0.5em;
+$page-padding-top: 0.5em;
+$page-padding-bottom: 4.5em;
+$page-paddings-horizontal: (
+    smallest: 0.75em,
+    smaller: 0.75em,
+    small: 1em,
+    medium: 1.25em,
+    large: 1.25em,
+    larger: 1.25em,
+    largest: 1.25em,
+);
 
 // Links
 $link-color: $variant-color-warning;
