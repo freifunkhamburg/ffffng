@@ -1,5 +1,5 @@
-import {createTransport, Transporter} from "nodemailer";
-import {config} from "../config";
+import { createTransport, Transporter } from "nodemailer";
+import { config } from "../config";
 import * as MailTemplateService from "../services/mailTemplateService";
 import Mail from "nodemailer/lib/mailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";

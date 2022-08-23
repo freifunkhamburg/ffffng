@@ -1,15 +1,28 @@
-import {isString, Logger, LoggingConfig, LogLevel, TaggedLogger} from './types';
-import moment from 'moment';
+import {
+    isString,
+    Logger,
+    LoggingConfig,
+    LogLevel,
+    TaggedLogger,
+} from "./types";
+import moment from "moment";
 
-export type LoggingFunction = (...args: any[]) => void;
+export type LoggingFunction = (...args: unknown[]) => void;
 
+// noinspection JSUnusedLocalSymbols
 const noopTaggedLogger: TaggedLogger = {
-    log(_level: LogLevel, ..._args: any[]): void {},
-    debug(..._args: any[]): void {},
-    info(..._args: any[]): void {},
-    warn(..._args: any[]): void {},
-    error(..._args: any[]): void {},
-    profile(..._args: any[]): void {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function
+    log(level: LogLevel, ...args: unknown[]): void {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function
+    debug(...args: unknown[]): void {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function
+    info(...args: unknown[]): void {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function
+    warn(...args: unknown[]): void {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function
+    error(...args: unknown[]): void {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function
+    profile(...args: unknown[]): void {},
 };
 
 export interface ActivatableLogger extends Logger {
@@ -34,17 +47,20 @@ export class ActivatableLoggerImpl implements ActivatableLogger {
             const profile = this.config.profile;
             const loggingFunction = this.loggingFunction;
             return {
-                log(level: LogLevel, ...args: any[]): void {
-                    const timeStr = moment().format('YYYY-MM-DD HH:mm:ss');
+                log(level: LogLevel, ...args: unknown[]): void {
+                    const timeStr = moment().format("YYYY-MM-DD HH:mm:ss");
                     const levelStr = level.toUpperCase();
-                    const tagsStr = tags ? '[' + tags.join(', ') + ']' : '';
+                    const tagsStr = tags ? "[" + tags.join(", ") + "]" : "";
                     const messagePrefix = `${timeStr} ${levelStr} - ${tagsStr}`;
 
                     // Make sure to only replace %s, etc. in real log message
                     // but not in tags.
-                    const escapedMessagePrefix = messagePrefix.replace(/%/g, '%%');
+                    const escapedMessagePrefix = messagePrefix.replace(
+                        /%/g,
+                        "%%"
+                    );
 
-                    let message = '';
+                    let message = "";
                     if (args && isString(args[0])) {
                         message = args[0];
                         args.shift();
@@ -55,26 +71,26 @@ export class ActivatableLoggerImpl implements ActivatableLogger {
                         : escapedMessagePrefix;
                     loggingFunction(logStr, ...args);
                 },
-                debug(...args: any[]): void {
+                debug(...args: unknown[]): void {
                     if (debug) {
-                        this.log('debug', ...args);
+                        this.log("debug", ...args);
                     }
                 },
-                info(...args: any[]): void {
-                    this.log('info', ...args);
+                info(...args: unknown[]): void {
+                    this.log("info", ...args);
                 },
-                warn(...args: any[]): void {
-                    this.log('warn', ...args);
+                warn(...args: unknown[]): void {
+                    this.log("warn", ...args);
                 },
-                error(...args: any[]): void {
-                    this.log('error', ...args);
+                error(...args: unknown[]): void {
+                    this.log("error", ...args);
                 },
-                profile(...args: any[]): void {
+                profile(...args: unknown[]): void {
                     if (profile) {
-                        this.log('profile', ...args);
+                        this.log("profile", ...args);
                     }
                 },
-            }
+            };
         } else {
             return noopTaggedLogger;
         }

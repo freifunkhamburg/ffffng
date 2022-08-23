@@ -1,51 +1,70 @@
-import {ISqlite, Statement} from "sqlite";
+import { ISqlite, Statement } from "sqlite";
 
 export type RunResult = ISqlite.RunResult;
 export type SqlType = ISqlite.SqlType;
 
-export {Statement};
+export { Statement };
 
 export interface TypedDatabase {
     /**
      * @see Database.on
      */
-    on(event: string, listener: any): Promise<void>;
+    on(event: string, listener: unknown): Promise<void>;
 
     /**
      * @see Database.run
      */
-    run(sql: SqlType, ...params: any[]): Promise<RunResult>;
+    run(sql: SqlType, ...params: unknown[]): Promise<RunResult>;
 
     /**
      * @see Database.get
      */
-    get<T>(sql: SqlType, ...params: any[]): Promise<T | undefined>;
+    get<T>(sql: SqlType, ...params: unknown[]): Promise<T | undefined>;
 
     /**
      * @see Database.each
      */
-    each<T>(sql: SqlType, callback: (err: any, row: T) => void): Promise<number>;
+    each<T>(
+        sql: SqlType,
+        callback: (err: unknown, row: T) => void
+    ): Promise<number>;
 
-    each<T>(sql: SqlType, param1: any, callback: (err: any, row: T) => void): Promise<number>;
+    each<T>(
+        sql: SqlType,
+        param1: unknown,
+        callback: (err: unknown, row: T) => void
+    ): Promise<number>;
 
-    each<T>(sql: SqlType, param1: any, param2: any, callback: (err: any, row: T) => void): Promise<number>;
+    each<T>(
+        sql: SqlType,
+        param1: unknown,
+        param2: unknown,
+        callback: (err: unknown, row: T) => void
+    ): Promise<number>;
 
-    each<T>(sql: SqlType, param1: any, param2: any, param3: any, callback: (err: any, row: T) => void): Promise<number>;
+    each<T>(
+        sql: SqlType,
+        param1: unknown,
+        param2: unknown,
+        param3: unknown,
+        callback: (err: unknown, row: T) => void
+    ): Promise<number>;
 
-    each<T>(sql: SqlType, ...params: any[]): Promise<number>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    each<T>(sql: SqlType, ...params: unknown[]): Promise<number>;
 
     /**
      * @see Database.all
      */
-    all<T = never>(sql: SqlType, ...params: any[]): Promise<T[]>;
+    all<T = never>(sql: SqlType, ...params: unknown[]): Promise<T[]>;
 
     /**
      * @see Database.exec
      */
-    exec(sql: SqlType, ...params: any[]): Promise<void>;
+    exec(sql: SqlType, ...params: unknown[]): Promise<void>;
 
     /**
      * @see Database.prepare
      */
-    prepare(sql: SqlType, ...params: any[]): Promise<Statement>;
+    prepare(sql: SqlType, ...params: unknown[]): Promise<Statement>;
 }

@@ -1,11 +1,12 @@
 import * as MonitoringService from "../services/monitoringService";
-import {jobResultOkay, jobResultWarning} from "./scheduler";
+import { jobResultOkay, jobResultWarning } from "./scheduler";
 
 export default {
-    name: 'NodeInformationRetrievalJob',
-    description: 'Fetches the nodes.json and calculates and stores the monitoring / online status for registered nodes.',
+    name: "NodeInformationRetrievalJob",
+    description:
+        "Fetches the nodes.json and calculates and stores the monitoring / online status for registered nodes.",
 
-    async run () {
+    async run() {
         const result = await MonitoringService.retrieveNodeInformation();
         if (result.failedParsingNodesCount > 0) {
             return jobResultWarning(

@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import moment from "moment";
 
-import {config} from "../config";
+import { config } from "../config";
 import Logger from "../logger";
 
 import MailQueueJob from "./MailQueueJob";
@@ -16,29 +16,29 @@ export enum JobResultState {
 }
 
 export type JobResult = {
-    state: JobResultState,
-    message?: string,
+    state: JobResultState;
+    message?: string;
 };
 
 export function jobResultOkay(message?: string): JobResult {
     return {
         state: JobResultState.OKAY,
-        message
-    }
+        message,
+    };
 }
 
 export function jobResultWarning(message?: string): JobResult {
     return {
         state: JobResultState.WARNING,
-        message
-    }
+        message,
+    };
 }
 
 export interface Job {
-    name: string,
-    description: string,
+    name: string;
+    description: string;
 
-    run(): Promise<JobResult>,
+    run(): Promise<JobResult>;
 }
 
 export enum TaskState {
@@ -59,7 +59,7 @@ export class Task {
         public lastRunDuration: number | null,
         public state: TaskState,
         public result: JobResult | null,
-        public enabled: boolean,
+        public enabled: boolean
     ) {}
 
     run(): void {
@@ -75,7 +75,7 @@ export class Task {
         const done = (state: TaskState, result: JobResult | null): void => {
             const now = moment();
             const duration = now.diff(this.runningSince || now);
-            Logger.tag('jobs').profile('[%sms]\t%s', duration, this.name);
+            Logger.tag("jobs").profile("[%sms]\t%s", duration, this.name);
 
             this.runningSince = null;
             this.lastRunDuration = duration;
@@ -83,16 +83,19 @@ export class Task {
             this.result = result;
         };
 
-        this.job.run().then(result => {
-            done(TaskState.IDLE, result);
-        }).catch(err => {
-            Logger.tag('jobs').error("Job %s failed: %s", this.name, err);
-            done(TaskState.FAILED, null);
-        });
+        this.job
+            .run()
+            .then((result) => {
+                done(TaskState.IDLE, result);
+            })
+            .catch((err) => {
+                Logger.tag("jobs").error("Job %s failed: %s", this.name, err);
+                done(TaskState.FAILED, null);
+            });
     }
 }
 
-type Tasks = {[key: string]: Task};
+type Tasks = { [key: string]: Task };
 
 const tasks: Tasks = {};
 
@@ -104,7 +107,7 @@ function nextTaskId(): number {
 }
 
 function schedule(expr: string, job: Job): void {
-    Logger.tag('jobs').info('Scheduling job: %s  %s', expr, job.name);
+    Logger.tag("jobs").info("Scheduling job: %s  %s", expr, job.name);
 
     const id = nextTaskId();
 
@@ -119,33 +122,35 @@ function schedule(expr: string, job: Job): void {
         null,
         TaskState.IDLE,
         null,
-        true,
+        true
     );
 
     cron.schedule(expr, () => task.run());
 
-    tasks['' + id] = task;
+    tasks["" + id] = task;
 }
 
 export function init() {
-    Logger.tag('jobs').info('Scheduling background jobs...');
+    Logger.tag("jobs").info("Scheduling background jobs...");
 
     try {
-        schedule('0 */1 * * * *', MailQueueJob);
-        schedule('15 */1 * * * *', FixNodeFilenamesJob);
+        schedule("0 */1 * * * *", MailQueueJob);
+        schedule("15 */1 * * * *", FixNodeFilenamesJob);
 
         if (config.client.monitoring.enabled) {
-            schedule('30 */15 * * * *', NodeInformationRetrievalJob);
-            schedule('45 */5 * * * *', MonitoringMailsSendingJob);
-            schedule('0 0 3 * * *', OfflineNodesDeletionJob); // every night at 3:00
+            schedule("30 */15 * * * *", NodeInformationRetrievalJob);
+            schedule("45 */5 * * * *", MonitoringMailsSendingJob);
+            schedule("0 0 3 * * *", OfflineNodesDeletionJob); // every night at 3:00
         }
-    }
-    catch (error) {
-        Logger.tag('jobs').error('Error during scheduling of background jobs:', error);
+    } catch (error) {
+        Logger.tag("jobs").error(
+            "Error during scheduling of background jobs:",
+            error
+        );
         throw error;
     }
 
-    Logger.tag('jobs').info('Scheduling of background jobs done.');
+    Logger.tag("jobs").info("Scheduling of background jobs done.");
 }
 
 export function getTasks(): Tasks {

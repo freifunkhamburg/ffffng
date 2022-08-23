@@ -1,46 +1,65 @@
-import commandLineArgs from "command-line-args"
-import commandLineUsage from "command-line-usage"
-import fs from "graceful-fs"
-import url from "url"
-import {parse} from "sparkson"
-import {Config, Url, Version} from "./types"
+import commandLineArgs from "command-line-args";
+import commandLineUsage from "command-line-usage";
+import fs from "graceful-fs";
+import url from "url";
+import { parse } from "sparkson";
+import { Config, hasOwnProperty, Url, Version } from "./types";
 
-// @ts-ignore
-export let config: Config = {};
+export let config: Config = {} as Config;
 export let version: Version = "unknown" as Version;
 
 export function parseCommandLine(): void {
     const commandLineDefs = [
-        {name: 'help', alias: 'h', type: Boolean, description: 'Show this help'},
-        {name: 'config', alias: 'c', type: String, description: 'Location of config.json'},
-        {name: 'version', alias: 'v', type: Boolean, description: 'Show ffffng version'}
+        {
+            name: "help",
+            alias: "h",
+            type: Boolean,
+            description: "Show this help",
+        },
+        {
+            name: "config",
+            alias: "c",
+            type: String,
+            description: "Location of config.json",
+        },
+        {
+            name: "version",
+            alias: "v",
+            type: Boolean,
+            description: "Show ffffng version",
+        },
     ];
 
     let commandLineOptions;
     try {
         commandLineOptions = commandLineArgs(commandLineDefs);
-    } catch (e: any) {
-        if (e.message) {
-            console.error(e.message);
+    } catch (error) {
+        if (hasOwnProperty(error, "message")) {
+            console.error(error.message);
         } else {
-            console.error(e);
+            console.error(error);
         }
-        console.error('Try \'--help\' for more information.');
+        console.error("Try '--help' for more information.");
         process.exit(1);
     }
 
-    const packageJsonFile = __dirname + '/../package.json';
+    const packageJsonFile = __dirname + "/../package.json";
     if (fs.existsSync(packageJsonFile)) {
-        version = JSON.parse(fs.readFileSync(packageJsonFile, 'utf8')).version;
+        version = JSON.parse(fs.readFileSync(packageJsonFile, "utf8")).version;
     }
 
     function usage() {
-        console.log(commandLineUsage([
-            {
-                header: 'ffffng - ' + version + ' - Freifunk node management form',
-                optionList: commandLineDefs
-            }
-        ]));
+        console.log(
+            commandLineUsage([
+                {
+                    header:
+                        "ffffng - " +
+                        version +
+                        " - Freifunk node management form",
+                    optionList: commandLineDefs,
+                },
+            ])
+        );
     }
 
     if (commandLineOptions.help) {
@@ -49,7 +68,7 @@ export function parseCommandLine(): void {
     }
 
     if (commandLineOptions.version) {
-        console.log('ffffng - ' + version);
+        console.log("ffffng - " + version);
         process.exit(0);
     }
 
@@ -62,9 +81,9 @@ export function parseCommandLine(): void {
     let configJSON = {};
 
     if (fs.existsSync(configJSONFile)) {
-        configJSON = JSON.parse(fs.readFileSync(configJSONFile, 'utf8'));
+        configJSON = JSON.parse(fs.readFileSync(configJSONFile, "utf8"));
     } else {
-        console.error('config.json not found: ' + configJSONFile);
+        console.error("config.json not found: " + configJSONFile);
         process.exit(1);
     }
 
@@ -72,7 +91,7 @@ export function parseCommandLine(): void {
 
     function stripTrailingSlash(url: Url): Url {
         return url.endsWith("/")
-            ? url.substring(0, url.length - 1) as Url
+            ? (url.substring(0, url.length - 1) as Url)
             : url;
     }
 

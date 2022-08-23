@@ -1,4 +1,4 @@
-import {ArrayField, Field, RawJsonField} from "sparkson";
+import { ArrayField, Field, RawJsonField } from "sparkson";
 
 // Types shared with the client.
 export type TypeGuard<T> = (arg: unknown) => arg is T;
@@ -9,6 +9,19 @@ export function parseJSON(str: string): JSONValue {
         throw new Error("Invalid JSON returned. Should never happen.");
     }
     return json;
+}
+
+export function filterUndefinedFromJSON(obj: {
+    [key: string]: JSONValue | undefined;
+}): JSONObject {
+    const result: JSONObject = {};
+    for (const [key, value] of Object.entries(obj)) {
+        if (value !== undefined) {
+            result[key] = value;
+        }
+    }
+
+    return result;
 }
 
 export type JSONValue =
@@ -49,8 +62,7 @@ export function isJSONObject(arg: unknown): arg is JSONObject {
     return true;
 }
 
-export interface JSONArray extends Array<JSONValue> {
-}
+export type JSONArray = Array<JSONValue>;
 
 export const isJSONArray = toIsArray(isJSONValue);
 
@@ -65,39 +77,59 @@ export function isObject(arg: unknown): arg is object {
     return arg !== null && typeof arg === "object";
 }
 
+export function isPlainObject(arg: unknown): arg is { [key: string]: unknown } {
+    return isObject(arg) && !Array.isArray(arg);
+}
+
+export function hasOwnProperty<Key extends PropertyKey>(
+    arg: unknown,
+    key: Key
+): arg is Record<Key, unknown> {
+    return isObject(arg) && key in arg;
+}
+
+export function getFieldIfExists(
+    arg: unknown,
+    key: PropertyKey
+): unknown | undefined {
+    return hasOwnProperty(arg, key) ? arg[key] : undefined;
+}
+
 export function isArray<T>(arg: unknown, isT: TypeGuard<T>): arg is Array<T> {
     if (!Array.isArray(arg)) {
         return false;
     }
     for (const element of arg) {
         if (!isT(element)) {
-            return false
+            return false;
         }
     }
     return true;
 }
 
-export function isMap(arg: unknown): arg is Map<any, any> {
+export function isMap(arg: unknown): arg is Map<unknown, unknown> {
     return arg instanceof Map;
 }
 
 export function isString(arg: unknown): arg is string {
-    return typeof arg === "string"
+    return typeof arg === "string";
 }
 
+// noinspection JSUnusedLocalSymbols
 export function toIsNewtype<
     Type extends Value & { readonly __tag: symbol },
-    Value,
->(isValue: TypeGuard<Value>, _example: Type): TypeGuard<Type> {
+    Value
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+>(isValue: TypeGuard<Value>, example: Type): TypeGuard<Type> {
     return (arg: unknown): arg is Type => isValue(arg);
 }
 
 export function isNumber(arg: unknown): arg is number {
-    return typeof arg === "number"
+    return typeof arg === "number";
 }
 
 export function isBoolean(arg: unknown): arg is boolean {
-    return typeof arg === "boolean"
+    return typeof arg === "boolean";
 }
 
 export function isUndefined(arg: unknown): arg is undefined {
@@ -113,14 +145,18 @@ export function toIsArray<T>(isT: TypeGuard<T>): TypeGuard<T[]> {
 }
 
 export function toIsEnum<E>(enumDef: E): EnumTypeGuard<E> {
-    return (arg): arg is EnumValue<E> => Object.values(enumDef).includes(arg as [keyof E]);
+    return (arg): arg is EnumValue<E> =>
+        Object.values(enumDef).includes(arg as [keyof E]);
 }
 
 export function isRegExp(arg: unknown): arg is RegExp {
     return isObject(arg) && arg instanceof RegExp;
 }
 
-export function isOptional<T>(arg: unknown, isT: TypeGuard<T>): arg is (T | undefined) {
+export function isOptional<T>(
+    arg: unknown,
+    isT: TypeGuard<T>
+): arg is T | undefined {
     return arg === undefined || isT(arg);
 }
 
@@ -160,7 +196,7 @@ export function isNodeStatistics(arg: unknown): arg is NodeStatistics {
 
 export type Statistics = {
     nodes: NodeStatistics;
-}
+};
 
 export function isStatistics(arg: unknown): arg is Statistics {
     return isObject(arg) && isNodeStatistics((arg as Statistics).nodes);
@@ -172,9 +208,8 @@ export class CommunityConfig {
         @Field("domain") public domain: string,
         @Field("contactEmail") public contactEmail: EmailAddress,
         @ArrayField("sites", String) public sites: Site[],
-        @ArrayField("domains", String) public domains: Domain[],
-    ) {
-    }
+        @ArrayField("domains", String) public domains: Domain[]
+    ) {}
 }
 
 export function isCommunityConfig(arg: unknown): arg is CommunityConfig {
@@ -194,9 +229,8 @@ export function isCommunityConfig(arg: unknown): arg is CommunityConfig {
 export class LegalConfig {
     constructor(
         @Field("privacyUrl", true) public privacyUrl?: Url,
-        @Field("imprintUrl", true) public imprintUrl?: Url,
-    ) {
-    }
+        @Field("imprintUrl", true) public imprintUrl?: Url
+    ) {}
 }
 
 export function isLegalConfig(arg: unknown): arg is LegalConfig {
@@ -205,16 +239,12 @@ export function isLegalConfig(arg: unknown): arg is LegalConfig {
     }
     const cfg = arg as LegalConfig;
     return (
-        isOptional(cfg.privacyUrl, isUrl) &&
-        isOptional(cfg.imprintUrl, isUrl)
+        isOptional(cfg.privacyUrl, isUrl) && isOptional(cfg.imprintUrl, isUrl)
     );
 }
 
 export class ClientMapConfig {
-    constructor(
-        @Field("mapUrl") public mapUrl: Url,
-    ) {
-    }
+    constructor(@Field("mapUrl") public mapUrl: Url) {}
 }
 
 export function isClientMapConfig(arg: unknown): arg is ClientMapConfig {
@@ -226,10 +256,7 @@ export function isClientMapConfig(arg: unknown): arg is ClientMapConfig {
 }
 
 export class MonitoringConfig {
-    constructor(
-        @Field("enabled") public enabled: boolean,
-    ) {
-    }
+    constructor(@Field("enabled") public enabled: boolean) {}
 }
 
 export function isMonitoringConfig(arg: unknown): arg is MonitoringConfig {
@@ -243,9 +270,8 @@ export function isMonitoringConfig(arg: unknown): arg is MonitoringConfig {
 export class CoordinatesConfig {
     constructor(
         @Field("lat") public lat: number,
-        @Field("lng") public lng: number,
-    ) {
-    }
+        @Field("lng") public lng: number
+    ) {}
 }
 
 export function isCoordinatesConfig(arg: unknown): arg is CoordinatesConfig {
@@ -253,10 +279,7 @@ export function isCoordinatesConfig(arg: unknown): arg is CoordinatesConfig {
         return false;
     }
     const coords = arg as CoordinatesConfig;
-    return (
-        isNumber(coords.lat) &&
-        isNumber(coords.lng)
-    );
+    return isNumber(coords.lat) && isNumber(coords.lng);
 }
 
 export class CoordinatesSelectorConfig {
@@ -264,12 +287,13 @@ export class CoordinatesSelectorConfig {
         @Field("lat") public lat: number,
         @Field("lng") public lng: number,
         @Field("defaultZoom") public defaultZoom: number,
-        @RawJsonField("layers") public layers: JSONObject,
-    ) {
-    }
+        @RawJsonField("layers") public layers: JSONObject
+    ) {}
 }
 
-export function isCoordinatesSelectorConfig(arg: unknown): arg is CoordinatesSelectorConfig {
+export function isCoordinatesSelectorConfig(
+    arg: unknown
+): arg is CoordinatesSelectorConfig {
     if (!isObject(arg)) {
         return false;
     }
@@ -286,12 +310,14 @@ export class OtherCommunityInfoConfig {
     constructor(
         @Field("showInfo") public showInfo: boolean,
         @Field("showBorderForDebugging") public showBorderForDebugging: boolean,
-        @ArrayField("localCommunityPolygon", CoordinatesConfig) public localCommunityPolygon: CoordinatesConfig[],
-    ) {
-    }
+        @ArrayField("localCommunityPolygon", CoordinatesConfig)
+        public localCommunityPolygon: CoordinatesConfig[]
+    ) {}
 }
 
-export function isOtherCommunityInfoConfig(arg: unknown): arg is OtherCommunityInfoConfig {
+export function isOtherCommunityInfoConfig(
+    arg: unknown
+): arg is OtherCommunityInfoConfig {
     if (!isObject(arg)) {
         return false;
     }
@@ -309,11 +335,12 @@ export class ClientConfig {
         @Field("legal") public legal: LegalConfig,
         @Field("map") public map: ClientMapConfig,
         @Field("monitoring") public monitoring: MonitoringConfig,
-        @Field("coordsSelector") public coordsSelector: CoordinatesSelectorConfig,
-        @Field("otherCommunityInfo") public otherCommunityInfo: OtherCommunityInfoConfig,
-        @Field("rootPath", true, undefined, "/") public rootPath: string,
-    ) {
-    }
+        @Field("coordsSelector")
+        public coordsSelector: CoordinatesSelectorConfig,
+        @Field("otherCommunityInfo")
+        public otherCommunityInfo: OtherCommunityInfoConfig,
+        @Field("rootPath", true, undefined, "/") public rootPath: string
+    ) {}
 }
 
 export function isClientConfig(arg: unknown): arg is ClientConfig {
@@ -345,15 +372,28 @@ export type DurationSeconds = number & { readonly __tag: unique symbol };
 export const isDurationSeconds = toIsNewtype(isNumber, NaN as DurationSeconds);
 
 export type DurationMilliseconds = number & { readonly __tag: unique symbol };
-export const isDurationMilliseconds = toIsNewtype(isNumber, NaN as DurationMilliseconds);
+export const isDurationMilliseconds = toIsNewtype(
+    isNumber,
+    NaN as DurationMilliseconds
+);
 
 export type UnixTimestampSeconds = number & { readonly __tag: unique symbol };
-export const isUnixTimestampSeconds = toIsNewtype(isNumber, NaN as UnixTimestampSeconds);
+export const isUnixTimestampSeconds = toIsNewtype(
+    isNumber,
+    NaN as UnixTimestampSeconds
+);
 
-export type UnixTimestampMilliseconds = number & { readonly __tag: unique symbol };
-export const isUnixTimestampMilliseconds = toIsNewtype(isNumber, NaN as UnixTimestampMilliseconds);
+export type UnixTimestampMilliseconds = number & {
+    readonly __tag: unique symbol;
+};
+export const isUnixTimestampMilliseconds = toIsNewtype(
+    isNumber,
+    NaN as UnixTimestampMilliseconds
+);
 
-export function toUnixTimestampSeconds(ms: UnixTimestampMilliseconds): UnixTimestampSeconds {
+export function toUnixTimestampSeconds(
+    ms: UnixTimestampMilliseconds
+): UnixTimestampSeconds {
     return Math.floor(ms) as UnixTimestampSeconds;
 }
 
@@ -371,7 +411,7 @@ export const isMonitoringState = toIsEnum(MonitoringState);
 export type NodeId = string & { readonly __tag: unique symbol };
 export const isNodeId = toIsNewtype(isString, "" as NodeId);
 
-export type Hostname = string & { readonly __tag: unique symbol }
+export type Hostname = string & { readonly __tag: unique symbol };
 export const isHostname = toIsNewtype(isString, "" as Hostname);
 
 export type Nickname = string & { readonly __tag: unique symbol };
@@ -387,10 +427,10 @@ export type BaseNode = {
     nickname: Nickname;
     email: EmailAddress;
     hostname: Hostname;
-    coords?: Coordinates;
-    key?: FastdKey;
+    coords: Coordinates | undefined;
+    key: FastdKey | undefined;
     mac: MAC;
-}
+};
 
 export function isBaseNode(arg: unknown): arg is BaseNode {
     if (!isObject(arg)) {
@@ -412,16 +452,14 @@ export function isBaseNode(arg: unknown): arg is BaseNode {
  */
 export type CreateOrUpdateNode = BaseNode & {
     monitoring: boolean;
-}
+};
 
 export function isCreateOrUpdateNode(arg: unknown): arg is CreateOrUpdateNode {
     if (!isBaseNode(arg)) {
         return false;
     }
     const node = arg as CreateOrUpdateNode;
-    return (
-        isBoolean(node.monitoring)
-    );
+    return isBoolean(node.monitoring);
 }
 
 /**
@@ -431,7 +469,7 @@ export type StoredNode = BaseNode & {
     token: Token;
     monitoringState: MonitoringState;
     modifiedAt: UnixTimestampSeconds;
-}
+};
 
 export function isStoredNode(arg: unknown): arg is StoredNode {
     if (!isObject(arg)) {
@@ -449,23 +487,20 @@ export function isStoredNode(arg: unknown): arg is StoredNode {
 export type NodeResponse = StoredNode & {
     monitoring: boolean;
     monitoringConfirmed: boolean;
-}
+};
 
 export function isNodeResponse(arg: unknown): arg is NodeResponse {
     if (!isStoredNode(arg)) {
         return false;
     }
     const node = arg as NodeResponse;
-    return (
-        isBoolean(node.monitoring) &&
-        isBoolean(node.monitoringConfirmed)
-    );
+    return isBoolean(node.monitoring) && isBoolean(node.monitoringConfirmed);
 }
 
 export type NodeTokenResponse = {
     token: Token;
     node: NodeResponse;
-}
+};
 
 export function isNodeTokenResponse(arg: unknown): arg is NodeTokenResponse {
     if (!isObject(arg)) {
@@ -495,13 +530,15 @@ export const isDomain = toIsNewtype(isString, "" as Domain);
 /**
  * Represents a node in the context of a Freifunk site and domain.
  */
-export type DomainSpecificNodeResponse = Record<NodeSortField, any> & NodeResponse & {
-    site?: Site,
-    domain?: Domain,
-    onlineState?: OnlineState,
-}
+export type DomainSpecificNodeResponse = NodeResponse & {
+    site: Site | undefined;
+    domain: Domain | undefined;
+    onlineState: OnlineState | undefined;
+};
 
-export function isDomainSpecificNodeResponse(arg: unknown): arg is DomainSpecificNodeResponse {
+export function isDomainSpecificNodeResponse(
+    arg: unknown
+): arg is DomainSpecificNodeResponse {
     if (!isNodeResponse(arg)) {
         return false;
     }
@@ -514,12 +551,12 @@ export function isDomainSpecificNodeResponse(arg: unknown): arg is DomainSpecifi
 }
 
 export type MonitoringResponse = {
-    hostname: Hostname,
-    mac: MAC,
-    email: EmailAddress,
-    monitoring: boolean,
-    monitoringConfirmed: boolean,
-}
+    hostname: Hostname;
+    mac: MAC;
+    email: EmailAddress;
+    monitoring: boolean;
+    monitoringConfirmed: boolean;
+};
 
 export function isMonitoringResponse(arg: unknown): arg is MonitoringResponse {
     if (!Object(arg)) {
@@ -535,21 +572,32 @@ export function isMonitoringResponse(arg: unknown): arg is MonitoringResponse {
     );
 }
 
-export enum NodeSortField {
-    HOSTNAME = 'hostname',
-    NICKNAME = 'nickname',
-    EMAIL = 'email',
-    TOKEN = 'token',
-    MAC = 'mac',
-    KEY = 'key',
-    SITE = 'site',
-    DOMAIN = 'domain',
-    COORDS = 'coords',
-    ONLINE_STATE = 'onlineState',
-    MONITORING_STATE = 'monitoringState',
+// noinspection JSUnusedGlobalSymbols
+enum NodeSortFieldEnum {
+    HOSTNAME = "hostname",
+    NICKNAME = "nickname",
+    EMAIL = "email",
+    TOKEN = "token",
+    MAC = "mac",
+    KEY = "key",
+    SITE = "site",
+    DOMAIN = "domain",
+    COORDS = "coords",
+    ONLINE_STATE = "onlineState",
+    MONITORING_STATE = "monitoringState",
 }
 
-export const isNodeSortField = toIsEnum(NodeSortField);
+export type NodeSortField = keyof Pick<
+    DomainSpecificNodeResponse,
+    NodeSortFieldEnum
+>;
+
+export function isNodeSortField(arg: unknown): arg is NodeSortField {
+    if (!isString(arg)) {
+        return false;
+    }
+    return Object.values(NodeSortFieldEnum).includes(arg as NodeSortField);
+}
 
 export type NodesFilter = {
     hasKey?: boolean;
@@ -558,7 +606,7 @@ export type NodesFilter = {
     site?: Site;
     domain?: Domain;
     onlineState?: OnlineState;
-}
+};
 
 export const NODES_FILTER_FIELDS = {
     hasKey: Boolean,
@@ -588,49 +636,49 @@ export type SearchTerm = string & { readonly __tag: unique symbol }
 export const isSearchTerm = isString;
 
 export enum MonitoringSortField {
-    ID = 'id',
-    HOSTNAME = 'hostname',
-    MAC = 'mac',
-    SITE = 'site',
-    DOMAIN = 'domain',
-    MONITORING_STATE = 'monitoring_state',
-    STATE = 'state',
-    LAST_SEEN = 'last_seen',
-    IMPORT_TIMESTAMP = 'import_timestamp',
-    LAST_STATUS_MAIL_TYPE = 'last_status_mail_type',
-    LAST_STATUS_MAIL_SENT = 'last_status_mail_sent',
-    CREATED_AT = 'created_at',
-    MODIFIED_AT = 'modified_at',
+    ID = "id",
+    HOSTNAME = "hostname",
+    MAC = "mac",
+    SITE = "site",
+    DOMAIN = "domain",
+    MONITORING_STATE = "monitoring_state",
+    STATE = "state",
+    LAST_SEEN = "last_seen",
+    IMPORT_TIMESTAMP = "import_timestamp",
+    LAST_STATUS_MAIL_TYPE = "last_status_mail_type",
+    LAST_STATUS_MAIL_SENT = "last_status_mail_sent",
+    CREATED_AT = "created_at",
+    MODIFIED_AT = "modified_at",
 }
 
 export const isMonitoringSortField = toIsEnum(MonitoringSortField);
 
 export enum TaskSortField {
-    ID = 'id',
-    NAME = 'name',
-    SCHEDULE = 'schedule',
-    STATE = 'state',
-    RUNNING_SINCE = 'runningSince',
-    LAST_RUN_STARTED = 'lastRunStarted',
+    ID = "id",
+    NAME = "name",
+    SCHEDULE = "schedule",
+    STATE = "state",
+    RUNNING_SINCE = "runningSince",
+    LAST_RUN_STARTED = "lastRunStarted",
 }
 
 export const isTaskSortField = toIsEnum(TaskSortField);
 
 export enum MailSortField {
-    ID = 'id',
-    FAILURES = 'failures',
-    SENDER = 'sender',
-    RECIPIENT = 'recipient',
-    EMAIL = 'email',
-    CREATED_AT = 'created_at',
-    MODIFIED_AT = 'modified_at',
+    ID = "id",
+    FAILURES = "failures",
+    SENDER = "sender",
+    RECIPIENT = "recipient",
+    EMAIL = "email",
+    CREATED_AT = "created_at",
+    MODIFIED_AT = "modified_at",
 }
 
 export const isMailSortField = toIsEnum(MailSortField);
 
 export type GenericSortField = {
     value: string;
-    readonly __tag: unique symbol
+    readonly __tag: unique symbol;
 };
 
 export enum SortDirection {

@@ -1,12 +1,12 @@
 import CONSTRAINTS from "../shared/validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
 import * as Resources from "../utils/resources";
-import {handleJSONWithData, RequestData} from "../utils/resources";
-import {getTasks, Task, TaskState} from "../jobs/scheduler";
-import {normalizeString} from "../shared/utils/strings";
-import {forConstraint} from "../shared/validation/validator";
-import {Request, Response} from "express";
-import {isString, isTaskSortField} from "../types";
+import { handleJSONWithData, RequestData } from "../utils/resources";
+import { getTasks, Task, TaskState } from "../jobs/scheduler";
+import { normalizeString } from "../shared/utils/strings";
+import { forConstraint } from "../shared/validation/validator";
+import { Request, Response } from "express";
+import { isString, isTaskSortField } from "../types";
 
 const isValidId = forConstraint(CONSTRAINTS.id, false);
 
@@ -22,7 +22,7 @@ type TaskResponse = {
     result: string | null;
     message: string | null;
     enabled: boolean;
-}
+};
 
 function toTaskResponse(task: Task): TaskResponse {
     return {
@@ -34,20 +34,26 @@ function toTaskResponse(task: Task): TaskResponse {
         lastRunStarted: task.lastRunStarted && task.lastRunStarted.unix(),
         lastRunDuration: task.lastRunDuration || null,
         state: task.state,
-        result: task.state !== TaskState.RUNNING && task.result ? task.result.state : null,
-        message: task.state !== TaskState.RUNNING && task.result ? task.result.message || null : null,
-        enabled: task.enabled
+        result:
+            task.state !== TaskState.RUNNING && task.result
+                ? task.result.state
+                : null,
+        message:
+            task.state !== TaskState.RUNNING && task.result
+                ? task.result.message || null
+                : null,
+        enabled: task.enabled,
     };
 }
 
 async function withValidTaskId(data: RequestData): Promise<string> {
     if (!isString(data.id)) {
-        throw {data: 'Missing task id.', type: ErrorTypes.badRequest};
+        throw { data: "Missing task id.", type: ErrorTypes.badRequest };
     }
     const id = normalizeString(data.id);
 
     if (!isValidId(id)) {
-        throw {data: 'Invalid task id.', type: ErrorTypes.badRequest};
+        throw { data: "Invalid task id.", type: ErrorTypes.badRequest };
     }
 
     return id;
@@ -58,7 +64,7 @@ async function getTask(id: string): Promise<Task> {
     const task = tasks[id];
 
     if (!task) {
-        throw {data: 'Task not found.', type: ErrorTypes.notFound};
+        throw { data: "Task not found.", type: ErrorTypes.notFound };
     }
 
     return task;
@@ -69,14 +75,19 @@ async function withTask(data: RequestData): Promise<Task> {
     return await getTask(id);
 }
 
-async function setTaskEnabled(data: RequestData, enable: boolean): Promise<TaskResponse> {
+async function setTaskEnabled(
+    data: RequestData,
+    enable: boolean
+): Promise<TaskResponse> {
     const task = await withTask(data);
     task.enabled = enable;
     return toTaskResponse(task);
 }
 
-async function doGetAll(req: Request): Promise<{ total: number, pageTasks: Task[] }> {
-    const restParams = await Resources.getValidRestParams('list', null, req);
+async function doGetAll(
+    req: Request
+): Promise<{ total: number; pageTasks: Task[] }> {
+    const restParams = await Resources.getValidRestParams("list", null, req);
 
     const tasks = Resources.sort(
         Object.values(getTasks()),
@@ -85,7 +96,7 @@ async function doGetAll(req: Request): Promise<{ total: number, pageTasks: Task[
     );
     const filteredTasks = Resources.filter(
         tasks,
-        ['id', 'name', 'schedule', 'state'],
+        ["id", "name", "schedule", "state"],
         restParams
     );
 
@@ -100,28 +111,28 @@ async function doGetAll(req: Request): Promise<{ total: number, pageTasks: Task[
 
 export function getAll(req: Request, res: Response): void {
     doGetAll(req)
-        .then(({total, pageTasks}) => {
-            res.set('X-Total-Count', total.toString(10));
+        .then(({ total, pageTasks }) => {
+            res.set("X-Total-Count", total.toString(10));
             Resources.success(res, pageTasks.map(toTaskResponse));
         })
-        .catch(err => Resources.error(res, err));
+        .catch((err) => Resources.error(res, err));
 }
 
-export const run = handleJSONWithData(async data => {
+export const run = handleJSONWithData(async (data) => {
     const task = await withTask(data);
 
     if (task.runningSince) {
-        throw {data: 'Task already running.', type: ErrorTypes.conflict};
+        throw { data: "Task already running.", type: ErrorTypes.conflict };
     }
 
     task.run();
     return toTaskResponse(task);
 });
 
-export const enable = handleJSONWithData(async data => {
+export const enable = handleJSONWithData(async (data) => {
     await setTaskEnabled(data, true);
 });
 
-export const disable = handleJSONWithData(async data => {
+export const disable = handleJSONWithData(async (data) => {
     await setTaskEnabled(data, false);
 });
