@@ -2,13 +2,13 @@
 import {useConfigStore} from "@/stores/config";
 import {useVersionStore} from "@/stores/version";
 
-const config = useConfigStore();
-const version = useVersionStore();
+const configStore = useConfigStore();
+const versionStore = useVersionStore();
 </script>
 
 <template>
-    <footer v-if="config.getConfig">
-        ffffng ({{ version.getVersion }})
+    <footer v-if="configStore.getConfig">
+        ffffng ({{ versionStore.getVersion }})
         <a href="https://github.com/freifunkhamburg/ffffng" target="_blank">
             <i class="fa fa-code" aria-hidden="true" /> Source Code
         </a>
@@ -16,12 +16,12 @@ const version = useVersionStore();
             <i class="fa fa-bug" aria-hidden="true" /> Fehler melden
         </a>
         <a
-            v-if="config.getConfig.legal.privacyUrl"
-            :href="config.getConfig.legal.privacyUrl"
+            v-if="configStore.getConfig.legal.privacyUrl"
+            :href="configStore.getConfig.legal.privacyUrl"
             target="_blank">Datenschutz</a>
         <a
-            v-if="config.getConfig.legal.imprintUrl"
-            :href="config.getConfig.legal.imprintUrl"
+            v-if="configStore.getConfig.legal.imprintUrl"
+            :href="configStore.getConfig.legal.imprintUrl"
             target="_blank">Impressum</a>
     </footer>
 </template>

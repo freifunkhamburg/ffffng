@@ -39,7 +39,7 @@ type NodeRedactField = "nickname" | "email" | "token";
 type NodeRedactFieldsMap = Partial<Record<NodeRedactField, boolean>>;
 
 type NodesRedactFieldsMap = Partial<Record<MAC, NodeRedactFieldsMap>>;
-const nodes = useNodesStore();
+const nodesStore = useNodesStore();
 const redactFieldsByDefault = ref(true);
 const nodesRedactFieldsMap = ref({} as NodesRedactFieldsMap)
 
@@ -49,7 +49,7 @@ async function refresh(page: number): Promise<void> {
     loading.value = true;
     redactAllFields(true);
     try {
-        await nodes.refresh(
+        await nodesStore.refresh(
             page,
             NODE_PER_PAGE,
             props.sortDirection,
@@ -127,9 +127,9 @@ watch(props, async () => {
     <NodesFilterPanel :search-term="searchTerm" :filter="filter" @update-filter="updateFilter"/>
 
     <Pager
-        :page="nodes.getPage"
-        :itemsPerPage="nodes.getNodesPerPage"
-        :totalItems="nodes.getTotalNodes"
+        :page="nodesStore.getPage"
+        :itemsPerPage="nodesStore.getNodesPerPage"
+        :totalItems="nodesStore.getTotalNodes"
         @changePage="refresh"/>
 
     <div class="actions">
@@ -237,7 +237,7 @@ watch(props, async () => {
 
             <tbody>
             <tr
-                v-for="node in nodes.getNodes"
+                v-for="node in nodesStore.getNodes"
                 :class="[node.onlineState ? node.onlineState.toLowerCase() : 'online-state-unknown']">
                 <td>{{ node.hostname }}</td>
                 <td v-if="shallRedactField(node, 'nickname')">
@@ -334,9 +334,9 @@ watch(props, async () => {
     </LoadingContainer>
 
     <Pager
-        :page="nodes.getPage"
-        :itemsPerPage="nodes.getNodesPerPage"
-        :totalItems="nodes.getTotalNodes"
+        :page="nodesStore.getPage"
+        :itemsPerPage="nodesStore.getNodesPerPage"
+        :totalItems="nodesStore.getTotalNodes"
         @changePage="refresh"/>
 </template>
 

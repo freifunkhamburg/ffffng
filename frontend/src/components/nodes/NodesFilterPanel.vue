@@ -50,7 +50,7 @@ const props = defineProps<Props>();
 const input = ref();
 const hasFocus = ref(false);
 const suggestedFiltersExpanded = ref(false);
-const config = useConfigStore();
+const configStore = useConfigStore();
 
 type Filter = {
     field: string,
@@ -81,7 +81,7 @@ function selectedFilterIndexForField(field: string): number {
 }
 
 const suggestedFilters = computed<Filter[][]>(() => {
-    const cfg = config.getConfig;
+    const cfg = configStore.getConfig;
     const sites = cfg?.community.sites || [];
     const domains = cfg?.community.domains || [];
 

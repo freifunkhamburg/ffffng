@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useConfigStore } from "@/stores/config";
+import {useConfigStore} from "@/stores/config";
 import {route, RouteName} from "@/router";
 
-const config = useConfigStore();
+const configStore = useConfigStore();
 </script>
 
 <template>
-    <header v-if="config.getConfig">
+    <header v-if="configStore.getConfig">
         <nav>
             <RouterLink class="logo" :to="route(RouteName.HOME)">
                 <img
@@ -17,8 +17,8 @@ const config = useConfigStore();
             </RouterLink>
 
             <h1>
-                    {{ config.getConfig.community.name }} – Knotenverwaltung
                 <RouterLink :to="route(RouteName.HOME)">
+                    {{ configStore.getConfig.community.name }} – Knotenverwaltung
                 </RouterLink>
             </h1>
 

@@ -5,17 +5,17 @@ import {ComponentVariant, MonitoringState} from "@/types";
 import {RouteName} from "@/router";
 import PageContainer from "@/components/page/PageContainer.vue";
 
-const statistics = useStatisticsStore();
+const statisticsStore = useStatisticsStore();
 
 function refresh(): void {
-    statistics.refresh();
+    statisticsStore.refresh();
 }
 
 refresh();
 </script>
 
 <template>
-    <PageContainer v-if="statistics.getStatistics">
+    <PageContainer v-if="statisticsStore.getStatistics">
         <h2>Knotenstatistik</h2>
 
         <div class="statistics">
@@ -23,14 +23,14 @@ refresh();
                 title="Registrierte Knoten"
                 icon="circle-o"
                 :variant="ComponentVariant.INFO"
-                :value="statistics.getStatistics.nodes.registered"
+                :value="statisticsStore.getStatistics.nodes.registered"
                 :route="RouteName.ADMIN_NODES"
             />
             <StatisticsCard
                 title="Mit hinterlegtem fastd-Key"
                 icon="lock"
                 :variant="ComponentVariant.WARNING"
-                :value="statistics.getStatistics.nodes.withVPN"
+                :value="statisticsStore.getStatistics.nodes.withVPN"
                 :route="RouteName.ADMIN_NODES"
                 :filter="{hasKey: true}"
             />
@@ -38,7 +38,7 @@ refresh();
                 title="Mit Koordinaten"
                 icon="map-marker"
                 :variant="ComponentVariant.SUCCESS"
-                :value="statistics.getStatistics.nodes.withCoords"
+                :value="statisticsStore.getStatistics.nodes.withCoords"
                 :route="RouteName.ADMIN_NODES"
                 :filter="{hasCoords: true}"
             />
@@ -46,7 +46,7 @@ refresh();
                 title="Monitoring aktiv"
                 icon="heartbeat"
                 :variant="ComponentVariant.SUCCESS"
-                :value="statistics.getStatistics.nodes.monitoring.active"
+                :value="statisticsStore.getStatistics.nodes.monitoring.active"
                 :route="RouteName.ADMIN_NODES"
                 :filter="{monitoringState: MonitoringState.ACTIVE}"
             />
@@ -54,7 +54,7 @@ refresh();
                 title="Monitoring noch nicht bestätigt"
                 icon="envelope"
                 :variant="ComponentVariant.DANGER"
-                :value="statistics.getStatistics.nodes.monitoring.pending"
+                :value="statisticsStore.getStatistics.nodes.monitoring.pending"
                 :route="RouteName.ADMIN_NODES"
                 :filter="{monitoringState: MonitoringState.PENDING}"
             />
