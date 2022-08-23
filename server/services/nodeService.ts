@@ -19,6 +19,7 @@ import {
     CreateOrUpdateNode,
     EmailAddress,
     FastdKey,
+    filterUndefinedFromJSON,
     Hostname,
     isFastdKey,
     isHostname,
@@ -504,7 +505,7 @@ async function sendMonitoringConfirmationMail(
         node.nickname + " <" + node.email + ">",
         MailType.MONITORING_CONFIRMATION,
         {
-            node: node,
+            node: filterUndefinedFromJSON(node),
             confirmUrl: confirmUrl,
             disableUrl: disableUrl,
         }

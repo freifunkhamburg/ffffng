@@ -18,6 +18,7 @@ import { forConstraint } from "../shared/validation/validator";
 import {
     Domain,
     DurationSeconds,
+    filterUndefinedFromJSON,
     Hostname,
     isBoolean,
     isDomain,
@@ -438,7 +439,7 @@ async function sendMonitoringMailsBatched(
                 node.nickname + " <" + node.email + ">",
                 mailType,
                 {
-                    node: node,
+                    node: filterUndefinedFromJSON(node),
                     lastSeen: nodeState.last_seen,
                     disableUrl: monitoringDisableUrl(monitoringToken),
                 }

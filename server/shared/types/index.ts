@@ -11,6 +11,19 @@ export function parseJSON(str: string): JSONValue {
     return json;
 }
 
+export function filterUndefinedFromJSON(obj: {
+    [key: string]: JSONValue | undefined;
+}): JSONObject {
+    const result: JSONObject = {};
+    for (const [key, value] of Object.entries(obj)) {
+        if (value !== undefined) {
+            result[key] = value;
+        }
+    }
+
+    return result;
+}
+
 export type JSONValue =
     | null
     | string
@@ -403,8 +416,8 @@ export type BaseNode = {
     nickname: Nickname;
     email: EmailAddress;
     hostname: Hostname;
-    coords?: Coordinates;
-    key?: FastdKey;
+    coords: Coordinates | undefined;
+    key: FastdKey | undefined;
     mac: MAC;
 };
 
@@ -506,12 +519,11 @@ export const isDomain = toIsNewtype(isString, "" as Domain);
 /**
  * Represents a node in the context of a Freifunk site and domain.
  */
-export type DomainSpecificNodeResponse = Record<NodeSortField, any> &
-    NodeResponse & {
-        site?: Site;
-        domain?: Domain;
-        onlineState?: OnlineState;
-    };
+export type DomainSpecificNodeResponse = NodeResponse & {
+    site: Site | undefined;
+    domain: Domain | undefined;
+    onlineState: OnlineState | undefined;
+};
 
 export function isDomainSpecificNodeResponse(
     arg: unknown
@@ -549,7 +561,8 @@ export function isMonitoringResponse(arg: unknown): arg is MonitoringResponse {
     );
 }
 
-export enum NodeSortField {
+// noinspection JSUnusedGlobalSymbols
+enum NodeSortFieldEnum {
     HOSTNAME = "hostname",
     NICKNAME = "nickname",
     EMAIL = "email",
@@ -563,7 +576,17 @@ export enum NodeSortField {
     MONITORING_STATE = "monitoringState",
 }
 
-export const isNodeSortField = toIsEnum(NodeSortField);
+export type NodeSortField = keyof Pick<
+    DomainSpecificNodeResponse,
+    NodeSortFieldEnum
+>;
+
+export function isNodeSortField(arg: unknown): arg is NodeSortField {
+    if (!isString(arg)) {
+        return false;
+    }
+    return Object.values(NodeSortFieldEnum).includes(arg as NodeSortField);
+}
 
 export type NodesFilter = {
     hasKey?: boolean;

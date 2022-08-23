@@ -286,12 +286,15 @@ export function filter<E>(
     );
 }
 
-export function sort<T extends Record<S, unknown>, S extends string>(
-    entities: T[],
-    isSortField: TypeGuard<S>,
+export function sort<
+    Type extends { [Key in SortField]: unknown },
+    SortField extends string
+>(
+    entities: Type[],
+    isSortField: TypeGuard<SortField>,
     restParams: RestParams
-): T[] {
-    const sortField: S | undefined = isSortField(restParams._sortField)
+): Type[] {
+    const sortField: SortField | undefined = isSortField(restParams._sortField)
         ? restParams._sortField
         : undefined;
     if (!sortField) {
