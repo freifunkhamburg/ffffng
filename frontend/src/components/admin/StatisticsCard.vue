@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {computed, defineProps} from "vue";
-import type {ComponentVariant, NodesFilter} from "@/types";
-import type {RouteName} from "@/router";
-import router, {route} from "@/router";
+import { computed, defineProps } from "vue";
+import type { ComponentVariant, NodesFilter } from "@/types";
+import type { RouteName } from "@/router";
+import { route } from "@/router";
 
 interface Props {
     title: string;
@@ -24,8 +24,11 @@ const linkTarget = computed(() => {
 </script>
 
 <template>
-    <RouterLink :to="linkTarget" :class="['statistics-card', 'statistics-card-' + variant]">
-        <i :class="['fa', 'fa-' + icon]" aria-hidden="true"/>
+    <RouterLink
+        :to="linkTarget"
+        :class="['statistics-card', 'statistics-card-' + variant]"
+    >
+        <i :class="['fa', 'fa-' + icon]" aria-hidden="true" />
         <dl>
             <dt>{{ title }}</dt>
             <dd>{{ value }}</dd>

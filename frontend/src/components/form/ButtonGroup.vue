@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import type {ButtonSize, ComponentAlignment} from "@/types";
+import type { ButtonSize, ComponentAlignment } from "@/types";
 
 interface Props {
     buttonSize: ButtonSize;
     align: ComponentAlignment;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 </script>
 
 <template>
-    <div :class="['button-group', buttonSize, align]">
+    <div :class="['button-group', props.buttonSize, props.align]">
         <slot></slot>
     </div>
 </template>

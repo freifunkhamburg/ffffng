@@ -10,8 +10,8 @@ import {
     type SearchTerm,
     type UnixTimestampMilliseconds,
 } from "@/types";
-import {computed, nextTick, onMounted, ref, watch} from "vue";
-import {useConfigStore} from "@/stores/config";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { useConfigStore } from "@/stores/config";
 
 interface Props {
     searchTerm: SearchTerm;
@@ -20,7 +20,7 @@ interface Props {
 
 const SEARCH_THROTTLE_DELAY_MS = 500;
 
-const FILTER_LABELS: Record<string, string | Map<any, any>> = {
+const FILTER_LABELS: Record<string, string | Map<string | boolean, any>> = {
     hasKey: new Map([
         [true, "Mit VPN-Schlüssel"],
         [false, "Ohne VPN-Schlüssel"],
@@ -40,10 +40,10 @@ const FILTER_LABELS: Record<string, string | Map<any, any>> = {
         [OnlineState.ONLINE, "online"],
         [OnlineState.OFFLINE, "offline"],
     ]),
-}
+};
 
 const emit = defineEmits<{
-    (e: "updateFilter", filter: NodesFilter, searchTerm: SearchTerm): void,
+    (e: "updateFilter", filter: NodesFilter, searchTerm: SearchTerm): void;
 }>();
 
 const props = defineProps<Props>();
@@ -53,15 +53,18 @@ const suggestedFiltersExpanded = ref(false);
 const configStore = useConfigStore();
 
 type Filter = {
-    field: string,
-    value: any,
+    field: string;
+    value: any;
 };
 const selectedFilters = ref<Filter[]>([]);
 
 function selectedFilterIndex(filter: Filter): number {
     for (let i = 0; i < selectedFilters.value.length; i += 1) {
         const selectedFilter = selectedFilters.value[i];
-        if (selectedFilter.field === filter.field && selectedFilter.value === filter.value) {
+        if (
+            selectedFilter.field === filter.field &&
+            selectedFilter.value === filter.value
+        ) {
             return i;
         }
     }
@@ -80,6 +83,12 @@ function selectedFilterIndexForField(field: string): number {
     return -1;
 }
 
+function pushFilter(filterGroup: Filter[], filter: Filter): void {
+    if (selectedFilterIndex(filter) < 0) {
+        filterGroup.push(filter);
+    }
+}
+
 const suggestedFilters = computed<Filter[][]>(() => {
     const cfg = configStore.getConfig;
     const sites = cfg?.community.sites || [];
@@ -88,18 +97,12 @@ const suggestedFilters = computed<Filter[][]>(() => {
     const filterGroups: Filter[][] = [];
 
     for (const field of Object.keys(NODES_FILTER_FIELDS)) {
-        const filterGroup: Filter[] = []
-
-        function pushFilter(filter: Filter): void {
-            if (selectedFilterIndex(filter) < 0) {
-                filterGroup.push(filter);
-            }
-        }
+        const filterGroup: Filter[] = [];
 
         switch (field) {
             case "site":
                 for (const site of sites) {
-                    pushFilter({
+                    pushFilter(filterGroup, {
                         field: "site",
                         value: site,
                     });
@@ -108,25 +111,26 @@ const suggestedFilters = computed<Filter[][]>(() => {
 
             case "domain":
                 for (const domain of domains) {
-                    pushFilter({
+                    pushFilter(filterGroup, {
                         field: "domain",
                         value: domain,
                     });
                 }
                 break;
 
-            default:
+            default: {
                 const labels = FILTER_LABELS[field];
                 if (!isMap(labels)) {
                     throw new Error(`Missing case for field ${field}.`);
                 }
 
                 for (const value of labels.keys()) {
-                    pushFilter({
+                    pushFilter(filterGroup, {
                         field,
                         value,
                     });
                 }
+            }
         }
 
         filterGroups.push(filterGroup);
@@ -152,7 +156,7 @@ function updateSelectedFilters() {
     const filter = props.filter as Record<string, any>;
     selectedFilters.value = [];
     for (const field of Object.keys(NODES_FILTER_FIELDS)) {
-        if (filter.hasOwnProperty(field)) {
+        if (Object.prototype.hasOwnProperty.call(filter, field)) {
             addSelectedFilter({
                 field,
                 value: filter[field],
@@ -165,7 +169,7 @@ watch(props, updateSelectedFilters);
 onMounted(updateSelectedFilters);
 
 function renderFilter(filter: Filter): string {
-    if (!FILTER_LABELS.hasOwnProperty(filter.field)) {
+    if (!Object.prototype.hasOwnProperty.call(FILTER_LABELS, filter.field)) {
         throw new Error(`Filter has no translation: ${filter.field}`);
     }
 
@@ -175,7 +179,11 @@ function renderFilter(filter: Filter): string {
     }
 
     if (!label.has(filter.value)) {
-        throw new Error(`Filter ${filter.field} has no translation for value: ${filter.value}(${typeof filter.value})`);
+        throw new Error(
+            `Filter ${filter.field} has no translation for value: ${
+                filter.value
+            }(${typeof filter.value})`
+        );
     }
 
     return label.get(filter.value);
@@ -204,7 +212,8 @@ function buildNodesFilter(): NodesFilter {
     return nodesFilter;
 }
 
-let lastSearchTimestamp: UnixTimestampMilliseconds = 0 as UnixTimestampMilliseconds;
+let lastSearchTimestamp: UnixTimestampMilliseconds =
+    0 as UnixTimestampMilliseconds;
 let searchTimeout: NodeJS.Timeout | undefined = undefined;
 let lastSearchTerm: SearchTerm = "" as SearchTerm;
 
@@ -217,17 +226,18 @@ function doSearch(): void {
 
 function doThrottledSearch(): void {
     if (lastSearchTerm === input.value.value) {
-        return
+        return;
     }
 
     // TODO: Share utils.
-    const now: UnixTimestampMilliseconds = Date.now() as UnixTimestampMilliseconds;
+    const now: UnixTimestampMilliseconds =
+        Date.now() as UnixTimestampMilliseconds;
     if (now - SEARCH_THROTTLE_DELAY_MS >= lastSearchTimestamp) {
         lastSearchTimestamp = now;
         doSearch();
     } else if (!searchTimeout) {
         searchTimeout = setTimeout(() => {
-            searchTimeout = undefined
+            searchTimeout = undefined;
             doThrottledSearch();
         }, SEARCH_THROTTLE_DELAY_MS);
     }
@@ -235,19 +245,25 @@ function doThrottledSearch(): void {
 </script>
 
 <template>
-    <div :class="{ 'nodes-filter-panel': true, 'focus': hasFocus}" @click="focusInput">
+    <div
+        :class="{ 'nodes-filter-panel': true, focus: hasFocus }"
+        @click="focusInput"
+    >
         <div class="nodes-filter-input">
             <div class="selected-filters">
                 <span
                     v-for="filter in selectedFilters"
+                    v-bind:key="`${filter.field}:${filter.value}`"
                     class="selected-filter"
                     @click="removeSelectedFilter(filter)"
-                    :title="renderFilter(filter)">
+                    :title="renderFilter(filter)"
+                >
                     {{ renderFilter(filter) }}
                     <i
                         class="fa fa-times remove-filter"
                         aria-hidden="true"
-                        title="Filter entfernen"/>
+                        title="Filter entfernen"
+                    />
                 </span>
             </div>
             <input
@@ -258,21 +274,28 @@ function doThrottledSearch(): void {
                 maxlength="64"
                 type="search"
                 :value="searchTerm"
-                placeholder="Knoten durchsuchen..."/>
-            <i class="fa fa-search search" @click="doSearch()"/>
+                placeholder="Knoten durchsuchen..."
+            />
+            <i class="fa fa-search search" @click="doSearch()" />
         </div>
         <div class="suggested-filters" v-if="suggestedFiltersExpanded">
-            <div class="suggested-filter-group" v-for="filterGroup in suggestedFilters">
+            <div
+                class="suggested-filter-group"
+                v-for="filterGroup in suggestedFilters"
+            >
                 <span
                     class="suggested-filter"
                     v-for="filter in filterGroup"
+                    v-bind:key="filter.field"
                     @click="addSelectedFilter(filter)"
-                    :title="renderFilter(filter)">
+                    :title="renderFilter(filter)"
+                >
                     {{ renderFilter(filter) }}
                     <i
                         class="fa fa-plus add-filter"
                         aria-hidden="true"
-                        title="Filter hinzufügen"/>
+                        title="Filter hinzufügen"
+                    />
                 </span>
             </div>
         </div>
@@ -281,14 +304,16 @@ function doThrottledSearch(): void {
         v-if="suggestedFiltersExpanded"
         class="toggle-suggested-filters"
         href="javascript:"
-        @click="showSuggestedFilters(false)">
+        @click="showSuggestedFilters(false)"
+    >
         Erweiterte Suche ausblenden
     </a>
     <a
         v-if="!suggestedFiltersExpanded"
         class="toggle-suggested-filters"
         href="javascript:"
-        @click="showSuggestedFilters(true)">
+        @click="showSuggestedFilters(true)"
+    >
         Erweiterte Suche einblenden
     </a>
 </template>
@@ -329,12 +354,14 @@ function doThrottledSearch(): void {
         user-select: none;
         white-space: nowrap;
 
-        .add-filter, .remove-filter {
+        .add-filter,
+        .remove-filter {
             margin-left: 0.25em;
         }
     }
 
-    .selected-filters, .suggested-filter-group {
+    .selected-filters,
+    .suggested-filter-group {
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;

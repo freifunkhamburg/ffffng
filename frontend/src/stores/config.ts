@@ -1,6 +1,6 @@
-import {defineStore} from "pinia";
-import {type ClientConfig, isClientConfig} from "@/types";
-import {api} from "@/utils/Api";
+import { defineStore } from "pinia";
+import { type ClientConfig, isClientConfig } from "@/types";
+import { api } from "@/utils/Api";
 
 interface ConfigStoreState {
     config: ClientConfig | null;
@@ -20,10 +20,7 @@ export const useConfigStore = defineStore({
     },
     actions: {
         async refresh(): Promise<void> {
-            this.config = await api.get<ClientConfig>(
-                "config",
-                isClientConfig
-            );
+            this.config = await api.get<ClientConfig>("config", isClientConfig);
         },
     },
 });

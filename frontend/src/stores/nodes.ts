@@ -1,6 +1,12 @@
-import {defineStore} from "pinia";
-import {type DomainSpecificNodeResponse, isDomainSpecificNodeResponse, type NodesFilter, NodeSortField, SortDirection} from "@/types";
-import {internalApi} from "@/utils/Api";
+import { defineStore } from "pinia";
+import {
+    type DomainSpecificNodeResponse,
+    isDomainSpecificNodeResponse,
+    type NodesFilter,
+    NodeSortField,
+    SortDirection,
+} from "@/types";
+import { internalApi } from "@/utils/Api";
 
 interface NodesStoreState {
     nodes: DomainSpecificNodeResponse[];
@@ -33,11 +39,11 @@ export const useNodesStore = defineStore({
         },
 
         getNodesPerPage(state: NodesStoreState): number {
-            return state.nodesPerPage
+            return state.nodesPerPage;
         },
 
         getPage(state: NodesStoreState): number {
-            return state.page
+            return state.page;
         },
     },
     actions: {
@@ -49,20 +55,23 @@ export const useNodesStore = defineStore({
             filter: NodesFilter,
             searchTerm?: string
         ): Promise<void> {
-            const query: Record<string, any> = {
+            const query: Record<string, unknown> = {
                 ...filter,
             };
             if (searchTerm) {
                 query.q = searchTerm;
             }
-            const result = await internalApi.getPagedList<DomainSpecificNodeResponse, NodeSortField>(
+            const result = await internalApi.getPagedList<
+                DomainSpecificNodeResponse,
+                NodeSortField
+            >(
                 "nodes",
                 isDomainSpecificNodeResponse,
                 page,
                 nodesPerPage,
                 sortDirection,
                 sortField,
-                query,
+                query
             );
             this.nodes = result.entries;
             this.totalNodes = result.total;

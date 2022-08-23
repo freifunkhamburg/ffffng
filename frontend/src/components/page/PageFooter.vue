@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {useConfigStore} from "@/stores/config";
-import {useVersionStore} from "@/stores/version";
+import { useConfigStore } from "@/stores/config";
+import { useVersionStore } from "@/stores/version";
 
 const configStore = useConfigStore();
 const versionStore = useVersionStore();
@@ -12,17 +12,24 @@ const versionStore = useVersionStore();
         <a href="https://github.com/freifunkhamburg/ffffng" target="_blank">
             <i class="fa fa-code" aria-hidden="true" /> Source Code
         </a>
-        <a href="https://github.com/freifunkhamburg/ffffng/issues" target="_blank">
+        <a
+            href="https://github.com/freifunkhamburg/ffffng/issues"
+            target="_blank"
+        >
             <i class="fa fa-bug" aria-hidden="true" /> Fehler melden
         </a>
         <a
             v-if="configStore.getConfig.legal.privacyUrl"
             :href="configStore.getConfig.legal.privacyUrl"
-            target="_blank">Datenschutz</a>
+            target="_blank"
+            >Datenschutz</a
+        >
         <a
             v-if="configStore.getConfig.legal.imprintUrl"
             :href="configStore.getConfig.legal.imprintUrl"
-            target="_blank">Impressum</a>
+            target="_blank"
+            >Impressum</a
+        >
     </footer>
 </template>
 

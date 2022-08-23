@@ -1,11 +1,11 @@
 <script lang="ts">
-import {type Component, defineComponent, type PropType} from "vue";
-import {type EnumValue, SortDirection} from "@/types";
+import { type Component, defineComponent, type PropType } from "vue";
+import { type EnumValue, SortDirection } from "@/types";
 
 type Props<SortField> = {
-    field: PropType<EnumValue<SortField>>,
-    currentField: PropType<EnumValue<SortField>>,
-    currentDirection: PropType<SortDirection>,
+    field: PropType<EnumValue<SortField>>;
+    currentField: PropType<EnumValue<SortField>>;
+    currentDirection: PropType<SortDirection>;
 };
 
 type SortTH<SortField> = Component<Props<SortField>>;
@@ -21,7 +21,9 @@ function defineGenericComponent<SortField>(): SortTH<SortField> {
         props,
         computed: {
             sortDirection: function () {
-                return this.field === this.currentField ? this.currentDirection : undefined;
+                return this.field === this.currentField
+                    ? this.currentDirection
+                    : undefined;
             },
             isAscending: function () {
                 return this.sortDirection === SortDirection.ASCENDING;
@@ -33,11 +35,13 @@ function defineGenericComponent<SortField>(): SortTH<SortField> {
         methods: {
             onClick(): void {
                 this.$emit(
-                    'sort',
+                    "sort",
                     this.field,
-                    this.isAscending ? SortDirection.DESCENDING : SortDirection.ASCENDING
+                    this.isAscending
+                        ? SortDirection.DESCENDING
+                        : SortDirection.ASCENDING
                 );
-            }
+            },
         },
     });
 }
@@ -55,7 +59,7 @@ export default component;
 <template>
     <th>
         <a href="javascript:" title="Sortieren" @click="onClick">
-            <slot/>
+            <slot />
             <i v-if="sortDirection && isAscending" class="fa fa-chevron-down" />
             <i v-if="sortDirection && !isAscending" class="fa fa-chevron-up" />
         </a>

@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import Spinner from "@/components/Spinner.vue";
+import ActivityIndicator from "@/components/ActivityIndicator.vue";
 
 const props = defineProps({
     loading: {
         type: Boolean,
         required: true,
-    }
+    },
 });
 </script>
 
 <template>
-    <div :class="{ 'loading-container': true, loading: loading }">
-        <Spinner class="spinner" v-if="loading" />
-        <div class="content" v-if="!loading">
+    <div :class="{ 'loading-container': true, loading: props.loading }">
+        <ActivityIndicator v-if="props.loading" />
+        <div class="content" v-if="!props.loading">
             <slot></slot>
         </div>
     </div>
@@ -31,5 +31,4 @@ const props = defineProps({
         height: 10em;
     }
 }
-
 </style>

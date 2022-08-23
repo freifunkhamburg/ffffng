@@ -1,9 +1,9 @@
-import {defineStore} from "pinia";
-import {isStoredNode, type StoredNode, type Token} from "@/types";
-import {api} from "@/utils/Api";
+import { defineStore } from "pinia";
+import { isStoredNode, type StoredNode, type Token } from "@/types";
+import { api } from "@/utils/Api";
 
-interface NodeStoreState {
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface NodeStoreState {}
 
 export const useNodeStore = defineStore({
     id: "node",
@@ -18,6 +18,6 @@ export const useNodeStore = defineStore({
 
         async deleteByToken(token: Token): Promise<void> {
             await api.delete(`node/${token}`);
-        }
+        },
     },
 });

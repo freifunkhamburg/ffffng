@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import StatisticsCard from "@/components/admin/StatisticsCard.vue";
-import {useStatisticsStore} from "@/stores/statistics";
-import {ComponentVariant, MonitoringState} from "@/types";
-import {RouteName} from "@/router";
+import { useStatisticsStore } from "@/stores/statistics";
+import { ComponentVariant, MonitoringState } from "@/types";
+import { RouteName } from "@/router";
 import PageContainer from "@/components/page/PageContainer.vue";
 
 const statisticsStore = useStatisticsStore();
@@ -32,7 +32,7 @@ refresh();
                 :variant="ComponentVariant.WARNING"
                 :value="statisticsStore.getStatistics.nodes.withVPN"
                 :route="RouteName.ADMIN_NODES"
-                :filter="{hasKey: true}"
+                :filter="{ hasKey: true }"
             />
             <StatisticsCard
                 title="Mit Koordinaten"
@@ -40,7 +40,7 @@ refresh();
                 :variant="ComponentVariant.SUCCESS"
                 :value="statisticsStore.getStatistics.nodes.withCoords"
                 :route="RouteName.ADMIN_NODES"
-                :filter="{hasCoords: true}"
+                :filter="{ hasCoords: true }"
             />
             <StatisticsCard
                 title="Monitoring aktiv"
@@ -48,7 +48,7 @@ refresh();
                 :variant="ComponentVariant.SUCCESS"
                 :value="statisticsStore.getStatistics.nodes.monitoring.active"
                 :route="RouteName.ADMIN_NODES"
-                :filter="{monitoringState: MonitoringState.ACTIVE}"
+                :filter="{ monitoringState: MonitoringState.ACTIVE }"
             />
             <StatisticsCard
                 title="Monitoring noch nicht bestätigt"
@@ -56,7 +56,7 @@ refresh();
                 :variant="ComponentVariant.DANGER"
                 :value="statisticsStore.getStatistics.nodes.monitoring.pending"
                 :route="RouteName.ADMIN_NODES"
-                :filter="{monitoringState: MonitoringState.PENDING}"
+                :filter="{ monitoringState: MonitoringState.PENDING }"
             />
         </div>
     </PageContainer>
@@ -78,5 +78,4 @@ refresh();
         }
     }
 }
-
 </style>

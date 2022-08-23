@@ -1,9 +1,18 @@
-import {createRouter, createWebHistory, type LocationQueryRaw} from "vue-router";
+import {
+    createRouter,
+    createWebHistory,
+    type LocationQueryRaw,
+} from "vue-router";
 import AdminDashboardView from "@/views/AdminDashboardView.vue";
 import AdminNodesView from "@/views/AdminNodesView.vue";
 import HomeView from "@/views/HomeView.vue";
 import NodeDeleteView from "@/views/NodeDeleteView.vue";
-import {isNodesFilter, isNodeSortField, isSortDirection, type SearchTerm} from "@/types";
+import {
+    isNodesFilter,
+    isNodeSortField,
+    isSortDirection,
+    type SearchTerm,
+} from "@/types";
 
 export interface Route {
     name: RouteName;
@@ -46,9 +55,11 @@ const router = createRouter({
             path: "/admin/nodes",
             name: RouteName.ADMIN_NODES,
             component: AdminNodesView,
-            props: route => {
-                let filter: any;
-                if (route.query.hasOwnProperty("filter")) {
+            props: (route) => {
+                let filter: unknown;
+                if (
+                    Object.prototype.hasOwnProperty.call(route.query, "filter")
+                ) {
                     try {
                         filter = JSON.parse(route.query.filter as string);
                     } catch (e) {
@@ -59,14 +70,20 @@ const router = createRouter({
                     filter = {};
                 }
 
-                const searchTerm = route.query.q ? route.query.q as SearchTerm : undefined;
+                const searchTerm = route.query.q
+                    ? (route.query.q as SearchTerm)
+                    : undefined;
                 return {
                     filter: isNodesFilter(filter) ? filter : {},
                     searchTerm,
-                    sortDirection: isSortDirection(route.query.sortDir) ? route.query.sortDir : undefined,
-                    sortField: isNodeSortField(route.query.sortField) ? route.query.sortField : undefined,
-                }
-            }
+                    sortDirection: isSortDirection(route.query.sortDir)
+                        ? route.query.sortDir
+                        : undefined,
+                    sortField: isNodeSortField(route.query.sortField)
+                        ? route.query.sortField
+                        : undefined,
+                };
+            },
         },
     ],
 });

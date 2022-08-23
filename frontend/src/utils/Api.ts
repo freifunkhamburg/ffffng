@@ -1,6 +1,6 @@
-import {SortDirection, toIsArray, type TypeGuard} from "@/types";
-import type {Headers} from "request";
-import {parseInteger} from "@/utils/Numbers";
+import { SortDirection, toIsArray, type TypeGuard } from "@/types";
+import type { Headers } from "request";
+import { parseInteger } from "@/utils/Numbers";
 
 type Method = "GET" | "PUT" | "POST" | "DELETE";
 
@@ -17,7 +17,7 @@ export class ApiError extends Error {
     private constructor(
         message: string,
         private status: number,
-        private errorType: ApiErrorType,
+        private errorType: ApiErrorType
     ) {
         super(message);
     }
@@ -25,13 +25,13 @@ export class ApiError extends Error {
     static async requestFailed(
         method: Method,
         path: string,
-        response: Response,
+        response: Response
     ): Promise<ApiError> {
         const body = await response.text();
         return new ApiError(
             `API ${method} request failed: ${path} => ${response.status} - ${body}`,
             response.status,
-            ApiErrorType.REQUEST_FAILED,
+            ApiErrorType.REQUEST_FAILED
         );
     }
 
@@ -39,17 +39,20 @@ export class ApiError extends Error {
         method: Method,
         path: string,
         response: Response,
-        json: any,
+        json: unknown
     ): Promise<ApiError> {
         return new ApiError(
             `API ${method} request result has unexpected type. ${path} => ${json}`,
             response.status,
-            ApiErrorType.UNEXPECTED_RESULT_TYPE,
+            ApiErrorType.UNEXPECTED_RESULT_TYPE
         );
     }
 
     isNotFoundError(): boolean {
-        return this.errorType === ApiErrorType.REQUEST_FAILED && this.status === HttpStatusCode.NOT_FOUND;
+        return (
+            this.errorType === ApiErrorType.REQUEST_FAILED &&
+            this.status === HttpStatusCode.NOT_FOUND
+        );
     }
 }
 
@@ -78,7 +81,9 @@ class Api {
         if (queryParams) {
             const queryStrings: string[] = [];
             for (const [key, value] of Object.entries(queryParams)) {
-                queryStrings.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+                queryStrings.push(
+                    `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+                );
             }
             if (queryStrings.length > 0) {
                 queryString = `?${queryStrings.join("&")}`;
@@ -87,12 +92,26 @@ class Api {
         return this.baseURL + this.apiPrefix + path + queryString;
     }
 
-    private async sendRequest(method: Method, path: string, queryParams?: object): Promise<ApiResponse<undefined>>;
-    private async sendRequest<T>(method: Method, path: string, isT: TypeGuard<T>, queryParams?: object): Promise<ApiResponse<T>>;
-    private async sendRequest<T>(method: Method, path: string, isT?: TypeGuard<T>, queryParams?: object): Promise<ApiResponse<T>> {
+    private async sendRequest(
+        method: Method,
+        path: string,
+        queryParams?: object
+    ): Promise<ApiResponse<undefined>>;
+    private async sendRequest<T>(
+        method: Method,
+        path: string,
+        isT: TypeGuard<T>,
+        queryParams?: object
+    ): Promise<ApiResponse<T>>;
+    private async sendRequest<T>(
+        method: Method,
+        path: string,
+        isT?: TypeGuard<T>,
+        queryParams?: object
+    ): Promise<ApiResponse<T>> {
         const url = this.toURL(path, queryParams);
         const response = await fetch(url, {
-            method
+            method,
         });
 
         if (!response.ok) {
@@ -103,7 +122,12 @@ class Api {
             const json = await response.json();
             if (isT && !isT(json)) {
                 console.log(json);
-                throw await ApiError.unexpectedResultType(method, path, response, json);
+                throw await ApiError.unexpectedResultType(
+                    method,
+                    path,
+                    response,
+                    json
+                );
             }
 
             return {
@@ -112,13 +136,17 @@ class Api {
             };
         } else {
             return {
-                result: undefined as any as T,
+                result: undefined as unknown as T,
                 headers: response.headers,
-            }
+            };
         }
     }
 
-    private async doGet<T>(path: string, isT: TypeGuard<T>, queryParams?: object): Promise<ApiResponse<T>> {
+    private async doGet<T>(
+        path: string,
+        isT: TypeGuard<T>,
+        queryParams?: object
+    ): Promise<ApiResponse<T>> {
         return await this.sendRequest<T>("GET", path, isT, queryParams);
     }
 
@@ -134,7 +162,7 @@ class Api {
         itemsPerPage: number,
         sortDirection?: SortDirection,
         sortField?: SortField,
-        filter?: object,
+        filter?: object
     ): Promise<PagedListResult<Element>> {
         const response = await this.doGet(path, toIsArray(isElement), {
             _page: page,
@@ -149,7 +177,7 @@ class Api {
         return {
             entries: response.result,
             total,
-        }
+        };
     }
 
     async delete(path: string): Promise<void> {

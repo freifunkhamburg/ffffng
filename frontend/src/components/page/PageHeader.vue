@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {useConfigStore} from "@/stores/config";
-import {route, RouteName} from "@/router";
+import { useConfigStore } from "@/stores/config";
+import { route, RouteName } from "@/router";
 
 const configStore = useConfigStore();
 </script>
@@ -18,12 +18,13 @@ const configStore = useConfigStore();
 
             <h1>
                 <RouterLink :to="route(RouteName.HOME)">
-                    {{ configStore.getConfig.community.name }} – Knotenverwaltung
+                    {{ configStore.getConfig.community.name }} –
+                    Knotenverwaltung
                 </RouterLink>
             </h1>
 
             <RouterLink class="admin-link" :to="route(RouteName.ADMIN)">
-                <i class="fa fa-wrench" aria-hidden="true"/> Admin-Panel
+                <i class="fa fa-wrench" aria-hidden="true" /> Admin-Panel
             </RouterLink>
         </nav>
     </header>

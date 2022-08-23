@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import {useConfigStore} from "@/stores/config";
-import {useNodeStore} from "@/stores/node";
-import {computed, nextTick, ref} from "vue";
+import { useConfigStore } from "@/stores/config";
+import { useNodeStore } from "@/stores/node";
+import { computed, nextTick, ref } from "vue";
 import CONSTRAINTS from "@/shared/validation/constraints";
 import ActionButton from "@/components/form/ActionButton.vue";
-import type {StoredNode, Token} from "@/types";
-import {ButtonSize, ComponentAlignment, ComponentVariant} from "@/types";
+import type { StoredNode, Token } from "@/types";
+import { ButtonSize, ComponentAlignment, ComponentVariant } from "@/types";
 import ErrorCard from "@/components/ErrorCard.vue";
 import ButtonGroup from "@/components/form/ButtonGroup.vue";
 import ValidationForm from "@/components/form/ValidationForm.vue";
 import ValidationFormInput from "@/components/form/ValidationFormInput.vue";
-import {route, RouteName} from "@/router";
+import { route, RouteName } from "@/router";
 import RouteButton from "@/components/form/RouteButton.vue";
-import {ApiError} from "@/utils/Api";
+import { ApiError } from "@/utils/Api";
 
 const configStore = useConfigStore();
 const email = computed(() => configStore.getConfig?.community.contactEmail);
@@ -57,15 +57,18 @@ async function onSubmit() {
 
         <div>
             <p>
-                Um die Daten Deines Knotens zu löschen, benötigen wir den passenden Token (eine 16-stellige Folge aus
-                Ziffern und Buchstaben). Diesen hast Du beim ersten Anmelden Deines Knotens erhalten. Sinn des Tokens
-                ist,
-                Dich davor zu schützen, dass Dritte unbefugt Deine Daten einsehen oder ändern können.
+                Um die Daten Deines Knotens zu löschen, benötigen wir den
+                passenden Token (eine 16-stellige Folge aus Ziffern und
+                Buchstaben). Diesen hast Du beim ersten Anmelden Deines Knotens
+                erhalten. Sinn des Tokens ist, Dich davor zu schützen, dass
+                Dritte unbefugt Deine Daten einsehen oder ändern können.
             </p>
             <p>
                 <strong>
-                    Solltest Du den Token nicht mehr haben, wende Dich einfach per E-Mail an
-                    <a v-if="email" :href="`mailto:${email}`">{{ email }}</a>.
+                    Solltest Du den Token nicht mehr haben, wende Dich einfach
+                    per E-Mail an
+                    <a v-if="email" :href="`mailto:${email}`">{{ email }}</a
+                    >.
                 </strong>
             </p>
 
@@ -74,9 +77,11 @@ async function onSubmit() {
             </ErrorCard>
 
             <ErrorCard v-if="generalError">
-                Beim Abrufen des Knotens ist ein Fehler aufgetreten. Bitte probiere es später nochmal. Sollte dieses
-                Problem weiter bestehen, so wende dich bitte per E-Mail an
-                <a v-if="email" :href="`mailto:${email}`">{{ email }}</a>.
+                Beim Abrufen des Knotens ist ein Fehler aufgetreten. Bitte
+                probiere es später nochmal. Sollte dieses Problem weiter
+                bestehen, so wende dich bitte per E-Mail an
+                <a v-if="email" :href="`mailto:${email}`">{{ email }}</a
+                >.
             </ErrorCard>
 
             <fieldset>
@@ -87,12 +92,16 @@ async function onSubmit() {
                     :constraint="CONSTRAINTS.token"
                     validation-error="Das Token ist ein 16-stelliger Wert bestehend aus 0-9 und a-f."
                 />
-                <ButtonGroup :align="ComponentAlignment.RIGHT" :button-size="ButtonSize.SMALL">
+                <ButtonGroup
+                    :align="ComponentAlignment.RIGHT"
+                    :button-size="ButtonSize.SMALL"
+                >
                     <ActionButton
                         type="submit"
                         icon="trash"
                         :variant="ComponentVariant.WARNING"
-                        :size="ButtonSize.SMALL">
+                        :size="ButtonSize.SMALL"
+                    >
                         Knoten löschen
                     </ActionButton>
                     <RouteButton
@@ -100,7 +109,8 @@ async function onSubmit() {
                         icon="times"
                         :variant="ComponentVariant.SECONDARY"
                         :size="ButtonSize.SMALL"
-                        :route="route(RouteName.HOME)">
+                        :route="route(RouteName.HOME)"
+                    >
                         Abbrechen
                     </RouteButton>
                 </ButtonGroup>
@@ -108,9 +118,11 @@ async function onSubmit() {
 
             <p>
                 <em>
-                    Hinweis: Nach dem Löschen kann der Knoten ggf. weiterhin in der Knotenkarte angezeigt werden. Dies
-                    ist dann der Fall, wenn der Knoten eingeschaltet ist und in Reichweite eines anderen aktiven Knotens
-                    steht. Die angezeigten Daten sind dann die während der Einrichtung des Knotens im Config-Mode
+                    Hinweis: Nach dem Löschen kann der Knoten ggf. weiterhin in
+                    der Knotenkarte angezeigt werden. Dies ist dann der Fall,
+                    wenn der Knoten eingeschaltet ist und in Reichweite eines
+                    anderen aktiven Knotens steht. Die angezeigten Daten sind
+                    dann die während der Einrichtung des Knotens im Config-Mode
                     (Konfigurationsoberfläche des Routers) hinterlegten.
                 </em>
             </p>
@@ -118,5 +130,4 @@ async function onSubmit() {
     </ValidationForm>
 </template>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

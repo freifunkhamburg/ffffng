@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {type ComponentInternalInstance, ref, type Slot} from "vue";
+import { type ComponentInternalInstance, ref } from "vue";
 
 const emit = defineEmits<{
-    (e: "submit"): void
+    (e: "submit"): void;
 }>();
 
 const validationComponents = ref<ComponentInternalInstance[]>([]);
@@ -10,14 +10,16 @@ const validationComponents = ref<ComponentInternalInstance[]>([]);
 defineExpose({
     registerValidationComponent(component: ComponentInternalInstance): void {
         validationComponents.value.push(component);
-    }
+    },
 });
 
 function validate(): boolean {
     let valid = true;
     for (const component of validationComponents.value) {
-        if (!(component.exposed?.validate)) {
-            throw new Error(`Component has no exposed validate() method: ${component.type.__name}`);
+        if (!component.exposed?.validate) {
+            throw new Error(
+                `Component has no exposed validate() method: ${component.type.__name}`
+            );
         }
         valid = component.exposed.validate() && valid;
     }
@@ -32,14 +34,12 @@ function onSubmit() {
     }
     // TODO: Else scroll to first error and focus input.
 }
-
 </script>
 
 <template>
     <form @submit.prevent="onSubmit">
-        <slot/>
+        <slot />
     </form>
 </template>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

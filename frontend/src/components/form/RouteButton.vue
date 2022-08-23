@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type {ButtonSize, ComponentVariant} from "@/types";
-import type {Route} from "@/router";
+import type { ButtonSize, ComponentVariant } from "@/types";
+import type { Route } from "@/router";
 import router from "@/router";
 import ActionButton from "@/components/form/ActionButton.vue";
 
@@ -19,15 +19,9 @@ async function onClick() {
 </script>
 
 <template>
-    <ActionButton
-        :variant="variant"
-        :size="size"
-        :icon="icon"
-        @click="onClick"
-    >
-        <slot/>
+    <ActionButton :variant="variant" :size="size" :icon="icon" @click="onClick">
+        <slot />
     </ActionButton>
 </template>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

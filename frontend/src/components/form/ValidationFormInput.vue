@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {getCurrentInstance, onMounted, ref} from "vue";
-import {type Constraint, forConstraint} from "@/shared/validation/validator";
+import { getCurrentInstance, onMounted, ref } from "vue";
+import { type Constraint, forConstraint } from "@/shared/validation/validator";
 
 interface Props {
     modelValue?: string;
@@ -30,7 +30,9 @@ function registerValidationComponent() {
         }
         parent = parent.parent;
     }
-    throw new Error("Could not find matching ValidationForm for ValidationFormInpunt.");
+    throw new Error(
+        "Could not find matching ValidationForm for ValidationFormInpunt."
+    );
 }
 
 function onInput() {
@@ -39,7 +41,7 @@ function onInput() {
     }
     const element = input.value;
     if (!element) {
-        console.warn("Could not get referenced input element.")
+        console.warn("Could not get referenced input element.");
         return;
     }
     emit("update:modelValue", element.value);
@@ -48,7 +50,7 @@ function onInput() {
 function validate(): boolean {
     const element = input.value;
     if (!element) {
-        console.warn("Could not get referenced input element.")
+        console.warn("Could not get referenced input element.");
         return false;
     }
     valid.value = forConstraint(props.constraint, false)(element.value);
@@ -57,7 +59,7 @@ function validate(): boolean {
 }
 
 defineExpose({
-    validate
+    validate,
 });
 
 onMounted(() => {
@@ -68,7 +70,7 @@ onMounted(() => {
 <template>
     <div>
         <label>
-            {{label}}:
+            {{ label }}:
             <input
                 ref="input"
                 :value="modelValue"
@@ -78,7 +80,7 @@ onMounted(() => {
             />
         </label>
         <div class="validation-error" v-if="!valid">
-            {{validationError}}
+            {{ validationError }}
         </div>
     </div>
 </template>

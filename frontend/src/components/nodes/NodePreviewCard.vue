@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type {StoredNode} from "@/types";
-import {MonitoringState} from "@/types";
+import type { StoredNode } from "@/types";
+import { MonitoringState } from "@/types";
 
 interface Props {
     node: StoredNode;
@@ -12,36 +12,43 @@ const props = defineProps<Props>();
 <template>
     <div class="node-preview-card">
         <h3>
-            <i class="fa fa-dot-circle-o" aria-hidden="true" title="Knotenname:" />
-            {{ node.hostname }}
+            <i
+                class="fa fa-dot-circle-o"
+                aria-hidden="true"
+                title="Knotenname:"
+            />
+            {{ props.node.hostname }}
         </h3>
 
         <div class="field">
-            <strong>Token:</strong> <code>{{ node.token }}</code>
+            <strong>Token:</strong> <code>{{ props.node.token }}</code>
         </div>
 
         <div class="field">
             <i class="fa fa-map-marker" aria-hidden="true" title="Standort:" />
-            {{ node.coords || "nicht angegeben" }}
+            {{ props.node.coords || "nicht angegeben" }}
         </div>
 
         <div class="field">
-            <strong>MAC-Adresse:</strong> <code>{{ node.mac }}</code>
+            <strong>MAC-Adresse:</strong> <code>{{ props.node.mac }}</code>
         </div>
 
         <div class="field">
-            <strong>VPN-Schlüssel:</strong> <code>{{ node.key || "nicht angegeben" }}</code>
+            <strong>VPN-Schlüssel:</strong>
+            <code>{{ props.node.key || "nicht angegeben" }}</code>
         </div>
 
         <div class="field">
             <strong>Monitoring:</strong>
-            <span v-if="node.monitoringState === MonitoringState.PENDING">
+            <span v-if="props.node.monitoringState === MonitoringState.PENDING">
                 Bestätigung ausstehend
             </span>
-            <span v-if="node.monitoringState === MonitoringState.ACTIVE">
+            <span v-if="props.node.monitoringState === MonitoringState.ACTIVE">
                 aktiv
             </span>
-            <span v-if="node.monitoringState === MonitoringState.DISABLED">
+            <span
+                v-if="props.node.monitoringState === MonitoringState.DISABLED"
+            >
                 nicht aktiv
             </span>
         </div>

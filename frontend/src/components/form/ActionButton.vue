@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type {ButtonSize, ComponentVariant} from "@/types";
+import type { ButtonSize, ComponentVariant } from "@/types";
 
 interface Props {
     variant: ComponentVariant;
@@ -7,10 +7,10 @@ interface Props {
     icon: string;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-    (e: "click"): void,
+    (e: "click"): void;
 }>();
 
 function onClick() {
@@ -19,8 +19,8 @@ function onClick() {
 </script>
 
 <template>
-    <button :class="[size, variant]" @click="onClick">
-        <i :class="['fa', `fa-${icon}`]" aria-hidden="true"/>
+    <button :class="[props.size, props.variant]" @click="onClick">
+        <i :class="['fa', `fa-${props.icon}`]" aria-hidden="true" />
         <slot></slot>
     </button>
 </template>
@@ -44,7 +44,8 @@ button {
             border-color: $color;
             color: map-get($variant-text-colors, $variant);
 
-            &:hover, &:active {
+            &:hover,
+            &:active {
                 background-color: $page-background-color;
                 border-color: $color;
                 color: $color;

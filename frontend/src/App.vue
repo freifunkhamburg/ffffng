@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import {RouterView} from "vue-router";
+import { RouterView } from "vue-router";
 import PageHeader from "@/components/page/PageHeader.vue";
 import PageFooter from "@/components/page/PageFooter.vue";
 </script>
 
 <template>
-    <PageHeader/>
+    <PageHeader />
 
     <main>
-        <RouterView/>
+        <RouterView />
     </main>
 
-    <PageFooter/>
+    <PageFooter />
 </template>
 
 <style lang="scss">
