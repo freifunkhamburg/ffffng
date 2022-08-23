@@ -2,12 +2,14 @@ import {SortDirection, toIsArray, type TypeGuard} from "@/types";
 import type {Headers} from "request";
 import {parseInteger} from "@/utils/Numbers";
 
+type Method = "GET" | "PUT" | "POST" | "DELETE";
+
 interface PagedListResult<T> {
     entries: T[];
     total: number;
 }
 
-interface Response<T> {
+interface ApiResponse<T> {
     result: T;
     headers: Headers;
 }
@@ -36,20 +38,40 @@ class Api {
         return this.baseURL + this.apiPrefix + path + queryString;
     }
 
-    private async doGet<T>(path: string, isT: TypeGuard<T>, queryParams?: object): Promise<Response<T>> {
+    private async sendRequest(method: Method, path: string, queryParams?: object): Promise<ApiResponse<undefined>>;
+    private async sendRequest<T>(method: Method, path: string, isT: TypeGuard<T>, queryParams?: object): Promise<ApiResponse<T>>;
+    private async sendRequest<T>(method: Method, path: string, isT?: TypeGuard<T>, queryParams?: object): Promise<ApiResponse<T>> {
         const url = this.toURL(path, queryParams);
-        const result = await fetch(url);
-        const json = await result.json();
+        const response = await fetch(url, {
+            method
+        });
 
-        if (!isT(json)) {
-            console.log(json);
-            throw new Error(`API get result has wrong type. ${url} => ${json}`);
+        if (!response.ok) {
+            const body = await response.text();
+            throw new Error(`API ${method} request failed: ${path} => ${response.status} - ${body}`);
         }
 
-        return {
-            result: json,
-            headers: result.headers,
-        };
+        if (isT) {
+            const json = await response.json();
+            if (isT && !isT(json)) {
+                console.log(json);
+                throw new Error(`API ${method} request result has wrong type. ${path} => ${json}`);
+            }
+
+            return {
+                result: json,
+                headers: response.headers,
+            };
+        } else {
+            return {
+                result: undefined as any as T,
+                headers: response.headers,
+            }
+        }
+    }
+
+    private async doGet<T>(path: string, isT: TypeGuard<T>, queryParams?: object): Promise<ApiResponse<T>> {
+        return await this.sendRequest<T>("GET", path, isT, queryParams);
     }
 
     async get<T>(path: string, isT: TypeGuard<T>): Promise<T> {
@@ -80,6 +102,10 @@ class Api {
             entries: response.result,
             total,
         }
+    }
+
+    async delete(path: string): Promise<void> {
+        await this.sendRequest("DELETE", path);
     }
 }
 
