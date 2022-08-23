@@ -1,21 +1,23 @@
-import {Logger, TaggedLogger, LogLevel} from '../types';
-import {ActivatableLogger} from '../logger';
+import { LogLevel, TaggedLogger } from "../types";
+import { ActivatableLogger } from "../logger";
 
-export type MockLogMessages = any[][];
+export type MockLogMessages = unknown[][];
 type TaggedLogMessages = {
-    tags: {[key: string]: TaggedLogMessages},
-    logs: {[key: string]: MockLogMessages}
-}
+    tags: { [key: string]: TaggedLogMessages };
+    logs: { [key: string]: MockLogMessages };
+};
 
 export class MockLogger implements ActivatableLogger {
-    private taggedLogMessages: TaggedLogMessages = MockLogger.emptyTaggedLogMessages();
+    private taggedLogMessages: TaggedLogMessages =
+        MockLogger.emptyTaggedLogMessages();
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     constructor() {}
 
     private static emptyTaggedLogMessages(): TaggedLogMessages {
         return {
             tags: {},
-            logs: {}
+            logs: {},
         };
     }
 
@@ -36,46 +38,54 @@ export class MockLogger implements ActivatableLogger {
         return taggedLogMessages.logs[level] || [];
     }
 
-    init(...args: any[]): void {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-function,@typescript-eslint/no-unused-vars
+    init(...args: unknown[]): void {}
 
-    private doLog(taggedLogMessages: TaggedLogMessages, level: LogLevel, tags: string[], args: any[]): void {
+    private doLog(
+        taggedLogMessages: TaggedLogMessages,
+        level: LogLevel,
+        tags: string[],
+        args: unknown[]
+    ): void {
         if (tags.length > 0) {
             const tag = tags[0];
             const remainingTags = tags.slice(1);
             const subTaggedLogsMessages: TaggedLogMessages =
-                taggedLogMessages.tags[tag] || MockLogger.emptyTaggedLogMessages();
+                taggedLogMessages.tags[tag] ||
+                MockLogger.emptyTaggedLogMessages();
             this.doLog(subTaggedLogsMessages, level, remainingTags, args);
             taggedLogMessages.tags[tag] = subTaggedLogsMessages;
-
         } else {
-            const logMessages: MockLogMessages = taggedLogMessages.logs[level] || [];
+            const logMessages: MockLogMessages =
+                taggedLogMessages.logs[level] || [];
             logMessages.push(args);
             taggedLogMessages.logs[level] = logMessages;
         }
     }
 
     tag(...tags: string[]): TaggedLogger {
-        const logger: MockLogger = this;
+        const doLog = this.doLog.bind(this);
+        const taggedLogMessages = this.taggedLogMessages;
         return {
-            log(level: LogLevel, ...args: any[]): void {
-                logger.doLog(logger.taggedLogMessages, level, tags, args);
+            log(level: LogLevel, ...args: unknown[]): void {
+                doLog(taggedLogMessages, level, tags, args);
             },
-            debug(...args: any[]): void {
-                this.log('debug', ...args);
+            debug(...args: unknown[]): void {
+                this.log("debug", ...args);
             },
-            info(...args: any[]): void {
-                this.log('info', ...args);
+            info(...args: unknown[]): void {
+                this.log("info", ...args);
             },
-            warn(...args: any[]): void {
-                this.log('warn', ...args);
+            warn(...args: unknown[]): void {
+                this.log("warn", ...args);
             },
-            error(...args: any[]): void {
-                this.log('error', ...args);
+            error(...args: unknown[]): void {
+                this.log("error", ...args);
             },
-            profile(...args: any[]): void {
-                this.log('profile', ...args);
+            profile(...args: unknown[]): void {
+                this.log("profile", ...args);
             },
-        }
+        };
     }
 }
 

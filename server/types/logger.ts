@@ -1,7 +1,13 @@
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'profile';
-export const LogLevels: LogLevel[] = ['debug', 'info', 'warn', 'error', 'profile'];
+export type LogLevel = "debug" | "info" | "warn" | "error" | "profile";
+export const LogLevels: LogLevel[] = [
+    "debug",
+    "info",
+    "warn",
+    "error",
+    "profile",
+];
 
-export function isLogLevel(arg: any): arg is LogLevel {
+export function isLogLevel(arg: unknown): arg is LogLevel {
     if (typeof arg !== "string") {
         return false;
     }
@@ -14,12 +20,12 @@ export function isLogLevel(arg: any): arg is LogLevel {
 }
 
 export interface TaggedLogger {
-    log(level: LogLevel, ...args: any[]): void;
-    debug(...args: any[]): void;
-    info(...args: any[]): void;
-    warn(...args: any[]): void;
-    error(...args: any[]): void;
-    profile(...args: any[]): void;
+    log(level: LogLevel, ...args: unknown[]): void;
+    debug(...args: unknown[]): void;
+    info(...args: unknown[]): void;
+    warn(...args: unknown[]): void;
+    error(...args: unknown[]): void;
+    profile(...args: unknown[]): void;
 }
 
 export interface Logger {

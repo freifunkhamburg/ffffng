@@ -1,11 +1,14 @@
-import {DurationSeconds, isString, UnixTimestampSeconds} from "../types";
-import moment, {Moment} from "moment";
+import { DurationSeconds, isString, UnixTimestampSeconds } from "../types";
+import moment, { Moment } from "moment";
 
 export function now(): UnixTimestampSeconds {
     return Math.round(Date.now() / 1000.0) as UnixTimestampSeconds;
 }
 
-export function subtract(timestamp: UnixTimestampSeconds, duration: DurationSeconds): UnixTimestampSeconds {
+export function subtract(
+    timestamp: UnixTimestampSeconds,
+    duration: DurationSeconds
+): UnixTimestampSeconds {
     return (timestamp - duration) as UnixTimestampSeconds;
 }
 
@@ -43,7 +46,9 @@ export function formatTimestamp(timestamp: UnixTimestampSeconds): string {
     return moment.unix(timestamp).format();
 }
 
-export function parseTimestamp(timestamp: any): UnixTimestampSeconds | null {
+export function parseTimestamp(
+    timestamp: unknown
+): UnixTimestampSeconds | null {
     if (!isString(timestamp)) {
         return null;
     }
@@ -53,4 +58,3 @@ export function parseTimestamp(timestamp: any): UnixTimestampSeconds | null {
     }
     return unix(parsed);
 }
-

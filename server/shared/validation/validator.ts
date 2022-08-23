@@ -1,23 +1,31 @@
-import {parseInteger} from "../utils/strings";
-import {isBoolean, isNumber, isObject, isOptional, isRegExp, isString, toIsArray} from "../types";
+import { parseInteger } from "../utils/strings";
+import {
+    isBoolean,
+    isNumber,
+    isObject,
+    isOptional,
+    isRegExp,
+    isString,
+    toIsArray,
+} from "../types";
 
 export interface Constraint {
-    type: string,
+    type: string;
 
-    default?: any,
+    default?: unknown;
 
-    optional?: boolean,
+    optional?: boolean;
 
-    allowed?: string[],
+    allowed?: string[];
 
-    min?: number,
-    max?: number,
+    min?: number;
+    max?: number;
 
-    regex?: RegExp,
+    regex?: RegExp;
 }
 
 export type Constraints = { [key: string]: Constraint };
-export type Values = { [key: string]: any };
+export type Values = { [key: string]: unknown };
 
 export function isConstraint(arg: unknown): arg is Constraint {
     if (!isObject(arg)) {
@@ -36,18 +44,22 @@ export function isConstraint(arg: unknown): arg is Constraint {
     );
 }
 
-export function isConstraints(constraints: unknown): constraints is Constraints {
+export function isConstraints(
+    constraints: unknown
+): constraints is Constraints {
     if (!isObject(constraints)) {
         return false;
     }
 
-    return Object.entries(constraints).every(([key, constraint]) => isString(key) && isConstraint(constraint));
+    return Object.entries(constraints).every(
+        ([key, constraint]) => isString(key) && isConstraint(constraint)
+    );
 }
 
 // TODO: sanitize input for further processing as specified by constraints (correct types, trimming, etc.)
 
 function isValidBoolean(value: unknown): boolean {
-    return isBoolean(value) || value === 'true' || value === 'false';
+    return isBoolean(value) || value === "true" || value === "false";
 }
 
 function isValidNumber(constraint: Constraint, value: unknown): boolean {
@@ -86,7 +98,9 @@ function isValidEnum(constraint: Constraint, value: unknown): boolean {
 
 function isValidString(constraint: Constraint, value: unknown): boolean {
     if (!constraint.regex) {
-        throw new Error("String constraints must have regex set: " + constraint);
+        throw new Error(
+            "String constraints must have regex set: " + constraint
+        );
     }
 
     if (!isString(value)) {
@@ -94,32 +108,43 @@ function isValidString(constraint: Constraint, value: unknown): boolean {
     }
 
     const trimmed = value.trim();
-    return (trimmed === '' && constraint.optional) || constraint.regex.test(trimmed);
+    return (
+        (trimmed === "" && constraint.optional) ||
+        constraint.regex.test(trimmed)
+    );
 }
 
-function isValid(constraint: Constraint, acceptUndefined: boolean, value: unknown): boolean {
+function isValid(
+    constraint: Constraint,
+    acceptUndefined: boolean,
+    value: unknown
+): boolean {
     if (value === undefined) {
         return acceptUndefined || constraint.optional === true;
     }
 
     switch (constraint.type) {
-        case 'boolean':
+        case "boolean":
             return isValidBoolean(value);
 
-        case 'number':
+        case "number":
             return isValidNumber(constraint, value);
 
-        case 'enum':
+        case "enum":
             return isValidEnum(constraint, value);
 
-        case 'string':
+        case "string":
             return isValidString(constraint, value);
     }
 
     return false;
 }
 
-function areValid(constraints: Constraints, acceptUndefined: boolean, values: Values): boolean {
+function areValid(
+    constraints: Constraints,
+    acceptUndefined: boolean,
+    values: Values
+): boolean {
     const fields = new Set(Object.keys(constraints));
     for (const field of fields) {
         if (!isValid(constraints[field], acceptUndefined, values[field])) {
@@ -136,10 +161,18 @@ function areValid(constraints: Constraints, acceptUndefined: boolean, values: Va
     return true;
 }
 
-export function forConstraint(constraint: Constraint, acceptUndefined: boolean): (value: unknown) => boolean {
-    return ((value: unknown): boolean => isValid(constraint, acceptUndefined, value));
+export function forConstraint(
+    constraint: Constraint,
+    acceptUndefined: boolean
+): (value: unknown) => boolean {
+    return (value: unknown): boolean =>
+        isValid(constraint, acceptUndefined, value);
 }
 
-export function forConstraints(constraints: Constraints, acceptUndefined: boolean): (values: Values) => boolean {
-    return ((values: Values): boolean => areValid(constraints, acceptUndefined, values));
+export function forConstraints(
+    constraints: Constraints,
+    acceptUndefined: boolean
+): (values: Values) => boolean {
+    return (values: Values): boolean =>
+        areValid(constraints, acceptUndefined, values);
 }

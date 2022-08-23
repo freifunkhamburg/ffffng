@@ -23,10 +23,10 @@ export * from "./logger";
 export * from "../shared/types";
 
 export type NodeStateData = {
-    site?: Site,
-    domain?: Domain,
-    state: OnlineState,
-}
+    site?: Site;
+    domain?: Domain;
+    state: OnlineState;
+};
 
 export function toCreateOrUpdateNode(node: StoredNode): CreateOrUpdateNode {
     return {
@@ -37,7 +37,7 @@ export function toCreateOrUpdateNode(node: StoredNode): CreateOrUpdateNode {
         key: node.key,
         mac: node.mac,
         monitoring: node.monitoringState !== MonitoringState.DISABLED,
-    }
+    };
 }
 
 export function toNodeResponse(node: StoredNode): NodeResponse {
@@ -53,17 +53,20 @@ export function toNodeResponse(node: StoredNode): NodeResponse {
         monitoringConfirmed: node.monitoringState === MonitoringState.ACTIVE,
         monitoringState: node.monitoringState,
         modifiedAt: node.modifiedAt,
-    }
+    };
 }
 
 export function toNodeTokenResponse(node: StoredNode): NodeTokenResponse {
     return {
         token: node.token,
         node: toNodeResponse(node),
-    }
+    };
 }
 
-export function toDomainSpecificNodeResponse(node: StoredNode, nodeStateData: NodeStateData): DomainSpecificNodeResponse {
+export function toDomainSpecificNodeResponse(
+    node: StoredNode,
+    nodeStateData: NodeStateData
+): DomainSpecificNodeResponse {
     return {
         token: node.token,
         nickname: node.nickname,
@@ -79,7 +82,7 @@ export function toDomainSpecificNodeResponse(node: StoredNode, nodeStateData: No
         site: nodeStateData.site,
         domain: nodeStateData.domain,
         onlineState: nodeStateData.state,
-    }
+    };
 }
 
 export function toMonitoringResponse(node: StoredNode): MonitoringResponse {
@@ -93,7 +96,7 @@ export function toMonitoringResponse(node: StoredNode): MonitoringResponse {
 }
 
 export type NodeSecrets = {
-    monitoringToken?: MonitoringToken,
+    monitoringToken?: MonitoringToken;
 };
 
 export type MailId = number & { readonly __tag: unique symbol };
@@ -118,4 +121,4 @@ export type Mail = {
     recipient: EmailAddress;
     data: MailData;
     failures: number;
-}
+};

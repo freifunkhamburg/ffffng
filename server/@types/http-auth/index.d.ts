@@ -4,9 +4,18 @@ declare module "http-auth" {
     class BasicAuth extends Auth {}
     class BasicAuthOptions {}
 
-    type BasicAuthChecker =
-        (username: string, password: string, callback: BasicAuthCheckerCallback) => void
-    type BasicAuthCheckerCallback = (result: boolean | Error, customUser?: string) => void
+    type BasicAuthChecker = (
+        username: string,
+        password: string,
+        callback: BasicAuthCheckerCallback
+    ) => void;
+    type BasicAuthCheckerCallback = (
+        result: boolean | Error,
+        customUser?: string
+    ) => void;
 
-    function basic(options: BasicAuthOptions, checker: BasicAuthChecker): BasicAuth
+    function basic(
+        options: BasicAuthOptions,
+        checker: BasicAuthChecker
+    ): BasicAuth;
 }

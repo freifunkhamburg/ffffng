@@ -1,48 +1,83 @@
-import {RunResult, SqlType, Statement, TypedDatabase} from "../../types";
+import { RunResult, SqlType, Statement, TypedDatabase } from "../../types";
 import * as sqlite3 from "sqlite3";
 
 export async function init(): Promise<void> {
+    return;
 }
 
 export class MockDatabase implements TypedDatabase {
-    constructor() {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    constructor() {}
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async on(event: string, listener: unknown): Promise<void> {
+        return;
     }
 
-    async on(event: string, listener: any): Promise<void> {
-    }
-
-    async run(sql: SqlType, ...params: any[]): Promise<RunResult> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async run(sql: SqlType, ...params: unknown[]): Promise<RunResult> {
         return {
             stmt: new Statement(new sqlite3.Statement()),
         };
     }
 
-    async get<T = any>(sql: SqlType, ...params: any[]): Promise<T | undefined> {
+    async get<T = unknown>(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        sql: SqlType,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ...params: unknown[]
+    ): Promise<T | undefined> {
         return undefined;
     }
 
-    async each<T = any>(sql: SqlType, callback: (err: any, row: T) => void): Promise<number>;
-    async each<T = any>(sql: SqlType, param1: any, callback: (err: any, row: T) => void): Promise<number>;
-    async each<T = any>(sql: SqlType, param1: any, param2: any, callback: (err: any, row: T) => void): Promise<number>;
-    async each<T = any>(sql: SqlType, param1: any, param2: any, param3: any, callback: (err: any, row: T) => void): Promise<number>;
-    async each<T = any>(sql: SqlType, ...params: any[]): Promise<number>;
-    async each(sql: SqlType, ...callback: (any)[]): Promise<number> {
+    async each<T = unknown>(
+        sql: SqlType,
+        callback: (err: unknown, row: T) => void
+    ): Promise<number>;
+    async each<T = unknown>(
+        sql: SqlType,
+        param1: unknown,
+        callback: (err: unknown, row: T) => void
+    ): Promise<number>;
+    async each<T = unknown>(
+        sql: SqlType,
+        param1: unknown,
+        param2: unknown,
+        callback: (err: unknown, row: T) => void
+    ): Promise<number>;
+    async each<T = unknown>(
+        sql: SqlType,
+        param1: unknown,
+        param2: unknown,
+        param3: unknown,
+        callback: (err: unknown, row: T) => void
+    ): Promise<number>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async each<T = unknown>(
+        sql: SqlType,
+        ...params: unknown[]
+    ): Promise<number>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async each(sql: SqlType, ...callback: unknown[]): Promise<number> {
         return 0;
     }
 
-    async all<T>(sql: SqlType, ...params: any[]): Promise<T[]> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async all<T>(sql: SqlType, ...params: unknown[]): Promise<T[]> {
         return [];
     }
 
-    async exec(sql: SqlType, ...params: any[]): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async exec(sql: SqlType, ...params: unknown[]): Promise<void> {
+        return;
     }
 
-
-    async prepare(sql: SqlType, ...params: any[]): Promise<Statement> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async prepare(sql: SqlType, ...params: unknown[]): Promise<Statement> {
         return new Statement(new sqlite3.Statement());
     }
 }
 
 export const db: MockDatabase = new MockDatabase();
 
-export {TypedDatabase, Statement}
+export { TypedDatabase, Statement };

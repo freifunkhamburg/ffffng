@@ -1,4 +1,4 @@
-import {MockLogger} from "./logger";
+import { MockLogger } from "./logger";
 
 test("should reset single message", () => {
     // given
@@ -104,7 +104,7 @@ test("should get messages for no tag", () => {
 
     // when
     logger.tag().debug("message");
-    
+
     // then
     expect(logger.getMessages("debug")).toEqual([["message"]]);
 });
@@ -152,7 +152,10 @@ test("should get multiple messages", () => {
     logger.tag("foo", "bar").debug("message 2");
 
     // then
-    expect(logger.getMessages("debug", "foo", "bar")).toEqual([["message 1"], ["message 2"]]);
+    expect(logger.getMessages("debug", "foo", "bar")).toEqual([
+        ["message 1"],
+        ["message 2"],
+    ]);
 });
 
 test("should get complex message", () => {
@@ -163,5 +166,7 @@ test("should get complex message", () => {
     logger.tag("foo", "bar").debug("message", 1, false, {});
 
     // then
-    expect(logger.getMessages("debug", "foo", "bar")).toEqual([["message", 1, false, {}]]);
+    expect(logger.getMessages("debug", "foo", "bar")).toEqual([
+        ["message", 1, false, {}],
+    ]);
 });
