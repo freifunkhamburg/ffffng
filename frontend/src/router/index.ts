@@ -1,8 +1,13 @@
-import {createRouter, createWebHistory, type LocationQueryRaw, type RouteLocationRaw} from "vue-router";
+import {createRouter, createWebHistory, type LocationQueryRaw} from "vue-router";
 import AdminDashboardView from "@/views/AdminDashboardView.vue";
 import AdminNodesView from "@/views/AdminNodesView.vue";
 import HomeView from "@/views/HomeView.vue";
 import {isNodesFilter, isNodeSortField, isSortDirection, type SearchTerm} from "@/types";
+
+export interface Route {
+    name: RouteName;
+    query?: LocationQueryRaw;
+}
 
 export enum RouteName {
     HOME = "home",
@@ -10,7 +15,7 @@ export enum RouteName {
     ADMIN_NODES = "admin-nodes",
 }
 
-export function route(name: RouteName, query?: LocationQueryRaw): RouteLocationRaw {
+export function route(name: RouteName, query?: LocationQueryRaw): Route {
     return {
         name,
         query,
