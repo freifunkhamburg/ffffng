@@ -1,4 +1,4 @@
-import {isString, MAC} from "../types";
+import {isString, type MAC} from "../types";
 
 export function normalizeString(str: string): string {
     return isString(str) ? str.trim().replace(/\s+/g, ' ') : str;
