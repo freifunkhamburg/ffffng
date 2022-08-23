@@ -77,6 +77,12 @@ $h2-margin: 0.5em 0;
 $link-color: $variant-color-warning;
 $link-hover-color: $variant-color-warning;
 
+// Form
+$label-font-weight: 600;
+$fieldset-border: 0.1em solid $gray;
+$fieldset-border-radius: 0.5em;
+$fieldset-background-color: $gray-darker;
+
 // Inputs
 $input-padding: 0.25em 0.5em;
 $input-background-color: $gray-lighter;
@@ -98,6 +104,16 @@ $button-sizes: (
     medium: 1em,
     large: 1.15em,
 );
+
+// Error cards
+$error-card-margin: 1em 0;
+$error-card-padding: 0.5em;
+$error-card-border: 0.1em solid $variant-color-danger;
+$error-card-border-radius: 0.5em;
+$error-card-font-weight: 600;
+$error-card-background-color: lighten($variant-color-danger, 10%);
+$error-card-color: $page-background-color;
+
 
 // Navigation
 $nav-bar-background-color: $gray-dark;
