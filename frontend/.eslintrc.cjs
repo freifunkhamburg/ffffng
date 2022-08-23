@@ -9,6 +9,7 @@ module.exports = {
         "@vue/eslint-config-typescript/recommended",
         "@vue/eslint-config-prettier",
     ],
+    parser: "vue-eslint-parser",
     env: {
         "vue/setup-compiler-macros": true,
     },

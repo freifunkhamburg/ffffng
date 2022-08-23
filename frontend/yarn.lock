@@ -2069,6 +2069,19 @@ vue-eslint-parser@^9.0.0, vue-eslint-parser@^9.0.1:
     lodash "^4.17.21"
     semver "^7.3.6"
 
+vue-eslint-parser@^9.0.3:
+  version "9.0.3"
+  resolved "https://registry.yarnpkg.com/vue-eslint-parser/-/vue-eslint-parser-9.0.3.tgz#0c17a89e0932cc94fa6a79f0726697e13bfe3c96"
+  integrity sha512-yL+ZDb+9T0ELG4VIFo/2anAOz8SvBdlqEnQnvJ3M7Scq56DvtjY0VY88bByRZB0D4J0u8olBcfrXTVONXsh4og==
+  dependencies:
+    debug "^4.3.4"
+    eslint-scope "^7.1.1"
+    eslint-visitor-keys "^3.3.0"
+    espree "^9.3.1"
+    esquery "^1.4.0"
+    lodash "^4.17.21"
+    semver "^7.3.6"
+
 vue-router@^4.1.4:
   version "4.1.4"
   resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-4.1.4.tgz#290540caaf2c54e37a14dec047bd074002eca175"
