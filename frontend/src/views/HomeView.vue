@@ -9,9 +9,11 @@ import {ButtonSize, ComponentAlignment, ComponentVariant} from "@/types";
     <PageContainer>
         <h2>Willkommen!</h2>
 
-        <p>Du hast einen neuen Freifunk Hamburg Router (Knoten), den Du in Betrieb nehmen möchtest? Du hast schon einen
-            Knoten in Betrieb und möchtest seine Daten ändern? Oder Du möchtest einen Knoten, der nicht mehr in Betrieb
-            ist löschen? Dann bist Du hier richtig!</p>
+        <p>
+            Du hast einen neuen Freifunk Hamburg Router (Knoten), den Du in Betrieb nehmen möchtest? Du hast schon
+            einen Knoten in Betrieb und möchtest seine Daten ändern? Oder Du möchtest einen Knoten, der nicht mehr
+            in Betrieb ist löschen? Dann bist Du hier richtig!
+        </p>
 
         <ButtonGroup class="actions" :align="ComponentAlignment.CENTER" :button-size="ButtonSize.LARGE">
             <ActionButton
@@ -40,5 +42,7 @@ import {ButtonSize, ComponentAlignment, ComponentVariant} from "@/types";
 @import "../scss/variables";
 @import "../scss/mixins";
 
-
+.actions {
+    margin-top: $home-actions-margin-top;
+}
 </style>

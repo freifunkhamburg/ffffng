@@ -300,10 +300,10 @@ function doThrottledSearch(): void {
     position: relative;
     background-color: $input-background-color;
     border-radius: $input-border-radius;
-    border: $input-border;
+    outline-offset: $input-outline-offset;
 
     &.focus {
-        outline: $input-focus-outline;
+        outline: $input-outline;
     }
 
     .nodes-filter-input {
@@ -363,6 +363,7 @@ function doThrottledSearch(): void {
         margin: 0.75em 0.25em 0.6em 0;
         padding: 0;
         border: none;
+        border-radius: 0;
         flex-grow: 1;
         height: 1em;
         outline: none;

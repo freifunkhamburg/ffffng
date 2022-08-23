@@ -53,4 +53,28 @@ a {
         outline: 0.1em solid $link-hover-color;
     }
 }
+
+h2 {
+    font-size: $h2-font-size;
+    margin: $h2-margin;
+}
+input {
+    padding: $input-padding;
+    border: none;
+    border-radius: $input-border-radius;
+
+    background-color: $input-background-color;
+    color: $input-text-color;
+
+    &::placeholder {
+        color: $input-placeholder-color;
+        opacity: $input-placeholder-opacity;
+    }
+
+    &:focus {
+        outline: $input-outline;
+        outline-offset: $input-outline-offset;
+    }
+}
+
 </style>

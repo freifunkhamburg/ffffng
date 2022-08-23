@@ -91,7 +91,7 @@ const linkTarget = computed(() => {
             top: 0;
             right: 0;
 
-            font-weight: bold;
+            font-weight: 600;
             font-size: $statistics-card-value-font-size;
         }
     }

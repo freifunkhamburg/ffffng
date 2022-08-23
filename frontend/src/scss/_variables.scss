@@ -69,18 +69,23 @@ $page-paddings-horizontal: (
     largest: 1.25em,
 );
 
+// Typography
+$h2-font-size: 2.5em;
+$h2-margin: 0.5em 0;
+
 // Links
 $link-color: $variant-color-warning;
 $link-hover-color: $variant-color-warning;
 
 // Inputs
+$input-padding: 0.25em 0.5em;
 $input-background-color: $gray-lighter;
 $input-text-color: $gray-darkest;
 $input-placeholder-color: $gray-darkest;
 $input-placeholder-opacity: 0.8;
-$input-border: 0.1em solid $page-background-color;
 $input-border-radius: 0.5em;
-$input-focus-outline: 0.1em solid $variant-color-info;
+$input-outline: 0.1em solid $variant-color-info;
+$input-outline-offset: 0.125em;
 
 $button-margin: 0.3em;
 $button-padding: 0.25em 0.5em;
@@ -105,6 +110,9 @@ $nav-header-logo-margin: 0 0.5em 0 0;
 
 $nav-footer-padding: 0.75em;
 
+// Home
+$home-actions-margin-top: 2.5em;
+
 // Statistics
 $statistics-card-widths: (
     smallest: 100%,
@@ -127,4 +135,4 @@ $statistics-card-value-font-size: 2.5em;
 $nodes-filter-panel-pill-variant: success;
 $nodes-filter-panel-pill-text-color: map-get($variant-text-colors, $nodes-filter-panel-pill-variant);
 $nodes-filter-panel-pill-background-color: map-get($variant-colors, $nodes-filter-panel-pill-variant);
-$nodes-filter-panel-pill-font-weight: bold;
+$nodes-filter-panel-pill-font-weight: 600;
