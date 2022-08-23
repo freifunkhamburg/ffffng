@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 
 const element = ref<HTMLElement>();
 
 function scrollIntoView() {
     element.value?.scrollIntoView({
         behavior: "smooth",
-        block: "nearest"
+        block: "nearest",
     });
 }
 
@@ -33,5 +33,17 @@ onMounted(scrollIntoView);
 
     background-color: $error-card-background-color;
     color: $error-card-color;
+
+    a {
+        color: $error-card-link-color;
+
+        &:hover {
+            color: $error-card-link-hover-color;
+        }
+
+        &:focus {
+            outline: $error-card-link-focus-outline;
+        }
+    }
 }
 </style>

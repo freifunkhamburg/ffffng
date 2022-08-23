@@ -75,7 +75,8 @@ $h2-margin: 0.5em 0;
 
 // Links
 $link-color: $variant-color-warning;
-$link-hover-color: $variant-color-warning;
+$link-hover-color: $link-color;
+$link-focus-outline: 0.1em solid $link-hover-color;
 
 // Form
 $label-font-weight: 600;
@@ -115,6 +116,9 @@ $error-card-border-radius: 0.5em;
 $error-card-font-weight: 600;
 $error-card-background-color: lighten($variant-color-danger, 10%);
 $error-card-color: $page-background-color;
+$error-card-link-color: darken($variant-color-danger, 30%);
+$error-card-link-hover-color: $error-card-link-color;
+$error-card-link-focus-outline: 0.1em solid $error-card-link-hover-color;
 
 // Node preview
 $node-preview-card-padding: 0.75em 1em;

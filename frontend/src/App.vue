@@ -50,7 +50,7 @@ a {
     }
 
     &:focus {
-        outline: 0.1em solid $link-hover-color;
+        outline: $link-focus-outline;
     }
 }
 
