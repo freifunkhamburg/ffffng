@@ -79,6 +79,8 @@ $link-hover-color: $variant-color-warning;
 
 // Form
 $label-font-weight: 600;
+$fieldset-margin: 0;
+$fieldset-padding: 0.5em 0.75em;
 $fieldset-border: 0.1em solid $gray;
 $fieldset-border-radius: 0.5em;
 $fieldset-background-color: $gray-darker;
@@ -114,6 +116,20 @@ $error-card-font-weight: 600;
 $error-card-background-color: lighten($variant-color-danger, 10%);
 $error-card-color: $page-background-color;
 
+// Node preview
+$node-preview-card-padding: 0.75em 1em;
+$node-preview-card-border: 0.2em solid $gray;
+$node-preview-card-border-radius: 1em;
+$node-preview-card-headline-font-size: 1.5em;
+$node-preview-card-headline-margin: 0 0 0.5em;
+$node-preview-card-field-margin: 0.25em 0;
+$node-preview-card-field-code-font-size: 1.25em;
+
+// Deleted node summary
+$node-deleted-summary-padding: $node-preview-card-padding;
+$node-deleted-summary-border: $node-preview-card-border;
+$node-deleted-summary-border-radius: $node-preview-card-border-radius;
+$node-deleted-summary-font-size: 1.25em;
 
 // Navigation
 $nav-bar-background-color: $gray-dark;

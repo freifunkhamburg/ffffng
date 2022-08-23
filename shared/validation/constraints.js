@@ -5,14 +5,14 @@
 
 (function () {
     var constraints = {
-        id:{
+        id: {
             type: 'string',
             regex: /^[1-9][0-9]*$/,
             optional: false
         },
-        token:{
+        token: {
             type: 'string',
-            regex: /^[0-9a-f]{16}$/i,
+            regex: /^[0-9a-fA-F]{16}$/,
             optional: false
         },
         node: {

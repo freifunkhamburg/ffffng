@@ -2,6 +2,7 @@ import {createRouter, createWebHistory, type LocationQueryRaw} from "vue-router"
 import AdminDashboardView from "@/views/AdminDashboardView.vue";
 import AdminNodesView from "@/views/AdminNodesView.vue";
 import HomeView from "@/views/HomeView.vue";
+import NodeDeleteView from "@/views/NodeDeleteView.vue";
 import {isNodesFilter, isNodeSortField, isSortDirection, type SearchTerm} from "@/types";
 
 export interface Route {
@@ -11,6 +12,7 @@ export interface Route {
 
 export enum RouteName {
     HOME = "home",
+    NODE_DELETE = "node-delete",
     ADMIN = "admin",
     ADMIN_NODES = "admin-nodes",
 }
@@ -29,6 +31,11 @@ const router = createRouter({
             path: "/",
             name: RouteName.HOME,
             component: HomeView,
+        },
+        {
+            path: "/node/delete",
+            name: RouteName.NODE_DELETE,
+            component: NodeDeleteView,
         },
         {
             path: "/admin",

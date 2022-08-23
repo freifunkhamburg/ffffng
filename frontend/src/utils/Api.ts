@@ -4,6 +4,55 @@ import {parseInteger} from "@/utils/Numbers";
 
 type Method = "GET" | "PUT" | "POST" | "DELETE";
 
+enum ApiErrorType {
+    REQUEST_FAILED = "request_failed",
+    UNEXPECTED_RESULT_TYPE = "unexpected_result_type",
+}
+
+enum HttpStatusCode {
+    NOT_FOUND = 404,
+}
+
+export class ApiError extends Error {
+    private constructor(
+        message: string,
+        private status: number,
+        private errorType: ApiErrorType,
+    ) {
+        super(message);
+    }
+
+    static async requestFailed(
+        method: Method,
+        path: string,
+        response: Response,
+    ): Promise<ApiError> {
+        const body = await response.text();
+        return new ApiError(
+            `API ${method} request failed: ${path} => ${response.status} - ${body}`,
+            response.status,
+            ApiErrorType.REQUEST_FAILED,
+        );
+    }
+
+    static async unexpectedResultType(
+        method: Method,
+        path: string,
+        response: Response,
+        json: any,
+    ): Promise<ApiError> {
+        return new ApiError(
+            `API ${method} request result has unexpected type. ${path} => ${json}`,
+            response.status,
+            ApiErrorType.UNEXPECTED_RESULT_TYPE,
+        );
+    }
+
+    isNotFoundError(): boolean {
+        return this.errorType === ApiErrorType.REQUEST_FAILED && this.status === HttpStatusCode.NOT_FOUND;
+    }
+}
+
 interface PagedListResult<T> {
     entries: T[];
     total: number;
@@ -47,15 +96,14 @@ class Api {
         });
 
         if (!response.ok) {
-            const body = await response.text();
-            throw new Error(`API ${method} request failed: ${path} => ${response.status} - ${body}`);
+            throw await ApiError.requestFailed(method, path, response);
         }
 
         if (isT) {
             const json = await response.json();
             if (isT && !isT(json)) {
                 console.log(json);
-                throw new Error(`API ${method} request result has wrong type. ${path} => ${json}`);
+                throw await ApiError.unexpectedResultType(method, path, response, json);
             }
 
             return {

@@ -3,7 +3,8 @@ import ActionButton from "@/components/form/ActionButton.vue";
 import ButtonGroup from "@/components/form/ButtonGroup.vue";
 import PageContainer from "@/components/page/PageContainer.vue";
 import {ButtonSize, ComponentAlignment, ComponentVariant} from "@/types";
-</script>
+import {route, RouteName} from "@/router";
+import RouteButton from "@/components/form/RouteButton.vue";</script>
 
 <template>
     <PageContainer>
@@ -28,12 +29,13 @@ import {ButtonSize, ComponentAlignment, ComponentVariant} from "@/types";
                 icon="pencil">
                 Knotendaten ändern
             </ActionButton>
-            <ActionButton
+            <RouteButton
                 :variant="ComponentVariant.WARNING"
                 :size="ButtonSize.LARGE"
-                icon="trash">
+                icon="trash"
+                :route="route(RouteName.NODE_DELETE)">
                 Knoten löschen
-            </ActionButton>
+            </RouteButton>
         </ButtonGroup>
     </PageContainer>
 </template>

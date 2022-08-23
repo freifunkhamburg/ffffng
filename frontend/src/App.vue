@@ -78,4 +78,13 @@ input {
     }
 }
 
+fieldset {
+    margin: $fieldset-margin;
+    padding: $fieldset-padding;
+
+    border: $fieldset-border;
+    border-radius: $fieldset-border-radius;
+
+    background-color: $fieldset-background-color;
+}
 </style>
