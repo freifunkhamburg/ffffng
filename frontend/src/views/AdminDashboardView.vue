@@ -2,6 +2,7 @@
 import StatisticsCard from "@/components/admin/StatisticsCard.vue";
 import {useStatisticsStore} from "@/stores/statistics";
 import {ComponentVariant, MonitoringState} from "@/types";
+import {RouteName} from "@/router";
 import PageContainer from "@/components/page/PageContainer.vue";
 
 const statistics = useStatisticsStore();
@@ -23,14 +24,14 @@ refresh();
                 icon="circle-o"
                 :variant="ComponentVariant.INFO"
                 :value="statistics.getStatistics.nodes.registered"
-                link="/admin/nodes"
+                :route="RouteName.ADMIN_NODES"
             />
             <StatisticsCard
                 title="Mit hinterlegtem fastd-Key"
                 icon="lock"
                 :variant="ComponentVariant.WARNING"
                 :value="statistics.getStatistics.nodes.withVPN"
-                link="/admin/nodes"
+                :route="RouteName.ADMIN_NODES"
                 :filter="{hasKey: true}"
             />
             <StatisticsCard
@@ -38,7 +39,7 @@ refresh();
                 icon="map-marker"
                 :variant="ComponentVariant.SUCCESS"
                 :value="statistics.getStatistics.nodes.withCoords"
-                link="/admin/nodes"
+                :route="RouteName.ADMIN_NODES"
                 :filter="{hasCoords: true}"
             />
             <StatisticsCard
@@ -46,7 +47,7 @@ refresh();
                 icon="heartbeat"
                 :variant="ComponentVariant.SUCCESS"
                 :value="statistics.getStatistics.nodes.monitoring.active"
-                link="/admin/nodes"
+                :route="RouteName.ADMIN_NODES"
                 :filter="{monitoringState: MonitoringState.ACTIVE}"
             />
             <StatisticsCard
@@ -54,7 +55,7 @@ refresh();
                 icon="envelope"
                 :variant="ComponentVariant.DANGER"
                 :value="statistics.getStatistics.nodes.monitoring.pending"
-                link="/admin/nodes"
+                :route="RouteName.ADMIN_NODES"
                 :filter="{monitoringState: MonitoringState.PENDING}"
             />
         </div>

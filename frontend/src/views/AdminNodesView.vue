@@ -8,7 +8,7 @@ import ActionButton from "@/components/form/ActionButton.vue";
 import LoadingContainer from "@/components/LoadingContainer.vue";
 import NodesFilterPanel from "@/components/nodes/NodesFilterPanel.vue";
 import {SortTH} from "@/components/table/SortTH.vue";
-import router from "@/router";
+import router, {route, RouteName} from "@/router";
 
 const NODE_PER_PAGE = 50;
 
@@ -92,15 +92,17 @@ async function updateRouterState(
     sortField: NodeSortField,
 ): Promise<void> {
     const filterStr = Object.keys(filter).length > 0 ? JSON.stringify(filter) : undefined;
-    await router.replace({
-        path: '/admin/nodes',
-        query: {
-            q: searchTerm || undefined,
-            filter: filterStr,
-            sortDir: sortDirection,
-            sortField: sortField,
-        }
-    });
+    await router.replace(
+        route(
+            RouteName.ADMIN_NODES,
+            {
+                q: searchTerm || undefined,
+                filter: filterStr,
+                sortDir: sortDirection,
+                sortField: sortField,
+            }
+        )
+    );
 }
 
 async function updateFilter(filter: NodesFilter, searchTerm: SearchTerm): Promise<void> {

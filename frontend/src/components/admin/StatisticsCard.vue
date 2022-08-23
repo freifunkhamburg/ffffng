@@ -1,29 +1,25 @@
 <script setup lang="ts">
 import {computed, defineProps} from "vue";
 import type {ComponentVariant, NodesFilter} from "@/types";
+import type {RouteName} from "@/router";
+import router, {route} from "@/router";
 
 interface Props {
     title: string;
     icon: string;
     variant: ComponentVariant;
     value: number;
-    link: string;
+    route: RouteName;
     filter?: NodesFilter;
 }
 
 const props = defineProps<Props>();
 
 const linkTarget = computed(() => {
-    if (props.filter) {
-        return {
-            path: props.link,
-            query: {
-                filter: JSON.stringify(props.filter),
-            },
-        }
-    } else {
-        return props.link;
-    }
+    const query = props.filter && {
+        filter: JSON.stringify(props.filter),
+    };
+    return route(props.route, query);
 });
 </script>
 

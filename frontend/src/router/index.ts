@@ -1,25 +1,38 @@
-import {createRouter, createWebHistory} from "vue-router";
+import {createRouter, createWebHistory, type LocationQueryRaw, type RouteLocationRaw} from "vue-router";
 import AdminDashboardView from "@/views/AdminDashboardView.vue";
 import AdminNodesView from "@/views/AdminNodesView.vue";
 import HomeView from "@/views/HomeView.vue";
 import {isNodesFilter, isNodeSortField, isSortDirection, type SearchTerm} from "@/types";
+
+export enum RouteName {
+    HOME = "home",
+    ADMIN = "admin",
+    ADMIN_NODES = "admin-nodes",
+}
+
+export function route(name: RouteName, query?: LocationQueryRaw): RouteLocationRaw {
+    return {
+        name,
+        query,
+    };
+}
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         {
             path: "/",
-            name: "home",
+            name: RouteName.HOME,
             component: HomeView,
         },
         {
             path: "/admin",
-            name: "admin",
+            name: RouteName.ADMIN,
             component: AdminDashboardView,
         },
         {
             path: "/admin/nodes",
-            name: "admin-nodes",
+            name: RouteName.ADMIN_NODES,
             component: AdminNodesView,
             props: route => {
                 let filter: any;
