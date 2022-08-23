@@ -19,13 +19,13 @@ export default defineConfig({
         strictPort: true,
         proxy: {
             "/api/": {
-                // target: "http://localhost:8080",
-                target: "https://formular.hamburg.freifunk.net",
+                target: "http://localhost:8080",
+                // target: "https://formular.hamburg.freifunk.net",
                 changeOrigin: true,
             },
             "/internal/api/": {
-                // target: "http://localhost:8080",
-                target: "https://formular.hamburg.freifunk.net",
+                target: "http://localhost:8080",
+                // target: "https://formular.hamburg.freifunk.net",
                 changeOrigin: true,
             },
         },
