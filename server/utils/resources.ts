@@ -7,12 +7,14 @@ import {
     Constraints,
     forConstraints,
     isConstraints,
+    NestedConstraints,
 } from "../shared/validation/validator";
 import { Request, Response } from "express";
 import {
     EnumTypeGuard,
     EnumValue,
     type GenericSortField,
+    getFieldIfExists,
     isJSONObject,
     isNumber,
     isString,
@@ -26,7 +28,7 @@ import {
 export type RequestData = JSONObject;
 export type RequestHandler = (request: Request, response: Response) => void;
 
-export type Entity = { [key: string]: any };
+export type Entity = { [key: string]: unknown };
 
 export type RestParams = {
     q?: string;
@@ -180,7 +182,7 @@ export async function getValidRestParams(
     subtype: string | null,
     req: Request
 ): Promise<RestParams> {
-    const restConstraints = CONSTRAINTS.rest as { [key: string]: any };
+    const restConstraints = CONSTRAINTS.rest as { [key: string]: Constraints };
     if (!(type in restConstraints) || !isConstraints(restConstraints[type])) {
         Logger.tag("validation", "rest").error(
             "Unknown REST resource type: {}",
@@ -193,18 +195,16 @@ export async function getValidRestParams(
     let filterConstraints: Constraints = {};
     if (subtype) {
         const subtypeFilters = subtype + "Filters";
-        const constraintsObj = CONSTRAINTS as { [key: string]: any };
-        if (
-            !(subtypeFilters in constraintsObj) ||
-            !isConstraints(constraintsObj[subtypeFilters])
-        ) {
+        const nestedConstraints = CONSTRAINTS as NestedConstraints;
+        const subConstraints = nestedConstraints[subtypeFilters];
+        if (!isConstraints(subConstraints)) {
             Logger.tag("validation", "rest").error(
                 "Unknown REST resource subtype: {}",
                 subtype
             );
             throw { data: "Internal error.", type: ErrorTypes.internalError };
         }
-        filterConstraints = constraintsObj[subtypeFilters];
+        filterConstraints = subConstraints;
     }
 
     const data = getData(req);
@@ -232,7 +232,7 @@ export function filter<E>(
         query = query.trim().toLowerCase();
     }
 
-    function queryMatches(entity: Entity): boolean {
+    function queryMatches(entity: E): boolean {
         if (!query) {
             return true;
         }
@@ -240,7 +240,7 @@ export function filter<E>(
             if (!query) {
                 return true;
             }
-            let value = entity[field];
+            let value = getFieldIfExists(entity, field);
             if (isNumber(value)) {
                 value = value.toString();
             }
@@ -249,21 +249,21 @@ export function filter<E>(
                 return false;
             }
 
-            value = value.toLowerCase();
+            const lowerCaseValue = value.toLowerCase();
             if (field === "mac") {
                 return _.includes(
-                    value.replace(/:/g, ""),
+                    lowerCaseValue.replace(/:/g, ""),
                     query.replace(/:/g, "")
                 );
             }
 
-            return _.includes(value, query);
+            return _.includes(lowerCaseValue, query);
         });
     }
 
     const filters = restParams.filters;
 
-    function filtersMatch(entity: Entity): boolean {
+    function filtersMatch(entity: E): boolean {
         if (isUndefined(filters) || _.isEmpty(filters)) {
             return true;
         }
@@ -275,9 +275,13 @@ export function filter<E>(
             if (key.startsWith("has")) {
                 const entityKey =
                     key.substring(3, 4).toLowerCase() + key.substring(4);
-                return _.isEmpty(entity[entityKey]).toString() !== value;
+                return (
+                    _.isEmpty(
+                        getFieldIfExists(entity, entityKey)
+                    ).toString() !== value
+                );
             }
-            return entity[key] === value;
+            return getFieldIfExists(entity, key) === value;
         });
     }
 
@@ -287,7 +291,8 @@ export function filter<E>(
 }
 
 export function sort<
-    Type extends { [Key in SortField]: unknown },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Type extends { [Key in SortField]: any },
     SortField extends string
 >(
     entities: Type[],
@@ -303,8 +308,8 @@ export function sort<
 
     const sorted = entities.slice(0);
     sorted.sort((a, b) => {
-        let as: any = a[sortField];
-        let bs: any = b[sortField];
+        let as = a[sortField];
+        let bs = b[sortField];
 
         if (isString(as)) {
             as = as.toLowerCase();

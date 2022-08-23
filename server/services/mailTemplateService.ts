@@ -21,6 +21,7 @@ const templateFunctions: {
         | ((unix: number) => string);
 } = {};
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function renderSnippet(this: any, name: string, data: MailData): string {
     const snippetFile = snippetsBasePath + "/" + name + ".html";
 
@@ -34,7 +35,9 @@ function renderSnippet(this: any, name: string, data: MailData): string {
     );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function snippet(name: string): (this: any, data: MailData) => string {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return function (this: any, data: MailData): string {
         return renderSnippet.bind(this)(name, data);
     };

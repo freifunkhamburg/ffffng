@@ -25,15 +25,6 @@ beforeEach(() => {
     mockedLogger.reset();
 });
 
-test("parseNode() should fail parsing node for undefined node data", () => {
-    // given
-    const importTimestamp = now();
-    const nodeData = undefined;
-
-    // then
-    expect(() => parseNode(importTimestamp, nodeData)).toThrowError();
-});
-
 test("parseNode() should fail parsing node for empty node data", () => {
     // given
     const importTimestamp = now();

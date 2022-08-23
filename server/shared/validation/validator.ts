@@ -25,6 +25,9 @@ export interface Constraint {
 }
 
 export type Constraints = { [key: string]: Constraint };
+export type NestedConstraints = {
+    [key: string]: Constraint | Constraints | NestedConstraints;
+};
 export type Values = { [key: string]: unknown };
 
 export function isConstraint(arg: unknown): arg is Constraint {

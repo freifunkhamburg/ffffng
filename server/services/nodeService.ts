@@ -405,7 +405,7 @@ function setNodeValue(
         case LINE_PREFIX.TOKEN:
             node.token = value as Token;
             break;
-        case LINE_PREFIX.MONITORING:
+        case LINE_PREFIX.MONITORING: {
             const active = value === "aktiv";
             const pending = value === "pending";
             node.monitoringState = active
@@ -414,6 +414,7 @@ function setNodeValue(
                 ? MonitoringState.PENDING
                 : MonitoringState.DISABLED;
             break;
+        }
         case LINE_PREFIX.MONITORING_TOKEN:
             nodeSecrets.monitoringToken = value as MonitoringToken;
             break;

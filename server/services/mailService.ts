@@ -196,21 +196,23 @@ export async function sendPendingMails(): Promise<void> {
 
     const startTime = moment();
 
-    while (true) {
+    let pendingMails = await findPendingMailsBefore(
+        startTime,
+        MAIL_QUEUE_DB_BATCH_SIZE
+    );
+
+    while (!_.isEmpty(pendingMails)) {
         Logger.tag("mail", "queue").debug("Sending next batch...");
-
-        const pendingMails = await findPendingMailsBefore(
-            startTime,
-            MAIL_QUEUE_DB_BATCH_SIZE
-        );
-
-        if (_.isEmpty(pendingMails)) {
-            Logger.tag("mail", "queue").debug("Done sending pending mails.");
-            return;
-        }
 
         for (const pendingMail of pendingMails) {
             await sendPendingMail(pendingMail);
         }
+
+        pendingMails = await findPendingMailsBefore(
+            startTime,
+            MAIL_QUEUE_DB_BATCH_SIZE
+        );
     }
+
+    Logger.tag("mail", "queue").debug("Done sending pending mails.");
 }

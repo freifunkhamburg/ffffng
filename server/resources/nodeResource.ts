@@ -10,6 +10,7 @@ import { Request, Response } from "express";
 import {
     CreateOrUpdateNode,
     DomainSpecificNodeResponse,
+    filterUndefinedFromJSON,
     isCreateOrUpdateNode,
     isNodeSortField,
     isString,
@@ -108,7 +109,7 @@ export const get = handleJSONWithData<NodeResponse>(async (data) => {
 
 async function doGetAll(
     req: Request
-): Promise<{ total: number; pageNodes: any }> {
+): Promise<{ total: number; pageNodes: DomainSpecificNodeResponse[] }> {
     const restParams = await Resources.getValidRestParams("list", "node", req);
 
     const nodes = await NodeService.getAllNodes();
@@ -159,9 +160,17 @@ async function doGetAll(
 
 export function getAll(req: Request, res: Response): void {
     doGetAll(req)
-        .then((result: { total: number; pageNodes: any[] }) => {
-            res.set("X-Total-Count", result.total.toString(10));
-            return Resources.success(res, result.pageNodes);
-        })
-        .catch((err: any) => Resources.error(res, err));
+        .then(
+            (result: {
+                total: number;
+                pageNodes: DomainSpecificNodeResponse[];
+            }) => {
+                res.set("X-Total-Count", result.total.toString(10));
+                return Resources.success(
+                    res,
+                    result.pageNodes.map(filterUndefinedFromJSON)
+                );
+            }
+        )
+        .catch((err) => Resources.error(res, err));
 }

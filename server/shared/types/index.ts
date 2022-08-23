@@ -77,11 +77,22 @@ export function isObject(arg: unknown): arg is object {
     return arg !== null && typeof arg === "object";
 }
 
+export function isPlainObject(arg: unknown): arg is { [key: string]: unknown } {
+    return isObject(arg) && !Array.isArray(arg);
+}
+
 export function hasOwnProperty<Key extends PropertyKey>(
     arg: unknown,
     key: Key
 ): arg is Record<Key, unknown> {
     return isObject(arg) && key in arg;
+}
+
+export function getFieldIfExists(
+    arg: unknown,
+    key: PropertyKey
+): unknown | undefined {
+    return hasOwnProperty(arg, key) ? arg[key] : undefined;
 }
 
 export function isArray<T>(arg: unknown, isT: TypeGuard<T>): arg is Array<T> {

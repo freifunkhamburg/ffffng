@@ -24,9 +24,11 @@ import {
     isDomain,
     isMonitoringSortField,
     isOnlineState,
+    isPlainObject,
     isSite,
     isString,
     isUndefined,
+    JSONValue,
     MAC,
     MailType,
     MonitoringSortField,
@@ -35,6 +37,7 @@ import {
     NodeId,
     NodeStateData,
     OnlineState,
+    parseJSON,
     RunResult,
     Site,
     StoredNode,
@@ -206,13 +209,13 @@ const isValidMac = forConstraint(CONSTRAINTS.node.mac, false);
 
 export function parseNode(
     importTimestamp: UnixTimestampSeconds,
-    nodeData: any
+    nodeData: JSONValue
 ): ParsedNode {
-    if (!_.isPlainObject(nodeData)) {
+    if (!isPlainObject(nodeData)) {
         throw new Error("Unexpected node type: " + typeof nodeData);
     }
 
-    if (!_.isPlainObject(nodeData.nodeinfo)) {
+    if (!isPlainObject(nodeData.nodeinfo)) {
         throw new Error(
             "Unexpected nodeinfo type: " + typeof nodeData.nodeinfo
         );
@@ -225,7 +228,7 @@ export function parseNode(
         );
     }
 
-    if (!_.isPlainObject(nodeData.nodeinfo.network)) {
+    if (!isPlainObject(nodeData.nodeinfo.network)) {
         throw new Error(
             "Node " +
                 nodeId +
@@ -239,9 +242,9 @@ export function parseNode(
             "Node " + nodeId + ": Invalid MAC: " + nodeData.nodeinfo.network.mac
         );
     }
-    const mac = normalizeMac(nodeData.nodeinfo.network.mac) as MAC;
+    const mac = normalizeMac(nodeData.nodeinfo.network.mac as MAC);
 
-    if (!_.isPlainObject(nodeData.flags)) {
+    if (!isPlainObject(nodeData.flags)) {
         throw new Error(
             "Node " +
                 nodeId +
@@ -271,7 +274,7 @@ export function parseNode(
 
     let site: Site | undefined;
     if (
-        _.isPlainObject(nodeData.nodeinfo.system) &&
+        isPlainObject(nodeData.nodeinfo.system) &&
         isSite(nodeData.nodeinfo.system.site_code)
     ) {
         site = nodeData.nodeinfo.system.site_code;
@@ -279,7 +282,7 @@ export function parseNode(
 
     let domain: Domain | undefined;
     if (
-        _.isPlainObject(nodeData.nodeinfo.system) &&
+        isPlainObject(nodeData.nodeinfo.system) &&
         isDomain(nodeData.nodeinfo.system.domain_code)
     ) {
         domain = nodeData.nodeinfo.system.domain_code;
@@ -300,9 +303,9 @@ export function parseNodesJson(body: string): NodesParsingResult {
         "Parsing nodes.json..."
     );
 
-    const json = JSON.parse(body);
+    const json = parseJSON(body);
 
-    if (!_.isPlainObject(json)) {
+    if (!isPlainObject(json)) {
         throw new Error(
             `Expecting a JSON object as the nodes.json root, but got: ${typeof json}`
         );
