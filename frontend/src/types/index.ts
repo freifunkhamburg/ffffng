@@ -6,8 +6,15 @@ export enum ButtonSize {
     LARGE = "large",
 }
 
+export enum ComponentAlignment {
+    LEFT = "left",
+    CENTER = "center",
+    RIGHT = "right",
+}
+
 export enum ComponentVariant {
     PRIMARY = "primary",
+    SECONDARY = "secondary",
     SUCCESS = "success",
     WARNING = "warning",
     DANGER = "danger",

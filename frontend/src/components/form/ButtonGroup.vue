@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import type {ButtonSize} from "@/types";
+import type {ButtonSize, ComponentAlignment} from "@/types";
 
 interface Props {
     buttonSize: ButtonSize;
+    align: ComponentAlignment;
 }
 
 const props = defineProps<Props>()
 </script>
 
 <template>
-    <div :class="['button-group', buttonSize]">
+    <div :class="['button-group', buttonSize, align]">
         <slot></slot>
     </div>
 </template>
@@ -20,8 +21,17 @@ const props = defineProps<Props>()
 
 .button-group {
     display: flex;
-    justify-content: center;
     flex-wrap: wrap;
+    margin: {
+        left: -$button-margin;
+        right: -$button-margin;
+    }
+
+    @each $align in (left, center, right) {
+        &.#{$align} {
+            justify-content: $align;
+        }
+    }
 
     button {
         margin: $button-margin;
@@ -32,15 +42,22 @@ const props = defineProps<Props>()
     .button-group {
         flex-direction: column;
 
+        margin: {
+            left: 0;
+            right: 0;
+        }
+
         button {
             margin: $button-margin 0;
             width: 100%;
         }
     }
 }
+
 @include page-breakpoint(smaller) {
     .button-group {
         align-items: center;
+
         button {
             flex-grow: 1;
             max-width: 80%;
