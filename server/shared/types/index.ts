@@ -573,7 +573,7 @@ export function isMonitoringResponse(arg: unknown): arg is MonitoringResponse {
 }
 
 // noinspection JSUnusedGlobalSymbols
-enum NodeSortFieldEnum {
+export enum NodeSortFieldEnum {
     HOSTNAME = "hostname",
     NICKNAME = "nickname",
     EMAIL = "email",
@@ -632,7 +632,7 @@ export function isNodesFilter(arg: unknown): arg is NodesFilter {
     );
 }
 
-export type SearchTerm = string & { readonly __tag: unique symbol }
+export type SearchTerm = string & { readonly __tag: unique symbol };
 export const isSearchTerm = isString;
 
 export enum MonitoringSortField {

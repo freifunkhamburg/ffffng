@@ -3,7 +3,7 @@ import {
     type DomainSpecificNodeResponse,
     isDomainSpecificNodeResponse,
     type NodesFilter,
-    NodeSortField,
+    NodeSortFieldEnum,
     SortDirection,
 } from "@/types";
 import { internalApi } from "@/utils/Api";
@@ -14,7 +14,7 @@ interface NodesStoreState {
     nodesPerPage: number;
     totalNodes: number;
     sortDirection: SortDirection;
-    sortField: NodeSortField;
+    sortField: NodeSortFieldEnum;
 }
 
 export const useNodesStore = defineStore({
@@ -26,7 +26,7 @@ export const useNodesStore = defineStore({
             nodesPerPage: 20,
             totalNodes: 0,
             sortDirection: SortDirection.ASCENDING,
-            sortField: NodeSortField.HOSTNAME,
+            sortField: NodeSortFieldEnum.HOSTNAME,
         };
     },
     getters: {
@@ -51,7 +51,7 @@ export const useNodesStore = defineStore({
             page: number,
             nodesPerPage: number,
             sortDirection: SortDirection,
-            sortField: NodeSortField,
+            sortField: NodeSortFieldEnum,
             filter: NodesFilter,
             searchTerm?: string
         ): Promise<void> {
@@ -63,7 +63,7 @@ export const useNodesStore = defineStore({
             }
             const result = await internalApi.getPagedList<
                 DomainSpecificNodeResponse,
-                NodeSortField
+                NodeSortFieldEnum
             >(
                 "nodes",
                 isDomainSpecificNodeResponse,

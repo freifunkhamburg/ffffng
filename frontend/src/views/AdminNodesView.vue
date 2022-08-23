@@ -10,7 +10,8 @@ import type {
 import {
     ButtonSize,
     ComponentVariant,
-    NodeSortField,
+    type NodeSortField,
+    NodeSortFieldEnum,
     SortDirection,
 } from "@/types";
 import ListPager from "@/components/ListPager.vue";
@@ -41,7 +42,7 @@ const props = defineProps({
     },
     sortField: {
         type: String as PropType<NodeSortField>,
-        default: NodeSortField.HOSTNAME,
+        default: NodeSortFieldEnum.HOSTNAME,
     },
 });
 
@@ -196,7 +197,7 @@ watch(props, async () => {
             <thead>
                 <tr>
                     <sth
-                        :field="NodeSortField.HOSTNAME"
+                        :field="NodeSortFieldEnum.HOSTNAME"
                         :currentField="sortField"
                         :currentDirection="sortDirection"
                         @sort="updateSortOrder"
@@ -204,7 +205,7 @@ watch(props, async () => {
                         Name
                     </sth>
                     <sth
-                        :field="NodeSortField.NICKNAME"
+                        :field="NodeSortFieldEnum.NICKNAME"
                         :currentField="sortField"
                         :currentDirection="sortDirection"
                         @sort="updateSortOrder"
@@ -212,7 +213,7 @@ watch(props, async () => {
                         Besitzer*in
                     </sth>
                     <sth
-                        :field="NodeSortField.EMAIL"
+                        :field="NodeSortFieldEnum.EMAIL"
                         :currentField="sortField"
                         :currentDirection="sortDirection"
                         @sort="updateSortOrder"
@@ -220,7 +221,7 @@ watch(props, async () => {
                         E-Mail
                     </sth>
                     <sth
-                        :field="NodeSortField.TOKEN"
+                        :field="NodeSortFieldEnum.TOKEN"
                         :currentField="sortField"
                         :currentDirection="sortDirection"
                         @sort="updateSortOrder"
@@ -228,7 +229,7 @@ watch(props, async () => {
                         Token
                     </sth>
                     <sth
-                        :field="NodeSortField.MAC"
+                        :field="NodeSortFieldEnum.MAC"
                         :currentField="sortField"
                         :currentDirection="sortDirection"
                         @sort="updateSortOrder"
@@ -236,7 +237,7 @@ watch(props, async () => {
                         MAC
                     </sth>
                     <sth
-                        :field="NodeSortField.KEY"
+                        :field="NodeSortFieldEnum.KEY"
                         :currentField="sortField"
                         :currentDirection="sortDirection"
                         @sort="updateSortOrder"
@@ -244,7 +245,7 @@ watch(props, async () => {
                         VPN
                     </sth>
                     <sth
-                        :field="NodeSortField.SITE"
+                        :field="NodeSortFieldEnum.SITE"
                         :currentField="sortField"
                         :currentDirection="sortDirection"
                         @sort="updateSortOrder"
@@ -252,7 +253,7 @@ watch(props, async () => {
                         Site
                     </sth>
                     <sth
-                        :field="NodeSortField.DOMAIN"
+                        :field="NodeSortFieldEnum.DOMAIN"
                         :currentField="sortField"
                         :currentDirection="sortDirection"
                         @sort="updateSortOrder"
@@ -260,7 +261,7 @@ watch(props, async () => {
                         Domäne
                     </sth>
                     <sth
-                        :field="NodeSortField.COORDS"
+                        :field="NodeSortFieldEnum.COORDS"
                         :currentField="sortField"
                         :currentDirection="sortDirection"
                         @sort="updateSortOrder"
@@ -268,7 +269,7 @@ watch(props, async () => {
                         GPS
                     </sth>
                     <sth
-                        :field="NodeSortField.ONLINE_STATE"
+                        :field="NodeSortFieldEnum.ONLINE_STATE"
                         :currentField="sortField"
                         :currentDirection="sortDirection"
                         @sort="updateSortOrder"
@@ -276,7 +277,7 @@ watch(props, async () => {
                         Status
                     </sth>
                     <sth
-                        :field="NodeSortField.MONITORING_STATE"
+                        :field="NodeSortFieldEnum.MONITORING_STATE"
                         :currentField="sortField"
                         :currentDirection="sortDirection"
                         @sort="updateSortOrder"
