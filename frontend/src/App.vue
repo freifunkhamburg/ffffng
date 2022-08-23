@@ -58,6 +58,7 @@ h2 {
     font-size: $h2-font-size;
     margin: $h2-margin;
 }
+
 input {
     padding: $input-padding;
     border: none;
