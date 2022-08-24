@@ -1,6 +1,6 @@
 import { SortDirection, toIsArray, type TypeGuard } from "@/types";
 import type { Headers } from "request";
-import { parseInteger } from "@/utils/Numbers";
+import { parseToInteger } from "@/utils/Numbers";
 
 type Method = "GET" | "PUT" | "POST" | "DELETE";
 
@@ -172,7 +172,7 @@ class Api {
             ...filter,
         });
         const totalStr = response.headers.get("x-total-count");
-        const total = parseInteger(totalStr, 10);
+        const total = parseToInteger(totalStr, 10);
 
         return {
             entries: response.result,

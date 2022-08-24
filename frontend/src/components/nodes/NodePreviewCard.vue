@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { StoredNode } from "@/types";
 import { MonitoringState } from "@/types";
+import NodeMap from "@/components/NodeMap.vue";
 
 interface Props {
     node: StoredNode;
@@ -54,11 +55,21 @@ const props = defineProps<Props>();
                 nicht aktiv
             </span>
         </div>
+
+        <NodeMap class="node-map" :coordinates="props.node.coords" />
     </div>
 </template>
 
 <style lang="scss" scoped>
 @import "../../scss/variables";
+@import "../../scss/mixins";
+
+@include min-page-breakpoint(medium) {
+    .node-preview-card {
+        max-width: nth(map-get($page-breakpoints, small), 1);
+        margin: 0 auto;
+    }
+}
 
 .node-preview-card {
     display: flex;
@@ -74,6 +85,10 @@ const props = defineProps<Props>();
         font-size: $node-preview-card-headline-font-size;
         margin: $node-preview-card-headline-margin;
         text-align: center;
+    }
+
+    .node-map {
+        margin: $node-preview-card-map-margin;
     }
 
     .field {

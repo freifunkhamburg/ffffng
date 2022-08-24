@@ -28,6 +28,9 @@ body {
 }
 
 main {
+    position: relative;
+    z-index: 0;
+
     padding-top: $page-padding-top;
     padding-bottom: $page-padding-bottom;
 

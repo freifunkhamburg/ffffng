@@ -103,6 +103,9 @@ async function onAbort() {
 
 <style lang="scss" scoped>
 .preview {
-    margin: 1em 0;
+    margin: {
+        top: 1em;
+        bottom: 1em;
+    }
 }
 </style>

@@ -120,12 +120,17 @@ $error-card-link-color: darken($variant-color-danger, 30%);
 $error-card-link-hover-color: $error-card-link-color;
 $error-card-link-focus-outline: 0.1em solid $error-card-link-hover-color;
 
+// Node map
+$node-map-aspect-ratio: 16 / 10;
+$node-map-border-radius: 0.75em;
+
 // Node preview
 $node-preview-card-padding: 0.75em 1em;
 $node-preview-card-border: 0.2em solid $gray;
 $node-preview-card-border-radius: 1em;
 $node-preview-card-headline-font-size: 1.5em;
 $node-preview-card-headline-margin: 0 0 0.5em;
+$node-preview-card-map-margin: 1em 0 0.25em 0;
 $node-preview-card-field-margin: 0.25em 0;
 $node-preview-card-field-code-font-size: 1.25em;
 
