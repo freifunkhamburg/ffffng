@@ -91,8 +91,8 @@ function pushFilter(filterGroup: Filter[], filter: Filter): void {
 
 const suggestedFilters = computed<Filter[][]>(() => {
     const cfg = configStore.getConfig;
-    const sites = cfg?.community.sites || [];
-    const domains = cfg?.community.domains || [];
+    const sites = cfg.community.sites;
+    const domains = cfg.community.domains;
 
     const filterGroups: Filter[][] = [];
 

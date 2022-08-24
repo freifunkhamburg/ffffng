@@ -6,7 +6,7 @@ const configStore = useConfigStore();
 </script>
 
 <template>
-    <header v-if="configStore.getConfig">
+    <header>
         <nav>
             <RouterLink class="logo" :to="route(RouteName.HOME)">
                 <img

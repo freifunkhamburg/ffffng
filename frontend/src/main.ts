@@ -6,16 +6,19 @@ import router from "./router";
 import { useConfigStore } from "@/stores/config";
 import { useVersionStore } from "@/stores/version";
 
-const app = createApp(App);
+async function main() {
+    const app = createApp(App);
 
-app.use(createPinia());
-app.use(router);
+    app.use(createPinia());
+    app.use(router);
 
-useConfigStore()
-    .refresh()
-    .catch((err) => console.error(err));
-useVersionStore()
-    .refresh()
-    .catch((err) => console.error(err));
+    const configLoaded = useConfigStore().refresh();
+    const versionLoaded = useVersionStore().refresh();
 
-app.mount("#app");
+    await configLoaded;
+    await versionLoaded;
+
+    app.mount("#app");
+}
+
+main().catch((error) => console.error("Unhandled error:", error));

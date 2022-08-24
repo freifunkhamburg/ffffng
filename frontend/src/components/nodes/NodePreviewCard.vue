@@ -21,7 +21,8 @@ const props = defineProps<Props>();
         </h3>
 
         <div class="field">
-            <strong>Token:</strong> <code>{{ props.node.token }}</code>
+            <strong>Token: </strong>
+            <code>{{ props.node.token }}</code>
         </div>
 
         <div class="field">
@@ -30,16 +31,17 @@ const props = defineProps<Props>();
         </div>
 
         <div class="field">
-            <strong>MAC-Adresse:</strong> <code>{{ props.node.mac }}</code>
+            <strong>MAC-Adresse: </strong>
+            <code>{{ props.node.mac }}</code>
         </div>
 
         <div class="field">
-            <strong>VPN-Schlüssel:</strong>
+            <strong>VPN-Schlüssel: </strong>
             <code>{{ props.node.key || "nicht angegeben" }}</code>
         </div>
 
         <div class="field">
-            <strong>Monitoring:</strong>
+            <strong>Monitoring: </strong>
             <span v-if="props.node.monitoringState === MonitoringState.PENDING">
                 Bestätigung ausstehend
             </span>

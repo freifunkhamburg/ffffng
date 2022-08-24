@@ -15,7 +15,7 @@ import RouteButton from "@/components/form/RouteButton.vue";
 import { ApiError } from "@/utils/Api";
 
 const configStore = useConfigStore();
-const email = computed(() => configStore.getConfig?.community.contactEmail);
+const email = computed(() => configStore.getConfig.community.contactEmail);
 
 const nodeStore = useNodeStore();
 
@@ -67,7 +67,7 @@ async function onSubmit() {
                 <strong>
                     Solltest Du den Token nicht mehr haben, wende Dich einfach
                     per E-Mail an
-                    <a v-if="email" :href="`mailto:${email}`">{{ email }}</a
+                    <a :href="`mailto:${email}`">{{ email }}</a
                     >.
                 </strong>
             </p>
@@ -80,7 +80,7 @@ async function onSubmit() {
                 Beim Abrufen des Knotens ist ein Fehler aufgetreten. Bitte
                 probiere es später nochmal. Sollte dieses Problem weiter
                 bestehen, so wende dich bitte per E-Mail an
-                <a v-if="email" :href="`mailto:${email}`">{{ email }}</a
+                <a :href="`mailto:${email}`">{{ email }}</a
                 >.
             </ErrorCard>
 

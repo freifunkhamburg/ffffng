@@ -11,18 +11,19 @@ function isVersionResponse(arg: unknown): arg is VersionResponse {
 }
 
 interface VersionStoreState {
-    version: Version | null;
+    version: Version;
 }
 
 export const useVersionStore = defineStore({
     id: "version",
     state(): VersionStoreState {
         return {
-            version: null,
+            // Initialized in main.ts before mounting app.
+            version: undefined as unknown as Version,
         };
     },
     getters: {
-        getVersion(state: VersionStoreState): Version | null {
+        getVersion(state: VersionStoreState): Version {
             return state.version;
         },
     },

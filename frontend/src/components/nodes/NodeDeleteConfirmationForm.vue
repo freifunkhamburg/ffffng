@@ -19,7 +19,7 @@ interface Props {
 const props = defineProps<Props>();
 const nodeStore = useNodeStore();
 const configStore = useConfigStore();
-const email = computed(() => configStore.getConfig?.community.contactEmail);
+const email = computed(() => configStore.getConfig.community.contactEmail);
 
 const errorDeletingNode = ref<boolean>(false);
 
@@ -70,7 +70,7 @@ async function onAbort() {
             Beim Löschen des Knotens ist ein Fehler aufgetreten. Bitte probiere
             es später nochmal. Sollte dieses Problem weiter bestehen, so wende
             dich bitte per E-Mail an
-            <a v-if="email" :href="`mailto:${email}`">{{ email }}</a
+            <a :href="`mailto:${email}`">{{ email }}</a
             >.
         </ErrorCard>
 

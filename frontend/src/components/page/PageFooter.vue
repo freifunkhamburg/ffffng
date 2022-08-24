@@ -7,7 +7,7 @@ const versionStore = useVersionStore();
 </script>
 
 <template>
-    <footer v-if="configStore.getConfig">
+    <footer>
         ffffng ({{ versionStore.getVersion }})
         <a href="https://github.com/freifunkhamburg/ffffng" target="_blank">
             <i class="fa fa-code" aria-hidden="true" /> Source Code

@@ -3,18 +3,19 @@ import { type ClientConfig, isClientConfig } from "@/types";
 import { api } from "@/utils/Api";
 
 interface ConfigStoreState {
-    config: ClientConfig | null;
+    config: ClientConfig;
 }
 
 export const useConfigStore = defineStore({
     id: "config",
     state(): ConfigStoreState {
         return {
-            config: null,
+            // Initialized in main.ts before mounting app.
+            config: undefined as unknown as ClientConfig,
         };
     },
     getters: {
-        getConfig(state: ConfigStoreState): ClientConfig | null {
+        getConfig(state: ConfigStoreState): ClientConfig {
             return state.config;
         },
     },

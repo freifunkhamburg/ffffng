@@ -8,8 +8,8 @@ import RouteButton from "@/components/form/RouteButton.vue";
 import { route, RouteName } from "@/router";
 
 const configStore = useConfigStore();
-const email = computed(() => configStore.getConfig?.community.contactEmail);
-const mapUrl = computed(() => configStore.getConfig?.map.mapUrl);
+const email = computed(() => configStore.getConfig.community.contactEmail);
+const mapUrl = computed(() => configStore.getConfig.map.mapUrl);
 
 interface Props {
     hostname: Hostname;
