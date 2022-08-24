@@ -2,9 +2,6 @@ import {
     CreateOrUpdateNode,
     Domain,
     DomainSpecificNodeResponse,
-    EmailAddress,
-    isNumber,
-    JSONObject,
     MonitoringResponse,
     MonitoringState,
     MonitoringToken,
@@ -13,8 +10,6 @@ import {
     OnlineState,
     Site,
     StoredNode,
-    toIsEnum,
-    toIsNewtype,
 } from "../shared/types";
 
 export * from "./config";
@@ -97,28 +92,4 @@ export function toMonitoringResponse(node: StoredNode): MonitoringResponse {
 
 export type NodeSecrets = {
     monitoringToken?: MonitoringToken;
-};
-
-export type MailId = number & { readonly __tag: unique symbol };
-export const isMailId = toIsNewtype(isNumber, NaN as MailId);
-
-export type MailData = JSONObject;
-
-export enum MailType {
-    MONITORING_OFFLINE_1 = "monitoring-offline-1",
-    MONITORING_OFFLINE_2 = "monitoring-offline-2",
-    MONITORING_OFFLINE_3 = "monitoring-offline-3",
-    MONITORING_ONLINE_AGAIN = "monitoring-online-again",
-    MONITORING_CONFIRMATION = "monitoring-confirmation",
-}
-
-export const isMailType = toIsEnum(MailType);
-
-export type Mail = {
-    id: MailId;
-    email: MailType;
-    sender: EmailAddress;
-    recipient: EmailAddress;
-    data: MailData;
-    failures: number;
 };

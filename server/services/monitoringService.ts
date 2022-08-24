@@ -22,7 +22,9 @@ import {
     Hostname,
     isBoolean,
     isDomain,
+    isMailType,
     isMonitoringSortField,
+    isMonitoringState,
     isOnlineState,
     isPlainObject,
     isSite,
@@ -30,12 +32,17 @@ import {
     isUndefined,
     JSONValue,
     MAC,
+    MailId,
     MailType,
+    MapId,
+    mapIdFromMAC,
     MonitoringSortField,
     MonitoringState,
     MonitoringToken,
     NodeId,
+    NodeMonitoringStateResponse,
     NodeStateData,
+    NodeStateId,
     OnlineState,
     parseJSON,
     RunResult,
@@ -55,13 +62,13 @@ import {
 } from "../utils/time";
 
 type NodeStateRow = {
-    id: number;
+    id: NodeStateId;
     created_at: UnixTimestampSeconds;
     domain: Domain | null;
     hostname: Hostname | null;
     import_timestamp: UnixTimestampSeconds;
     last_seen: UnixTimestampSeconds;
-    last_status_mail_sent: string | null;
+    last_status_mail_sent: UnixTimestampSeconds | null;
     last_status_mail_type: string | null;
     mac: MAC;
     modified_at: UnixTimestampSeconds;
@@ -356,7 +363,7 @@ export function parseNodesJson(body: string): NodesParsingResult {
 }
 
 async function updateSkippedNode(
-    id: NodeId,
+    id: NodeStateId,
     node?: StoredNode
 ): Promise<RunResult> {
     return await db.run(
@@ -370,7 +377,7 @@ async function updateSkippedNode(
 async function sendMonitoringMailsBatched(
     name: string,
     mailType: MailType,
-    findBatchFun: () => Promise<any[]>
+    findBatchFun: () => Promise<NodeStateRow[]>
 ): Promise<void> {
     Logger.tag("monitoring", "mail-sending").debug(
         'Sending "%s" mails...',
@@ -477,8 +484,8 @@ async function sendOnlineAgainMails(
     await sendMonitoringMailsBatched(
         "online again",
         MailType.MONITORING_ONLINE_AGAIN,
-        async (): Promise<any[]> =>
-            await db.all(
+        async (): Promise<NodeStateRow[]> =>
+            await db.all<NodeStateRow>(
                 "SELECT * FROM node_state " +
                     "WHERE modified_at < ? AND state = ? AND last_status_mail_type IN (" +
                     "'monitoring-offline-1', 'monitoring-offline-2', 'monitoring-offline-3'" +
@@ -497,7 +504,7 @@ async function sendOfflineMails(
     await sendMonitoringMailsBatched(
         "offline " + mailNumber,
         mailType,
-        async (): Promise<any[]> => {
+        async (): Promise<NodeStateRow[]> => {
             const previousType =
                 mailNumber === 1
                     ? "monitoring-online-again"
@@ -510,7 +517,7 @@ async function sendOfflineMails(
             const schedule = MONITORING_OFFLINE_MAILS_SCHEDULE[mailNumber];
             const scheduledTimeBefore = subtract(now(), schedule);
 
-            return await db.all(
+            return await db.all<NodeStateRow>(
                 "SELECT * FROM node_state " +
                     "WHERE modified_at < ? AND state = ? AND (last_status_mail_type = ?" +
                     allowNull +
@@ -667,10 +674,33 @@ async function retrieveNodeInformationForUrls(
     };
 }
 
-// FIXME: Replace any[] by type.
+function toResponse(row: NodeStateRow): NodeMonitoringStateResponse {
+    // TODO: Handle conversion errors.
+    return {
+        id: row.id,
+        created_at: row.created_at,
+        domain: row.domain || undefined,
+        hostname: row.hostname || undefined,
+        import_timestamp: row.import_timestamp,
+        last_seen: row.last_seen,
+        last_status_mail_sent: row.last_status_mail_sent || undefined,
+        last_status_mail_type: isMailType(row.last_status_mail_type)
+            ? row.last_status_mail_type
+            : undefined,
+        mac: row.mac,
+        modified_at: row.modified_at,
+        monitoring_state: isMonitoringState(row.monitoring_state)
+            ? row.monitoring_state
+            : undefined,
+        site: row.site || undefined,
+        state: isOnlineState(row.state) ? row.state : OnlineState.OFFLINE,
+        mapId: mapIdFromMAC(row.mac),
+    };
+}
+
 export async function getAll(
     restParams: RestParams
-): Promise<{ total: number; monitoringStates: any[] }> {
+): Promise<{ total: number; monitoringStates: NodeMonitoringStateResponse[] }> {
     const filterFields = [
         "hostname",
         "mac",
@@ -695,12 +725,15 @@ export async function getAll(
         filterFields
     );
 
-    const monitoringStates = await db.all(
+    const monitoringStates = await db.all<NodeStateRow>(
         "SELECT * FROM node_state WHERE " + filter.query,
         filter.params
     );
 
-    return { monitoringStates, total };
+    return {
+        monitoringStates: monitoringStates.map(toResponse),
+        total,
+    };
 }
 
 export async function getByMacs(
@@ -877,7 +910,7 @@ async function deleteNeverOnlineNodesBefore(
 
         const placeholders = macs.map(() => "?").join(",");
 
-        const rows: { mac: MAC }[] = await db.all(
+        const rows = await db.all<NodeStateRow>(
             `SELECT * FROM node_state WHERE mac IN (${placeholders})`,
             macs
         );

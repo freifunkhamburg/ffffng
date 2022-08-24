@@ -11,23 +11,22 @@ import {
     JSONObject,
     MonitoringResponse,
     MonitoringToken,
+    NodeMonitoringStateResponse,
     toMonitoringResponse,
 } from "../types";
 
 const isValidToken = forConstraint(CONSTRAINTS.token, false);
 
-// FIXME: Get rid of any
-async function doGetAll(req: Request): Promise<{ total: number; result: any }> {
+async function doGetAll(
+    req: Request
+): Promise<{ total: number; result: NodeMonitoringStateResponse[] }> {
     const restParams = await Resources.getValidRestParams("list", null, req);
     const { monitoringStates, total } = await MonitoringService.getAll(
         restParams
     );
     return {
         total,
-        result: monitoringStates.map((state) => {
-            state.mapId = state.mac.toLowerCase().replace(/:/g, "");
-            return state;
-        }),
+        result: monitoringStates,
     };
 }
 

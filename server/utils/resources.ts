@@ -321,7 +321,7 @@ export function sort<
         let order = 0;
         if (as < bs) {
             order = -1;
-        } else if (bs > as) {
+        } else if (as > bs) {
             order = 1;
         }
 
