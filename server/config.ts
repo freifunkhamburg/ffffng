@@ -3,7 +3,15 @@ import commandLineUsage from "command-line-usage";
 import fs from "graceful-fs";
 import url from "url";
 import { parse } from "sparkson";
-import { Config, hasOwnProperty, Url, Version } from "./types";
+import {
+    Config,
+    hasOwnProperty,
+    isLayerConfig,
+    isPlainObject,
+    isString,
+    Url,
+    Version,
+} from "./types";
 
 export let config: Config = {} as Config;
 export let version: Version = "unknown" as Version;
@@ -88,6 +96,24 @@ export function parseCommandLine(): void {
     }
 
     config = parse(Config, configJSON);
+
+    if (!isPlainObject(config.client.coordsSelector.layers)) {
+        console.error(
+            "Error in config.json: client.coordsSelector.layers is not an JSON object."
+        );
+        process.exit(1);
+    }
+
+    for (const [id, layerConfig] of Object.entries(
+        config.client.coordsSelector.layers
+    )) {
+        if (!isLayerConfig(layerConfig)) {
+            console.error(
+                `Error in config.json: client.coordsSelector.layers[${id}] is not a valid layer config.`
+            );
+            process.exit(1);
+        }
+    }
 
     function stripTrailingSlash(url: Url): Url {
         return url.endsWith("/")
