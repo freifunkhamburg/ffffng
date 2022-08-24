@@ -368,6 +368,12 @@ export const isFastdKey = toIsNewtype(isString, "" as FastdKey);
 export type MAC = string & { readonly __tag: unique symbol };
 export const isMAC = toIsNewtype(isString, "" as MAC);
 
+export type MapId = string & { readonly __tag: unique symbol };
+export const isMapId = toIsNewtype(isString, "" as MapId);
+export function mapIdFromMAC(mac: MAC): MapId {
+    return mac.toLowerCase().replace(/:/g, "") as MapId;
+}
+
 export type DurationSeconds = number & { readonly __tag: unique symbol };
 export const isDurationSeconds = toIsNewtype(isNumber, NaN as DurationSeconds);
 
@@ -571,6 +577,49 @@ export function isMonitoringResponse(arg: unknown): arg is MonitoringResponse {
         isBoolean(response.monitoringConfirmed)
     );
 }
+
+export type NodeStateId = number & { readonly __tag: unique symbol };
+export const isNodeStateId = toIsNewtype(isNumber, 0 as NodeStateId);
+
+export type NodeMonitoringStateResponse = {
+    id: NodeStateId;
+    created_at: UnixTimestampSeconds;
+    domain?: Domain;
+    hostname?: Hostname;
+    import_timestamp: UnixTimestampSeconds;
+    last_seen: UnixTimestampSeconds;
+    last_status_mail_sent?: UnixTimestampSeconds;
+    last_status_mail_type?: MailType;
+    mac: MAC;
+    modified_at: UnixTimestampSeconds;
+    monitoring_state?: MonitoringState;
+    site?: Site;
+    state: OnlineState;
+    mapId: MapId;
+};
+
+export type MailId = number & { readonly __tag: unique symbol };
+export const isMailId = toIsNewtype(isNumber, NaN as MailId);
+
+export type MailData = JSONObject;
+
+export enum MailType {
+    MONITORING_OFFLINE_1 = "monitoring-offline-1",
+    MONITORING_OFFLINE_2 = "monitoring-offline-2",
+    MONITORING_OFFLINE_3 = "monitoring-offline-3",
+    MONITORING_ONLINE_AGAIN = "monitoring-online-again",
+    MONITORING_CONFIRMATION = "monitoring-confirmation",
+}
+export const isMailType = toIsEnum(MailType);
+
+export type Mail = {
+    id: MailId;
+    email: MailType;
+    sender: EmailAddress;
+    recipient: EmailAddress;
+    data: MailData;
+    failures: number;
+};
 
 // noinspection JSUnusedGlobalSymbols
 enum NodeSortFieldEnum {
