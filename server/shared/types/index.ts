@@ -1,4 +1,9 @@
-import { ArrayField, Field, RawJsonField } from "sparkson";
+import {
+    ArrayField,
+    Field,
+    RawJsonField,
+    registerStringMapper,
+} from "sparkson";
 
 // Types shared with the client.
 export type TypeGuard<T> = (arg: unknown) => arg is T;
@@ -282,12 +287,50 @@ export function isCoordinatesConfig(arg: unknown): arg is CoordinatesConfig {
     return isNumber(coords.lat) && isNumber(coords.lng);
 }
 
+export type LayerOptions = {
+    attribution: string;
+    subdomains?: string;
+    maxZoom: number;
+};
+
+export function isLayerOptions(arg: unknown): arg is LayerOptions {
+    if (!isPlainObject(arg)) {
+        return false;
+    }
+    const obj = arg as LayerOptions;
+    return (
+        isString(obj.attribution) &&
+        isOptional(obj.subdomains, isString) &&
+        isNumber(obj.maxZoom)
+    );
+}
+
+export type LayerConfig = {
+    name: string;
+    url: Url;
+    type: string;
+    layerOptions: LayerOptions;
+};
+
+export function isLayerConfig(arg: unknown): arg is LayerConfig {
+    if (!isPlainObject(arg)) {
+        return false;
+    }
+    const obj = arg as LayerConfig;
+    return (
+        isString(obj.name) &&
+        isUrl(obj.url) &&
+        isString(obj.type) &&
+        isLayerOptions(obj.layerOptions)
+    );
+}
+
 export class CoordinatesSelectorConfig {
     constructor(
         @Field("lat") public lat: number,
         @Field("lng") public lng: number,
         @Field("defaultZoom") public defaultZoom: number,
-        @RawJsonField("layers") public layers: JSONObject
+        @RawJsonField("layers") public layers: Record<string, LayerConfig>
     ) {}
 }
 
