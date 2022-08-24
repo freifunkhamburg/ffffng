@@ -461,6 +461,10 @@ export const isHostname = toIsNewtype(isString, "" as Hostname);
 export type Nickname = string & { readonly __tag: unique symbol };
 export const isNickname = toIsNewtype(isString, "" as Nickname);
 
+/**
+ * String representing geo coordinates. Latitude and longitude are delimited by one whitespace.
+ * E.g.: <code>"53.565278 10.001389"</code>
+ */
 export type Coordinates = string & { readonly __tag: unique symbol };
 export const isCoordinates = toIsNewtype(isString, "" as Coordinates);
 
