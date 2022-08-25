@@ -8,7 +8,6 @@ import {
     hasOwnProperty,
     isLayerConfig,
     isPlainObject,
-    isString,
     Url,
     Version,
 } from "./types";

@@ -32,20 +32,16 @@ import {
     isUndefined,
     JSONValue,
     MAC,
-    MailId,
     MailType,
-    MapId,
     mapIdFromMAC,
     MonitoringSortField,
     MonitoringState,
     MonitoringToken,
-    NodeId,
     NodeMonitoringStateResponse,
     NodeStateData,
     NodeStateId,
     OnlineState,
     parseJSON,
-    RunResult,
     Site,
     StoredNode,
     toCreateOrUpdateNode,
@@ -144,7 +140,7 @@ async function insertNodeInformation(
 async function updateNodeInformation(
     nodeData: ParsedNode,
     node: StoredNode,
-    row: any
+    row: NodeStateRow
 ): Promise<void> {
     Logger.tag("monitoring", "informacallbacktion-retrieval").debug(
         "Node is known in monitoring: %s",
@@ -201,9 +197,10 @@ async function storeNodeInformation(
         nodeData.mac
     );
 
-    const row = await db.get("SELECT * FROM node_state WHERE mac = ?", [
-        node.mac,
-    ]);
+    const row = await db.get<NodeStateRow>(
+        "SELECT * FROM node_state WHERE mac = ?",
+        [node.mac]
+    );
 
     if (isUndefined(row)) {
         return await insertNodeInformation(nodeData, node);
@@ -365,8 +362,8 @@ export function parseNodesJson(body: string): NodesParsingResult {
 async function updateSkippedNode(
     id: NodeStateId,
     node?: StoredNode
-): Promise<RunResult> {
-    return await db.run(
+): Promise<void> {
+    await db.run(
         "UPDATE node_state " +
             "SET hostname = ?, monitoring_state = ?, modified_at = ?" +
             "WHERE id = ?",
@@ -384,98 +381,126 @@ async function sendMonitoringMailsBatched(
         name
     );
 
-    while (true) {
-        Logger.tag("monitoring", "mail-sending").debug("Sending next batch...");
-
-        const nodeStates = await findBatchFun();
-        if (_.isEmpty(nodeStates)) {
-            Logger.tag("monitoring", "mail-sending").debug(
-                'Done sending "%s" mails.',
-                name
-            );
-            return;
-        }
-
-        for (const nodeState of nodeStates) {
-            const mac = nodeState.mac;
-            Logger.tag("monitoring", "mail-sending").debug(
-                "Loading node data for: %s",
-                mac
-            );
-
-            const result = await NodeService.findNodeDataWithSecretsByMac(mac);
-            if (!result) {
-                Logger.tag("monitoring", "mail-sending").debug(
-                    'Node not found. Skipping sending of "' +
-                        name +
-                        '" mail: ' +
-                        mac
-                );
-                await updateSkippedNode(nodeState.id);
-                continue;
-            }
-
-            const { node, nodeSecrets } = result;
-
-            if (node.monitoringState !== MonitoringState.ACTIVE) {
-                Logger.tag("monitoring", "mail-sending").debug(
-                    'Monitoring disabled, skipping "%s" mail for: %s',
-                    name,
-                    mac
-                );
-                await updateSkippedNode(nodeState.id, node);
-                continue;
-            }
-
-            const monitoringToken = nodeSecrets.monitoringToken;
-            if (!monitoringToken) {
-                Logger.tag("monitoring", "mail-sending").error(
-                    'Node has no monitoring token. Cannot send mail "%s" for: %s',
-                    name,
-                    mac
-                );
-                await updateSkippedNode(nodeState.id, node);
-                continue;
-            }
-
-            Logger.tag("monitoring", "mail-sending").info(
-                'Sending "%s" mail for: %s',
-                name,
-                mac
-            );
-
-            await MailService.enqueue(
-                config.server.email.from,
-                node.nickname + " <" + node.email + ">",
-                mailType,
-                {
-                    node: filterUndefinedFromJSON(node),
-                    lastSeen: nodeState.last_seen,
-                    disableUrl: monitoringDisableUrl(monitoringToken),
-                }
-            );
-
-            Logger.tag("monitoring", "mail-sending").debug(
-                "Updating node state: ",
-                mac
-            );
-
-            const timestamp = now();
-            await db.run(
-                "UPDATE node_state " +
-                    "SET hostname = ?, monitoring_state = ?, modified_at = ?, last_status_mail_sent = ?, last_status_mail_type = ?" +
-                    "WHERE id = ?",
-                [
-                    node.hostname,
-                    node.monitoringState,
-                    timestamp,
-                    timestamp,
-                    mailType,
-                    nodeState.id,
-                ]
-            );
-        }
+    let nodeStates = await findBatchFun();
+    while (nodeStates.length > 0) {
+        await sendMonitoringMailsBatch(name, mailType, nodeStates);
+        nodeStates = await findBatchFun();
     }
+
+    Logger.tag("monitoring", "mail-sending").debug(
+        'Done sending "%s" mails.',
+        name
+    );
+}
+
+async function sendMonitoringMailsBatch(
+    name: string,
+    mailType: MailType,
+    nodeStates: NodeStateRow[]
+) {
+    Logger.tag("monitoring", "mail-sending").debug("Sending next batch...");
+
+    for (const nodeState of nodeStates) {
+        await sendMonitoringMail(name, mailType, nodeState);
+    }
+}
+
+async function sendMonitoringMail(
+    name: string,
+    mailType: MailType,
+    nodeState: NodeStateRow
+) {
+    const mac = nodeState.mac;
+    Logger.tag("monitoring", "mail-sending").debug(
+        "Loading node data for: %s",
+        mac
+    );
+
+    const result = await NodeService.findNodeDataWithSecretsByMac(mac);
+    if (!result) {
+        Logger.tag("monitoring", "mail-sending").debug(
+            `Node not found. Skipping sending of "${name}" mail: ${mac}`
+        );
+        await updateSkippedNode(nodeState.id);
+        return;
+    }
+
+    const { node, nodeSecrets } = result;
+
+    if (node.monitoringState !== MonitoringState.ACTIVE) {
+        Logger.tag("monitoring", "mail-sending").debug(
+            'Monitoring disabled, skipping "%s" mail for: %s',
+            name,
+            mac
+        );
+        await updateSkippedNode(nodeState.id, node);
+        return;
+    }
+
+    const monitoringToken = nodeSecrets.monitoringToken;
+    if (!monitoringToken) {
+        Logger.tag("monitoring", "mail-sending").error(
+            'Node has no monitoring token. Cannot send mail "%s" for: %s',
+            name,
+            mac
+        );
+        await updateSkippedNode(nodeState.id, node);
+        return;
+    }
+
+    await enqueMail(name, mailType, node, nodeState, monitoringToken);
+    await updateNodeForSentEmail(mailType, node, nodeState);
+}
+
+async function enqueMail(
+    name: string,
+    mailType: MailType,
+    node: StoredNode,
+    nodeState: NodeStateRow,
+    monitoringToken: MonitoringToken
+) {
+    Logger.tag("monitoring", "mail-sending").info(
+        'Sending "%s" mail for: %s',
+        name,
+        node.mac
+    );
+
+    await MailService.enqueue(
+        config.server.email.from,
+        node.nickname + " <" + node.email + ">",
+        mailType,
+        {
+            node: filterUndefinedFromJSON(node),
+            lastSeen: nodeState.last_seen,
+            disableUrl: monitoringDisableUrl(monitoringToken),
+        }
+    );
+}
+
+async function updateNodeForSentEmail(
+    mailType: MailType,
+    node: StoredNode,
+    nodeState: NodeStateRow
+) {
+    Logger.tag("monitoring", "mail-sending").debug(
+        "Updating node state: ",
+        node.mac
+    );
+
+    const timestamp = now();
+    await db.run(
+        "UPDATE node_state " +
+            "SET hostname = ?, monitoring_state = ?, modified_at = ?, last_status_mail_sent = ?, last_status_mail_type = ?" +
+            "WHERE id = ?",
+        [
+            node.hostname,
+            node.monitoringState,
+            timestamp,
+            timestamp,
+            mailType,
+            nodeState.id,
+        ]
+    );
 }
 
 async function sendOnlineAgainMails(
