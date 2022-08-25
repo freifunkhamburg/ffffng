@@ -3,12 +3,14 @@ import {
     isMap,
     isNodesFilter,
     isString,
+    isUndefined,
     MonitoringState,
     NODES_FILTER_FIELDS,
     type NodesFilter,
     OnlineState,
     type SearchTerm,
     type UnixTimestampMilliseconds,
+    type ValueOf,
 } from "@/types";
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useConfigStore } from "@/stores/config";
@@ -20,7 +22,10 @@ interface Props {
 
 const SEARCH_THROTTLE_DELAY_MS = 500;
 
-const FILTER_LABELS: Record<string, string | Map<string | boolean, any>> = {
+const FILTER_LABELS: Record<
+    string,
+    string | Map<ValueOf<NodesFilter>, string>
+> = {
     hasKey: new Map([
         [true, "Mit VPN-Schlüssel"],
         [false, "Ohne VPN-Schlüssel"],
@@ -54,7 +59,7 @@ const configStore = useConfigStore();
 
 type Filter = {
     field: string;
-    value: any;
+    value: ValueOf<NodesFilter>;
 };
 const selectedFilters = ref<Filter[]>([]);
 
@@ -153,15 +158,13 @@ function removeSelectedFilter(filter: Filter): void {
 }
 
 function updateSelectedFilters() {
-    const filter = props.filter as Record<string, any>;
+    const filter = props.filter;
     selectedFilters.value = [];
-    for (const field of Object.keys(NODES_FILTER_FIELDS)) {
-        if (Object.prototype.hasOwnProperty.call(filter, field)) {
-            addSelectedFilter({
-                field,
-                value: filter[field],
-            });
-        }
+    for (const [field, value] of Object.entries(filter)) {
+        addSelectedFilter({
+            field,
+            value,
+        });
     }
 }
 
@@ -178,7 +181,8 @@ function renderFilter(filter: Filter): string {
         return `${label}: ${filter.value}`;
     }
 
-    if (!label.has(filter.value)) {
+    const filterValue = label.get(filter.value);
+    if (isUndefined(filterValue)) {
         throw new Error(
             `Filter ${filter.field} has no translation for value: ${
                 filter.value
@@ -186,7 +190,7 @@ function renderFilter(filter: Filter): string {
         );
     }
 
-    return label.get(filter.value);
+    return filterValue;
 }
 
 function setFocus(focus: boolean): void {
@@ -202,7 +206,7 @@ function showSuggestedFilters(expanded: boolean): void {
 }
 
 function buildNodesFilter(): NodesFilter {
-    const nodesFilter: Record<string, any> = {};
+    const nodesFilter: Record<string, ValueOf<NodesFilter>> = {};
     for (const filter of selectedFilters.value) {
         nodesFilter[filter.field] = filter.value;
     }

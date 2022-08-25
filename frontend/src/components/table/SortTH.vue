@@ -1,10 +1,10 @@
 <script lang="ts">
 import { type Component, defineComponent, type PropType } from "vue";
-import { type EnumValue, SortDirection } from "@/types";
+import { type ValueOf, SortDirection } from "@/types";
 
 type Props<SortField> = {
-    field: PropType<EnumValue<SortField>>;
-    currentField: PropType<EnumValue<SortField>>;
+    field: PropType<ValueOf<SortField>>;
+    currentField: PropType<ValueOf<SortField>>;
     currentDirection: PropType<SortDirection>;
 };
 
@@ -12,8 +12,8 @@ type SortTH<SortField> = Component<Props<SortField>>;
 
 function defineGenericComponent<SortField>(): SortTH<SortField> {
     const props: Props<SortField> = {
-        field: null as unknown as PropType<EnumValue<SortField>>,
-        currentField: null as unknown as PropType<EnumValue<SortField>>,
+        field: null as unknown as PropType<ValueOf<SortField>>,
+        currentField: null as unknown as PropType<ValueOf<SortField>>,
         currentDirection: null as unknown as PropType<SortDirection>,
     };
     return defineComponent({
@@ -30,6 +30,7 @@ function defineGenericComponent<SortField>(): SortTH<SortField> {
             },
         },
         emits: {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             sort: (field: SortField, direction: SortDirection) => true,
         },
         methods: {
@@ -48,6 +49,7 @@ function defineGenericComponent<SortField>(): SortTH<SortField> {
 
 const component = defineGenericComponent<unknown>();
 
+// eslint-disable-next-line no-redeclare
 export function SortTH<SortField>(): SortTH<SortField> {
     return component as SortTH<SortField>;
 }

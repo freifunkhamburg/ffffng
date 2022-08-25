@@ -21,7 +21,7 @@ function toggleExpansion() {
         title="Hilfe"
     />
     <p v-if="expanded" class="help-text">
-        {{ text }}
+        {{ props.text }}
     </p>
 </template>
 

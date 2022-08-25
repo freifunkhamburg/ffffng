@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useConfigStore } from "@/stores/config";
 import { useNodeStore } from "@/stores/node";
-import { computed, nextTick, onMounted, ref } from "vue";
+import { nextTick, onMounted, ref } from "vue";
 import CONSTRAINTS from "@/shared/validation/constraints";
 import ActionButton from "@/components/form/ActionButton.vue";
 import type {

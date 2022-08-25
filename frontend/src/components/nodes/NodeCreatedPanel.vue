@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ButtonGroup from "@/components/form/ButtonGroup.vue";
-import type { Hostname, StoredNode } from "@/types";
+import type { StoredNode } from "@/types";
 import { ButtonSize, ComponentAlignment, ComponentVariant } from "@/types";
 import { useConfigStore } from "@/stores/config";
 import { computed } from "vue";
