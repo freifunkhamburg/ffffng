@@ -1,9 +1,4 @@
-import {
-    ArrayField,
-    Field,
-    RawJsonField,
-    registerStringMapper,
-} from "sparkson";
+import { ArrayField, Field, RawJsonField } from "sparkson";
 
 // Types shared with the client.
 export type TypeGuard<T> = (arg: unknown) => arg is T;
@@ -71,8 +66,8 @@ export type JSONArray = Array<JSONValue>;
 
 export const isJSONArray = toIsArray(isJSONValue);
 
-export type EnumValue<E> = E[keyof E];
-export type EnumTypeGuard<E> = TypeGuard<EnumValue<E>>;
+export type ValueOf<T> = T[keyof T];
+export type EnumTypeGuard<E> = TypeGuard<ValueOf<E>>;
 
 export function unhandledEnumField(field: never): never {
     throw new Error(`Unhandled enum field: ${field}`);
@@ -138,7 +133,7 @@ export function isBoolean(arg: unknown): arg is boolean {
 }
 
 export function isUndefined(arg: unknown): arg is undefined {
-    return arg === undefined;
+    return typeof arg === "undefined";
 }
 
 export function isNull(arg: unknown): arg is null {
@@ -150,7 +145,7 @@ export function toIsArray<T>(isT: TypeGuard<T>): TypeGuard<T[]> {
 }
 
 export function toIsEnum<E>(enumDef: E): EnumTypeGuard<E> {
-    return (arg): arg is EnumValue<E> =>
+    return (arg): arg is ValueOf<E> =>
         Object.values(enumDef).includes(arg as [keyof E]);
 }
 
