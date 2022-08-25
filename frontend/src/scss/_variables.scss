@@ -1,3 +1,5 @@
+@use "sass:math";
+
 // Grays
 $black: #000000;
 $gray-darkest: #1c1c1c;
@@ -121,7 +123,7 @@ $error-card-link-hover-color: $error-card-link-color;
 $error-card-link-focus-outline: 0.1em solid $error-card-link-hover-color;
 
 // Node map
-$node-map-aspect-ratio: 16 / 10;
+$node-map-aspect-ratio: math.div(16, 10);
 $node-map-border-radius: 0.75em;
 
 // Node preview
