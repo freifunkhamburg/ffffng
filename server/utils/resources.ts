@@ -12,7 +12,7 @@ import {
 import { Request, Response } from "express";
 import {
     EnumTypeGuard,
-    EnumValue,
+    ValueOf,
     type GenericSortField,
     getFieldIfExists,
     isJSONObject,
@@ -79,10 +79,10 @@ function respond(
 
 function orderByClause<S>(
     restParams: RestParams,
-    defaultSortField: EnumValue<S>,
+    defaultSortField: ValueOf<S>,
     isSortField: EnumTypeGuard<S>
 ): OrderByClause {
-    let sortField: EnumValue<S> | undefined = isSortField(restParams._sortField)
+    let sortField: ValueOf<S> | undefined = isSortField(restParams._sortField)
         ? restParams._sortField
         : undefined;
     if (!sortField) {
@@ -347,7 +347,7 @@ export { filterCondition as whereCondition };
 
 export function filterClause<S>(
     restParams: RestParams,
-    defaultSortField: EnumValue<S>,
+    defaultSortField: ValueOf<S>,
     isSortField: EnumTypeGuard<S>,
     filterFields: string[]
 ): FilterClause {
