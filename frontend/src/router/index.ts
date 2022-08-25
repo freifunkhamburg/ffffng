@@ -2,6 +2,7 @@ import {
     createRouter,
     createWebHistory,
     type LocationQueryRaw,
+    type RouteLocationNormalized,
 } from "vue-router";
 import AdminDashboardView from "@/views/AdminDashboardView.vue";
 import AdminNodesView from "@/views/AdminNodesView.vue";
@@ -9,10 +10,18 @@ import HomeView from "@/views/HomeView.vue";
 import NodeCreateView from "@/views/NodeCreateView.vue";
 import NodeDeleteView from "@/views/NodeDeleteView.vue";
 import {
+    hasOwnProperty,
+    isFastdKey,
+    isHostname,
+    isMAC,
     isNodesFilter,
     isNodeSortField,
+    isSearchTerm,
     isSortDirection,
-    type SearchTerm,
+    isString,
+    type JSONValue,
+    parseJSON,
+    type TypeGuard,
 } from "@/types";
 
 export interface Route {
@@ -35,6 +44,39 @@ export function route(name: RouteName, query?: LocationQueryRaw): Route {
     };
 }
 
+function getQueryField<T>(
+    route: RouteLocationNormalized,
+    field: string,
+    isT: TypeGuard<T>
+): T | undefined {
+    if (!hasOwnProperty(route.query, field)) {
+        return undefined;
+    }
+    const value = route.query[field];
+    return isT(value) ? value : undefined;
+}
+
+function getJSONQueryField<T>(
+    route: RouteLocationNormalized,
+    field: string,
+    isT: TypeGuard<T>
+): T | undefined {
+    const value = getQueryField(route, field, isString);
+    if (!value) {
+        return undefined;
+    }
+
+    let json: JSONValue;
+    try {
+        json = parseJSON(value);
+    } catch (e) {
+        console.warn(e);
+        return undefined;
+    }
+
+    return isT(json) ? json : undefined;
+}
+
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
@@ -47,6 +89,11 @@ const router = createRouter({
             path: "/node/create",
             name: RouteName.NODE_CREATE,
             component: NodeCreateView,
+            props: (route) => ({
+                hostname: getQueryField(route, "hostname", isHostname),
+                fastdKey: getQueryField(route, "key", isFastdKey),
+                mac: getQueryField(route, "mac", isMAC),
+            }),
         },
         {
             path: "/node/delete",
@@ -62,35 +109,12 @@ const router = createRouter({
             path: "/admin/nodes",
             name: RouteName.ADMIN_NODES,
             component: AdminNodesView,
-            props: (route) => {
-                let filter: unknown;
-                if (
-                    Object.prototype.hasOwnProperty.call(route.query, "filter")
-                ) {
-                    try {
-                        filter = JSON.parse(route.query.filter as string);
-                    } catch (e) {
-                        console.warn(e);
-                        filter = {};
-                    }
-                } else {
-                    filter = {};
-                }
-
-                const searchTerm = route.query.q
-                    ? (route.query.q as SearchTerm)
-                    : undefined;
-                return {
-                    filter: isNodesFilter(filter) ? filter : {},
-                    searchTerm,
-                    sortDirection: isSortDirection(route.query.sortDir)
-                        ? route.query.sortDir
-                        : undefined,
-                    sortField: isNodeSortField(route.query.sortField)
-                        ? route.query.sortField
-                        : undefined,
-                };
-            },
+            props: (route) => ({
+                filter: getJSONQueryField(route, "filter", isNodesFilter) || {},
+                searchTerm: getQueryField(route, "q", isSearchTerm),
+                sortDirection: getQueryField(route, "sortDir", isSortDirection),
+                sortField: getQueryField(route, "sortField", isNodeSortField),
+            }),
         },
     ],
 });

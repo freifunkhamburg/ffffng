@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useConfigStore } from "@/stores/config";
 import { useNodeStore } from "@/stores/node";
-import { computed, nextTick, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import CONSTRAINTS from "@/shared/validation/constraints";
 import ActionButton from "@/components/form/ActionButton.vue";
 import type {
@@ -30,6 +30,14 @@ import { ApiError } from "@/utils/Api";
 const configStore = useConfigStore();
 const nodeStore = useNodeStore();
 
+interface Props {
+    hostname?: Hostname;
+    fastdKey?: FastdKey;
+    mac?: MAC;
+}
+
+const props = defineProps<Props>();
+
 const emit = defineEmits<{
     (e: "create", node: StoredNode): void;
 }>();
@@ -44,13 +52,25 @@ const CONFLICT_MESSAGES: Record<string, string> = {
 
 const conflictErrorMessage = ref<string | undefined>(undefined);
 
-const hostname = ref("" as Hostname);
-const fastdKey = ref("" as FastdKey);
-const mac = ref("" as MAC);
-const coords = ref("" as Coordinates);
-const nickname = ref("" as Nickname);
-const email = ref("" as EmailAddress);
-const monitoring = ref(false);
+const hostnameModel = ref("" as Hostname);
+const fastdKeyModel = ref("" as FastdKey);
+const macModel = ref("" as MAC);
+const coordsModel = ref("" as Coordinates);
+const nicknameModel = ref("" as Nickname);
+const emailModel = ref("" as EmailAddress);
+const monitoringModel = ref(false);
+
+onMounted(() => {
+    if (props.hostname) {
+        hostnameModel.value = props.hostname;
+    }
+    if (props.fastdKey) {
+        fastdKeyModel.value = props.fastdKey;
+    }
+    if (props.mac) {
+        macModel.value = props.mac;
+    }
+});
 
 async function onSubmit() {
     generalError.value = false;
@@ -61,13 +81,13 @@ async function onSubmit() {
 
     try {
         const node = await nodeStore.create({
-            hostname: hostname.value,
-            key: fastdKey.value || undefined,
-            mac: mac.value,
-            coords: coords.value || undefined,
-            nickname: nickname.value,
-            email: email.value,
-            monitoring: monitoring.value,
+            hostname: hostnameModel.value,
+            key: fastdKeyModel.value || undefined,
+            mac: macModel.value,
+            coords: coordsModel.value || undefined,
+            nickname: nicknameModel.value,
+            email: emailModel.value,
+            monitoring: monitoringModel.value,
         });
         emit("create", node);
     } catch (error) {
@@ -114,7 +134,7 @@ async function onSubmit() {
                 Beim Anlegen des Knotens ist ein Fehler aufgetreten. Bitte
                 probiere es später nochmal. Sollte dieses Problem weiter
                 bestehen, so wende dich bitte per E-Mail an
-                <a :href="`mailto:${email}`">{{ email }}</a
+                <a :href="`mailto:${emailModel}`">{{ emailModel }}</a
                 >.
             </ErrorCard>
 
@@ -122,7 +142,7 @@ async function onSubmit() {
                 <h3>Knotendaten</h3>
 
                 <ValidationFormInput
-                    v-model="hostname"
+                    v-model="hostnameModel"
                     label="Knotenname"
                     placeholder="z. B. Lisas-Freifunk"
                     :constraint="CONSTRAINTS.node.hostname"
@@ -130,7 +150,7 @@ async function onSubmit() {
                     validation-error="Knotennamen dürfen maximal 32 Zeichen lang sein und nur Klein- und Großbuchstaben, sowie Ziffern, - und _ enthalten."
                 />
                 <ValidationFormInput
-                    v-model="fastdKey"
+                    v-model="fastdKeyModel"
                     label="VPN-Schlüssel (bitte nur weglassen, wenn Du weisst, was Du tust)"
                     placeholder="Dein 64-stelliger VPN-Schlüssel"
                     :constraint="CONSTRAINTS.node.key"
@@ -138,7 +158,7 @@ async function onSubmit() {
                     validation-error="Knotennamen dürfen maximal 32 Zeichen lang sein und nur Klein- und Großbuchstaben, sowie Ziffern, - und _ enthalten."
                 />
                 <ValidationFormInput
-                    v-model="mac"
+                    v-model="macModel"
                     label="MAC-Adresse"
                     placeholder="z. B. 12:34:56:78:9a:bc oder 123456789abc"
                     :constraint="CONSTRAINTS.node.mac"
@@ -165,14 +185,14 @@ async function onSubmit() {
                 </p>
 
                 <ValidationFormInput
-                    v-model="nickname"
+                    v-model="nicknameModel"
                     label="Nickname / Name"
                     placeholder="z. B. Lisa"
                     :constraint="CONSTRAINTS.node.nickname"
                     validation-error="Nicknames dürfen maximal 64 Zeichen lang sein und nur Klein- und Großbuchstaben, sowie Ziffern, - und _ enthalten. Umlaute sind erlaubt."
                 />
                 <ValidationFormInput
-                    v-model="email"
+                    v-model="emailModel"
                     type="email"
                     label="E-Mail-Adresse"
                     :placeholder="`z. B. lisa@${configStore.getConfig.community.domain}`"
