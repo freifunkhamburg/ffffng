@@ -695,7 +695,13 @@ export type NodesFilter = {
     onlineState?: OnlineState;
 };
 
-export const NODES_FILTER_FIELDS = {
+export const NODES_FILTER_FIELDS: Record<
+    keyof NodesFilter,
+    | BooleanConstructor
+    | StringConstructor
+    | typeof MonitoringState
+    | typeof OnlineState
+> = {
     hasKey: Boolean,
     hasCoords: Boolean,
     monitoringState: MonitoringState,
