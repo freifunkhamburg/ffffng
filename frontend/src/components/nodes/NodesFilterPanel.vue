@@ -61,6 +61,9 @@ type Filter = {
     field: string;
     value: ValueOf<NodesFilter>;
 };
+
+type FilterGroup = { field: string; filters: Filter[] };
+
 const selectedFilters = ref<Filter[]>([]);
 
 function selectedFilterIndex(filter: Filter): number {
@@ -88,21 +91,24 @@ function selectedFilterIndexForField(field: string): number {
     return -1;
 }
 
-function pushFilter(filterGroup: Filter[], filter: Filter): void {
+function pushFilter(filterGroup: FilterGroup, filter: Filter): void {
     if (selectedFilterIndex(filter) < 0) {
-        filterGroup.push(filter);
+        filterGroup.filters.push(filter);
     }
 }
 
-const suggestedFilters = computed<Filter[][]>(() => {
+const suggestedFilters = computed<FilterGroup[]>(() => {
     const cfg = configStore.getConfig;
     const sites = cfg.community.sites;
     const domains = cfg.community.domains;
 
-    const filterGroups: Filter[][] = [];
+    const filterGroups: FilterGroup[] = [];
 
     for (const field of Object.keys(NODES_FILTER_FIELDS)) {
-        const filterGroup: Filter[] = [];
+        const filterGroup: FilterGroup = {
+            field,
+            filters: [],
+        };
 
         switch (field) {
             case "site":
@@ -286,11 +292,12 @@ function doThrottledSearch(): void {
             <div
                 class="suggested-filter-group"
                 v-for="filterGroup in suggestedFilters"
+                v-bind:key="filterGroup.field"
             >
                 <span
                     class="suggested-filter"
-                    v-for="filter in filterGroup"
-                    v-bind:key="filter.field"
+                    v-for="filter in filterGroup.filters"
+                    v-bind:key="`${filter.field}:${filter.value}`"
                     @click="addSelectedFilter(filter)"
                     :title="renderFilter(filter)"
                 >
