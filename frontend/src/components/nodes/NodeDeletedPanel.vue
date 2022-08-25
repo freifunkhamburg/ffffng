@@ -20,7 +20,7 @@ const props = defineProps<Props>();
 
 <template>
     <div>
-        <h1>Erledigt!</h1>
+        <h2>Erledigt!</h2>
         <p>
             Die Daten Deines Freifunk-Knotens sind gelöscht worden. Es kann
             jetzt noch bis zu 20 Minuten dauern, bis die Änderungen überall

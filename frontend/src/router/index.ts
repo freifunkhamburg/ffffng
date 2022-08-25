@@ -6,6 +6,7 @@ import {
 import AdminDashboardView from "@/views/AdminDashboardView.vue";
 import AdminNodesView from "@/views/AdminNodesView.vue";
 import HomeView from "@/views/HomeView.vue";
+import NodeCreateView from "@/views/NodeCreateView.vue";
 import NodeDeleteView from "@/views/NodeDeleteView.vue";
 import {
     isNodesFilter,
@@ -21,6 +22,7 @@ export interface Route {
 
 export enum RouteName {
     HOME = "home",
+    NODE_CREATE = "node-create",
     NODE_DELETE = "node-delete",
     ADMIN = "admin",
     ADMIN_NODES = "admin-nodes",
@@ -40,6 +42,11 @@ const router = createRouter({
             path: "/",
             name: RouteName.HOME,
             component: HomeView,
+        },
+        {
+            path: "/node/create",
+            name: RouteName.NODE_CREATE,
+            component: NodeCreateView,
         },
         {
             path: "/node/delete",

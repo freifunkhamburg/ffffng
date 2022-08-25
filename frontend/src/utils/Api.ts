@@ -1,8 +1,25 @@
-import { SortDirection, toIsArray, type TypeGuard } from "@/types";
+import {
+    hasOwnProperty,
+    isPlainObject,
+    isString,
+    type JSONValue,
+    SortDirection,
+    toIsArray,
+    type TypeGuard,
+} from "@/types";
 import type { Headers } from "request";
 import { parseToInteger } from "@/utils/Numbers";
 
-type Method = "GET" | "PUT" | "POST" | "DELETE";
+type Method = "GET" | "POST" | "PUT" | "DELETE";
+
+enum Header {
+    CONTENT_TYPE = "Content-Type",
+    "X_TOTAL_COUNT" = "x-total-count",
+}
+
+enum MimeType {
+    APPLICATION_JSON = "application/json",
+}
 
 enum ApiErrorType {
     REQUEST_FAILED = "request_failed",
@@ -11,13 +28,15 @@ enum ApiErrorType {
 
 enum HttpStatusCode {
     NOT_FOUND = 404,
+    CONFLICT = 409,
 }
 
 export class ApiError extends Error {
     private constructor(
         message: string,
         private status: number,
-        private errorType: ApiErrorType
+        private errorType: ApiErrorType,
+        private body: JSONValue
     ) {
         super(message);
     }
@@ -27,11 +46,17 @@ export class ApiError extends Error {
         path: string,
         response: Response
     ): Promise<ApiError> {
-        const body = await response.text();
+        const body: JSONValue =
+            response.headers.get(Header.CONTENT_TYPE) ===
+            MimeType.APPLICATION_JSON
+                ? await response.json()
+                : await response.text();
+
         return new ApiError(
             `API ${method} request failed: ${path} => ${response.status} - ${body}`,
             response.status,
-            ApiErrorType.REQUEST_FAILED
+            ApiErrorType.REQUEST_FAILED,
+            body
         );
     }
 
@@ -39,12 +64,13 @@ export class ApiError extends Error {
         method: Method,
         path: string,
         response: Response,
-        json: unknown
+        json: JSONValue
     ): Promise<ApiError> {
         return new ApiError(
             `API ${method} request result has unexpected type. ${path} => ${json}`,
             response.status,
-            ApiErrorType.UNEXPECTED_RESULT_TYPE
+            ApiErrorType.UNEXPECTED_RESULT_TYPE,
+            json
         );
     }
 
@@ -53,6 +79,26 @@ export class ApiError extends Error {
             this.errorType === ApiErrorType.REQUEST_FAILED &&
             this.status === HttpStatusCode.NOT_FOUND
         );
+    }
+
+    isConflict(): boolean {
+        return (
+            this.errorType === ApiErrorType.REQUEST_FAILED &&
+            this.status === HttpStatusCode.CONFLICT
+        );
+    }
+
+    getConflictField(): string | undefined {
+        if (
+            !this.isConflict() ||
+            !isPlainObject(this.body) ||
+            !hasOwnProperty(this.body, "field") ||
+            !isString(this.body.field)
+        ) {
+            return undefined;
+        }
+
+        return this.body.field;
     }
 }
 
@@ -92,35 +138,32 @@ class Api {
         return this.baseURL + this.apiPrefix + path + queryString;
     }
 
-    private async sendRequest(
-        method: Method,
-        path: string,
-        queryParams?: object
-    ): Promise<ApiResponse<undefined>>;
-    private async sendRequest<T>(
-        method: Method,
-        path: string,
-        isT: TypeGuard<T>,
-        queryParams?: object
-    ): Promise<ApiResponse<T>>;
     private async sendRequest<T>(
         method: Method,
         path: string,
         isT?: TypeGuard<T>,
+        bodyData?: object,
         queryParams?: object
     ): Promise<ApiResponse<T>> {
         const url = this.toURL(path, queryParams);
-        const response = await fetch(url, {
+        const options: RequestInit = {
             method,
-        });
+        };
+        if (bodyData) {
+            options.body = JSON.stringify(bodyData);
+            options.headers = {
+                [Header.CONTENT_TYPE]: MimeType.APPLICATION_JSON,
+            };
+        }
+        const response = await fetch(url, options);
 
         if (!response.ok) {
             throw await ApiError.requestFailed(method, path, response);
         }
 
         if (isT) {
-            const json = await response.json();
-            if (isT && !isT(json)) {
+            const json: JSONValue = await response.json();
+            if (!isT(json)) {
                 console.log(json);
                 throw await ApiError.unexpectedResultType(
                     method,
@@ -142,16 +185,58 @@ class Api {
         }
     }
 
+    async post<T>(
+        path: string,
+        isT: TypeGuard<T>,
+        postData: object,
+        queryParams?: object
+    ): Promise<T> {
+        const response = await this.sendRequest<T>(
+            "POST",
+            path,
+            isT,
+            postData,
+            queryParams
+        );
+        return response.result;
+    }
+
+    async put<T>(
+        path: string,
+        isT: TypeGuard<T>,
+        putData: object,
+        queryParams?: object
+    ): Promise<T> {
+        const response = await this.sendRequest<T>(
+            "PUT",
+            path,
+            isT,
+            putData,
+            queryParams
+        );
+        return response.result;
+    }
+
     private async doGet<T>(
         path: string,
         isT: TypeGuard<T>,
         queryParams?: object
     ): Promise<ApiResponse<T>> {
-        return await this.sendRequest<T>("GET", path, isT, queryParams);
+        return await this.sendRequest<T>(
+            "GET",
+            path,
+            isT,
+            undefined,
+            queryParams
+        );
     }
 
-    async get<T>(path: string, isT: TypeGuard<T>): Promise<T> {
-        const response = await this.doGet(path, isT);
+    async get<T>(
+        path: string,
+        isT: TypeGuard<T>,
+        queryParams?: object
+    ): Promise<T> {
+        const response = await this.doGet(path, isT, queryParams);
         return response.result;
     }
 
@@ -171,7 +256,7 @@ class Api {
             _sortField: sortField,
             ...filter,
         });
-        const totalStr = response.headers.get("x-total-count");
+        const totalStr = response.headers.get(Header.X_TOTAL_COUNT);
         const total = parseToInteger(totalStr, 10);
 
         return {

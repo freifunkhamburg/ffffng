@@ -23,7 +23,7 @@ const emit = defineEmits<{
     (e: "submit", node: StoredNode): void;
 }>();
 
-const token = ref("");
+const token = ref("" as Token);
 const nodeNotFound = ref<boolean>(false);
 const generalError = ref<boolean>(false);
 
@@ -34,7 +34,7 @@ async function onSubmit() {
     await nextTick();
 
     try {
-        const node = await nodeStore.fetchByToken(token.value as Token);
+        const node = await nodeStore.fetchByToken(token.value);
         emit("submit", node);
     } catch (error) {
         if (error instanceof ApiError) {
@@ -86,6 +86,7 @@ async function onSubmit() {
 
             <fieldset>
                 <ValidationFormInput
+                    class="token-input"
                     v-model="token"
                     label="Token"
                     placeholder="Dein 16-stelliger Token"
@@ -130,4 +131,8 @@ async function onSubmit() {
     </ValidationForm>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.token-input {
+    margin: 0;
+}
+</style>

@@ -87,6 +87,7 @@ $fieldset-padding: 0.5em 0.75em;
 $fieldset-border: 0.1em solid $gray;
 $fieldset-border-radius: 0.5em;
 $fieldset-background-color: $gray-darker;
+$validation-form-input-margin: 1em 0;
 
 // Inputs
 $input-padding: 0.25em 0.5em;
@@ -109,6 +110,10 @@ $button-sizes: (
     medium: 1em,
     large: 1.15em,
 );
+
+// Help
+$help-icon-color: $variant-color-info;
+$help-text-margin: 0.5em 0 0.75em 0;
 
 // Error cards
 $error-card-margin: 1em 0;
@@ -135,6 +140,13 @@ $node-preview-card-headline-margin: 0 0 0.5em;
 $node-preview-card-map-margin: 1em 0 0.25em 0;
 $node-preview-card-field-margin: 0.25em 0;
 $node-preview-card-field-code-font-size: 1.25em;
+
+// Created node summary
+$node-created-summary-padding: $node-preview-card-padding;
+$node-created-summary-background-color: darken($variant-color-success, 30%);
+$node-created-summary-border: 0.2em dashed $variant-color-success;
+$node-created-summary-border-radius: $node-preview-card-border-radius;
+$node-created-summary-font-size: 1.25em;
 
 // Deleted node summary
 $node-deleted-summary-padding: $node-preview-card-padding;

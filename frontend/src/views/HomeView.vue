@@ -23,13 +23,14 @@ import RouteButton from "@/components/form/RouteButton.vue";
             :align="ComponentAlignment.CENTER"
             :button-size="ButtonSize.LARGE"
         >
-            <ActionButton
+            <RouteButton
                 :variant="ComponentVariant.INFO"
                 :size="ButtonSize.LARGE"
                 icon="dot-circle-o"
+                :route="route(RouteName.NODE_CREATE)"
             >
                 Neuen Knoten anmelden
-            </ActionButton>
+            </RouteButton>
             <ActionButton
                 :variant="ComponentVariant.PRIMARY"
                 :size="ButtonSize.LARGE"

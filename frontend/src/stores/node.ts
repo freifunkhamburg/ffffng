@@ -1,5 +1,11 @@
 import { defineStore } from "pinia";
-import { isStoredNode, type StoredNode, type Token } from "@/types";
+import {
+    type CreateOrUpdateNode,
+    isNodeTokenResponse,
+    isStoredNode,
+    type StoredNode,
+    type Token,
+} from "@/types";
 import { api } from "@/utils/Api";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -12,6 +18,11 @@ export const useNodeStore = defineStore({
     },
     getters: {},
     actions: {
+        async create(node: CreateOrUpdateNode): Promise<StoredNode> {
+            const response = await api.post("node", isNodeTokenResponse, node);
+            return response.node;
+        },
+
         async fetchByToken(token: Token): Promise<StoredNode> {
             return await api.get(`node/${token}`, isStoredNode);
         },

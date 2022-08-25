@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { getCurrentInstance, onMounted, ref } from "vue";
+import { computed, getCurrentInstance, onMounted, ref } from "vue";
 import { type Constraint, forConstraint } from "@/shared/validation/validator";
+import ExpandableHelpBox from "@/components/ExpandableHelpBox.vue";
 
 interface Props {
     modelValue?: string;
@@ -9,12 +10,17 @@ interface Props {
     placeholder: string;
     constraint: Constraint;
     validationError: string;
+    help?: string;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
     (e: "update:modelValue", value: string): void;
 }>();
+
+const displayLabel = computed(() =>
+    props.constraint.optional ? props.label : `${props.label}*`
+);
 
 const input = ref<HTMLInputElement>();
 const valid = ref(true);
@@ -68,25 +74,30 @@ onMounted(() => {
 </script>
 
 <template>
-    <div>
+    <div class="validation-form-input">
         <label>
-            {{ label }}:
+            {{ displayLabel }}:
+            <ExpandableHelpBox v-if="props.help" :text="props.help" />
             <input
                 ref="input"
-                :value="modelValue"
+                :value="props.modelValue"
                 @input="onInput"
-                :type="type || 'text'"
-                :placeholder="placeholder"
+                :type="props.type || 'text'"
+                :placeholder="props.placeholder"
             />
         </label>
         <div class="validation-error" v-if="!valid">
-            {{ validationError }}
+            {{ props.validationError }}
         </div>
     </div>
 </template>
 
 <style scoped lang="scss">
 @import "../../scss/variables";
+
+.validation-form-input {
+    margin: $validation-form-input-margin;
+}
 
 label {
     display: block;
