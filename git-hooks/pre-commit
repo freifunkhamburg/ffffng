@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+
+export PATH="$PWD/nix:$PATH"
+
+for directory in . ./frontend; do
+    if [[ -d "$directory" ]]; then
+        echo
+        echo "==================================================="
+        echo "Checking: $PWD"
+        echo "==================================================="
+        echo
+
+        pushd "$directory"
+        yarn run check
+        popd
+    fi
+done
