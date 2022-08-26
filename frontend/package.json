@@ -8,9 +8,11 @@
     "email": "andreas@baldeau.net"
   },
   "scripts": {
+    "check": "yarn run typecheck && yarn run lint",
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview --port 5050",
+    "test": "yarn run test:unit",
     "test:unit": "vitest --environment jsdom",
     "typecheck": "vue-tsc --noEmit",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"

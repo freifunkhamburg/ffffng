@@ -19,10 +19,12 @@
         "ffffng": "server/main.js"
     },
     "scripts": {
+        "check": "yarn run build && yarn run lint && yarn run test",
         "test": "yarn run server:test",
+        "lint": "yarn run server:lint",
         "build": "yarn run server:build && grunt build && rsync -avzL --exclude='*/__mocks__/' --exclude='*.test.*' server-build/ dist/server/",
         "clean": "rm -rf server-build/ dist/ && grunt clean",
-        "dist": "yarn run clean && yarn run build && yarn run server:lint && ./bin/dist-fix-symlinks.sh && yarn run test",
+        "dist": "yarn run clean && yarn run build && yarn run check && ./bin/dist-fix-symlinks.sh",
         "client:serve": "grunt serve",
         "server:test": "jest --config=jest.server.config.js",
         "server:build": "tsc -b server && ln -sfv ../../server/db/patches ./server-build/db/ && ln -sfv ../server/templates ./server-build/ && ln -sfv ../server/mailTemplates ./server-build/",
