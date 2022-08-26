@@ -53,7 +53,9 @@ export class ApiError extends Error {
                 : await response.text();
 
         return new ApiError(
-            `API ${method} request failed: ${path} => ${response.status} - ${body}`,
+            `API ${method} request failed: ${path} => ${
+                response.status
+            } - ${JSON.stringify(body)}`,
             response.status,
             ApiErrorType.REQUEST_FAILED,
             body
@@ -67,7 +69,9 @@ export class ApiError extends Error {
         json: JSONValue
     ): Promise<ApiError> {
         return new ApiError(
-            `API ${method} request result has unexpected type. ${path} => ${json}`,
+            `API ${method} request result has unexpected type. ${path} => ${JSON.stringify(
+                json
+            )}`,
             response.status,
             ApiErrorType.UNEXPECTED_RESULT_TYPE,
             json
