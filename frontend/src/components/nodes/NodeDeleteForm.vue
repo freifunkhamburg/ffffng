@@ -87,6 +87,7 @@ async function onSubmit() {
             <fieldset>
                 <ValidationFormInput
                     class="token-input"
+                    name="token"
                     v-model="token"
                     label="Token"
                     placeholder="Dein 16-stelliger Token"

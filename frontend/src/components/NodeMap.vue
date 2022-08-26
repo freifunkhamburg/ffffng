@@ -1,21 +1,32 @@
 <script setup lang="ts">
 import "leaflet/dist/leaflet.css";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useConfigStore } from "@/stores/config";
 import type { Coordinates } from "@/types";
 import * as L from "leaflet";
 import { parseToFloat } from "@/utils/Numbers";
+import type { LatLngTuple } from "leaflet";
+import { forConstraint } from "@/shared/validation/validator";
+import CONSTRAINTS from "@/shared/validation/constraints";
 
 const wrapper = ref<HTMLElement>();
 const configStore = useConfigStore();
 
 interface Props {
     coordinates?: Coordinates;
+    editable?: boolean;
 }
 
 const props = defineProps<Props>();
+const emit = defineEmits<{
+    (e: "coordinatesSelected", value: Coordinates): void;
+}>();
+
+let map: L.Map | null = null;
+let marker: L.Marker | null = null;
 
 onMounted(renderMap);
+watch(props, updateMarker);
 
 function getLayers(): {
     layers: { [name: string]: L.Layer };
@@ -41,6 +52,18 @@ function getLayers(): {
     return { layers, defaultLayers };
 }
 
+function getCoordinates(): LatLngTuple | undefined {
+    const coordinates = props.coordinates;
+    if (!coordinates) {
+        return undefined;
+    }
+    if (!forConstraint(CONSTRAINTS.node.coords, false)(coordinates)) {
+        return undefined;
+    }
+    const [lat, lng] = props.coordinates.split(" ").map(parseToFloat);
+    return [lat, lng];
+}
+
 function createMap(defaultLayers: L.Layer[], layers: { [p: string]: L.Layer }) {
     const element = wrapper.value;
     if (!element) {
@@ -57,27 +80,64 @@ function createMap(defaultLayers: L.Layer[], layers: { [p: string]: L.Layer }) {
         attributionControl: true,
         layers: defaultLayers,
     };
-    const map = L.map(element, options);
+    map = L.map(element, options);
     L.control.layers(layers).addTo(map);
 
-    return map;
+    if (props.editable) {
+        map.on("click", onClick);
+    }
 }
 
-function centerOnCoordinates(map: L.Map) {
+function updateMarker() {
+    const coordinates = getCoordinates();
+    if (!coordinates) {
+        return;
+    }
+
+    if (!map) {
+        console.error("Map is not initialized.");
+        return;
+    }
+
+    if (marker) {
+        marker.setLatLng(coordinates);
+    } else {
+        marker = L.marker(coordinates, {}).addTo(map);
+    }
+
+    if (!map.getBounds().contains(marker.getLatLng())) {
+        map.setView(marker.getLatLng(), map.getZoom());
+    }
+}
+
+function centerOnCoordinates() {
+    if (!map) {
+        console.error("Map is not initialized.");
+        return;
+    }
     let { lat, lng, defaultZoom: zoom } = configStore.getConfig.coordsSelector;
 
-    if (props.coordinates) {
-        [lat, lng] = props.coordinates.split(" ").map(parseToFloat);
+    const coordinates = getCoordinates();
+
+    if (coordinates) {
+        [lat, lng] = coordinates;
         zoom = map.getMaxZoom();
-        L.marker([lat, lng], {}).addTo(map);
     }
     map.setView([lat, lng], zoom);
 }
 
 function renderMap() {
     const { layers, defaultLayers } = getLayers();
-    const map = createMap(defaultLayers, layers);
-    centerOnCoordinates(map);
+    createMap(defaultLayers, layers);
+    centerOnCoordinates();
+    updateMarker();
+}
+
+function onClick(event: L.LeafletMouseEvent) {
+    emit(
+        "coordinatesSelected",
+        `${event.latlng.lat} ${event.latlng.lng}` as Coordinates
+    );
 }
 </script>
 

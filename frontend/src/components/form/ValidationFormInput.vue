@@ -4,8 +4,9 @@ import { type Constraint, forConstraint } from "@/shared/validation/validator";
 import ExpandableHelpBox from "@/components/ExpandableHelpBox.vue";
 
 interface Props {
+    name: string;
     modelValue?: string;
-    label: string;
+    label?: string;
     type?: string;
     placeholder: string;
     constraint: Constraint;
@@ -19,7 +20,11 @@ const emit = defineEmits<{
 }>();
 
 const displayLabel = computed(() =>
-    props.constraint.optional ? props.label : `${props.label}*`
+    props.label
+        ? props.constraint.optional
+            ? props.label
+            : `${props.label}*`
+        : undefined
 );
 
 const input = ref<HTMLInputElement>();
@@ -75,17 +80,27 @@ onMounted(() => {
 
 <template>
     <div class="validation-form-input">
-        <label>
+        <label v-if="displayLabel">
             {{ displayLabel }}:
             <ExpandableHelpBox v-if="props.help" :text="props.help" />
             <input
                 ref="input"
+                :name="props.name"
                 :value="props.modelValue"
                 @input="onInput"
                 :type="props.type || 'text'"
                 :placeholder="props.placeholder"
             />
         </label>
+        <input
+            v-if="!displayLabel"
+            ref="input"
+            :name="props.name"
+            :value="props.modelValue"
+            @input="onInput"
+            :type="props.type || 'text'"
+            :placeholder="props.placeholder"
+        />
         <div class="validation-error" v-if="!valid">
             {{ props.validationError }}
         </div>

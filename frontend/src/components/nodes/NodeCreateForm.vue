@@ -26,6 +26,7 @@ import ValidationFormInput from "@/components/form/ValidationFormInput.vue";
 import { route, RouteName } from "@/router";
 import RouteButton from "@/components/form/RouteButton.vue";
 import { ApiError } from "@/utils/Api";
+import NodeCoordinatesInput from "@/components/nodes/NodeCoordinatesInput.vue";
 
 const configStore = useConfigStore();
 const nodeStore = useNodeStore();
@@ -143,6 +144,7 @@ async function onSubmit() {
 
                 <ValidationFormInput
                     v-model="hostnameModel"
+                    name="hostname"
                     label="Knotenname"
                     placeholder="z. B. Lisas-Freifunk"
                     :constraint="CONSTRAINTS.node.hostname"
@@ -151,6 +153,7 @@ async function onSubmit() {
                 />
                 <ValidationFormInput
                     v-model="fastdKeyModel"
+                    name="key"
                     label="VPN-Schlüssel (bitte nur weglassen, wenn Du weisst, was Du tust)"
                     placeholder="Dein 64-stelliger VPN-Schlüssel"
                     :constraint="CONSTRAINTS.node.key"
@@ -159,6 +162,7 @@ async function onSubmit() {
                 />
                 <ValidationFormInput
                     v-model="macModel"
+                    name="mac"
                     label="MAC-Adresse"
                     placeholder="z. B. 12:34:56:78:9a:bc oder 123456789abc"
                     :constraint="CONSTRAINTS.node.mac"
@@ -167,7 +171,11 @@ async function onSubmit() {
                 />
             </fieldset>
 
-            <h1>TODO: Standort</h1>
+            <fieldset>
+                <h3>Wo soll Dein Router stehen?</h3>
+
+                <NodeCoordinatesInput v-model="coordsModel" />
+            </fieldset>
 
             <fieldset>
                 <h3>Wie können wir Dich erreichen?</h3>
@@ -186,6 +194,7 @@ async function onSubmit() {
 
                 <ValidationFormInput
                     v-model="nicknameModel"
+                    name="nickname"
                     label="Nickname / Name"
                     placeholder="z. B. Lisa"
                     :constraint="CONSTRAINTS.node.nickname"
@@ -193,6 +202,7 @@ async function onSubmit() {
                 />
                 <ValidationFormInput
                     v-model="emailModel"
+                    name="email"
                     type="email"
                     label="E-Mail-Adresse"
                     :placeholder="`z. B. lisa@${configStore.getConfig.community.domain}`"
@@ -201,7 +211,11 @@ async function onSubmit() {
                 />
             </fieldset>
 
-            <h1>TODO: Monitoring</h1>
+            <fieldset>
+                <h3>TODO: Monitoring</h3>
+            </fieldset>
+
+            <h1>TODO: Check community bounds</h1>
 
             <ButtonGroup
                 :align="ComponentAlignment.RIGHT"
