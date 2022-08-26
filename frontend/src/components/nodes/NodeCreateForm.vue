@@ -27,6 +27,8 @@ import { route, RouteName } from "@/router";
 import RouteButton from "@/components/form/RouteButton.vue";
 import { ApiError } from "@/utils/Api";
 import NodeCoordinatesInput from "@/components/nodes/NodeCoordinatesInput.vue";
+import CheckboxInput from "@/components/form/CheckboxInput.vue";
+import InfoCard from "@/components/InfoCard.vue";
 
 const configStore = useConfigStore();
 const nodeStore = useNodeStore();
@@ -211,8 +213,57 @@ async function onSubmit() {
                 />
             </fieldset>
 
-            <fieldset>
-                <h3>TODO: Monitoring</h3>
+            <fieldset v-if="configStore.getConfig.monitoring.enabled">
+                <h3>Möchtest Du automatisiert Status-E-Mails bekommen?</h3>
+
+                <i class="monitoring-icon fa fa-heartbeat" aria-hidden="true" />
+
+                <p class="help-block">
+                    Du kannst Dich automatisiert benachrichtigen lassen, sobald
+                    Dein Knoten längere Zeit offline ist. Die erste E-Mail
+                    bekommst Du nach 3 Stunden, nach einem Tag gibt es dann
+                    nochmal eine Erinnerung. Sollte Dein Knoten nach einer Woche
+                    immernoch offline sein, bekommst Du eine letzte
+                    Status-E-Mail.
+                </p>
+
+                <p class="help-block">
+                    Du kannst den automatisierten Versand von Status-E-Mails
+                    hier selbstverständlich jederzeit wieder deaktivieren.
+                </p>
+
+                <CheckboxInput
+                    v-model="monitoringModel"
+                    name="monitoring"
+                    label="Informiert mich, wenn mein Knoten offline ist"
+                />
+
+                <InfoCard v-if="monitoringModel">
+                    <p>
+                        Zur Bestätigung Deiner E-Mail-Adresse schicken wir Dir
+                        nach dem Speichern Deiner Knotendaten eine E-Mail mit
+                        einem Bestätigungs-Link. Erst nach der Bestätigung
+                        deiner E-Mail-Adresse wirst Du informiert, falls Dein
+                        Knoten längere Zeit offline ist.
+                    </p>
+
+                    <p>
+                        Die Inbetriebnahme Deines Knotens kannst Du
+                        selbstverständlich unabhängig von der Bestätigung immer
+                        sofort duchführen.
+                    </p>
+
+                    <p v-if="emailModel">
+                        <strong>
+                            <i
+                                class="fa fa-envelope-o"
+                                aria-hidden="true"
+                                title="E-Mail-Adresse"
+                            />
+                            {{ emailModel }}
+                        </strong>
+                    </p>
+                </InfoCard>
             </fieldset>
 
             <h1>TODO: Check community bounds</h1>
@@ -243,4 +294,13 @@ async function onSubmit() {
     </ValidationForm>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+@import "../../scss/variables";
+
+.monitoring-icon {
+    float: left;
+    margin: 0 0.25em 0.125em 0;
+    font-size: 3em;
+    color: $variant-color-primary;
+}
+</style>

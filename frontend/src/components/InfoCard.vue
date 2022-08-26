@@ -5,9 +5,9 @@ import { ComponentVariant } from "@/types";
 
 <template>
     <BaseCard
-        :variant="ComponentVariant.DANGER"
-        icon="warning"
-        :scrollIntoView="true"
+        :variant="ComponentVariant.INFO"
+        icon="info-circle"
+        :scrollIntoView="false"
     >
         <slot />
     </BaseCard>

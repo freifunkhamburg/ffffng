@@ -3,11 +3,13 @@ import { computed, getCurrentInstance, onMounted, ref } from "vue";
 import { type Constraint, forConstraint } from "@/shared/validation/validator";
 import ExpandableHelpBox from "@/components/ExpandableHelpBox.vue";
 
+type InputType = "text" | "number" | "password" | "email" | "tel" | "url";
+
 interface Props {
     name: string;
     modelValue?: string;
     label?: string;
-    type?: string;
+    type?: InputType;
     placeholder: string;
     constraint: Constraint;
     validationError: string;

@@ -99,6 +99,10 @@ $input-border-radius: 0.5em;
 $input-outline: 0.1em solid $variant-color-info;
 $input-outline-offset: 0.125em;
 
+$checkbox-size: 1.25em;
+$checkbox-margin: 0 0.5em 0 0;
+$checkbox-border-radius: 0.25em;
+
 $button-margin: 0.3em;
 $button-padding: 0.25em 0.5em;
 $button-border-radius: $input-border-radius;
@@ -115,17 +119,18 @@ $button-sizes: (
 $help-icon-color: $variant-color-info;
 $help-text-margin: 0.5em 0 0.75em 0;
 
-// Error cards
-$error-card-margin: 1em 0;
-$error-card-padding: 0.5em;
-$error-card-border: 0.1em solid $variant-color-danger;
-$error-card-border-radius: 0.5em;
-$error-card-font-weight: 600;
-$error-card-background-color: lighten($variant-color-danger, 10%);
-$error-card-color: $page-background-color;
-$error-card-link-color: darken($variant-color-danger, 30%);
-$error-card-link-hover-color: $error-card-link-color;
-$error-card-link-focus-outline: 0.1em solid $error-card-link-hover-color;
+// Cards
+$base-card-margin: 1em 0;
+$base-card-padding: 1em 0.5em;
+$base-card-border-width: 0.1em;
+$base-card-border-style: solid;
+$base-card-border-radius: 0.5em;
+$base-card-font-weight: normal;
+$base-card-link-focus-outline-width: 0.1em;
+$base-card-link-focus-outline-style: solid;
+$base-card-icon-margin: 0 0.25em 0.125em 0;
+$base-card-icon-size: 2em;
+$base-card-min-height: $base-card-icon-size;
 
 // Node map
 $node-map-aspect-ratio: math.div(16, 10);
