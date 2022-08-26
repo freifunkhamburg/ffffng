@@ -121,7 +121,7 @@ function centerOnCoordinates() {
 
     if (coordinates) {
         [lat, lng] = coordinates;
-        zoom = map.getMaxZoom();
+        zoom = map.getMaxZoom() - 1;
     }
     map.setView([lat, lng], zoom);
 }
