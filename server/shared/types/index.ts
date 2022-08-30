@@ -144,7 +144,9 @@ export function toIsArray<T>(isT: TypeGuard<T>): TypeGuard<T[]> {
     return (arg): arg is T[] => isArray(arg, isT);
 }
 
-export function toIsEnum<E>(enumDef: E): EnumTypeGuard<E> {
+export function toIsEnum<E extends Record<keyof E, ValueOf<E>>>(
+    enumDef: E
+): EnumTypeGuard<E> {
     return (arg): arg is ValueOf<E> =>
         Object.values(enumDef).includes(arg as [keyof E]);
 }
