@@ -18,7 +18,7 @@ function toggleExpansion() {
         class="fa fa-question-circle help-icon"
         @click.prevent="toggleExpansion"
         aria-hidden="true"
-        title="Hilfe"
+        :title="props.text"
     />
     <p v-if="expanded" class="help-text">
         {{ props.text }}
