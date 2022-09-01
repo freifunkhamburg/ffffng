@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "fork-awesome": "^1.2.0",
+    "geolib": "^3.3.3",
     "leaflet": "^1.8.0",
     "pinia": "^2.0.21",
     "sparkson": "^1.3.6",

@@ -133,6 +133,14 @@ function centerOnCoordinates() {
 function renderMap() {
     const { layers, defaultLayers } = getLayers();
     createMap(defaultLayers, layers);
+    if (
+        map &&
+        configStore.getConfig.otherCommunityInfo.showBorderForDebugging
+    ) {
+        new L.Polygon(
+            configStore.getConfig.otherCommunityInfo.localCommunityPolygon
+        ).addTo(map);
+    }
     centerOnCoordinates();
     updateMarker();
 }

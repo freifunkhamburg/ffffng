@@ -19,6 +19,7 @@ import {
     ComponentVariant,
     hasOwnProperty,
 } from "@/types";
+import FloatingIcon from "@/components/FloatingIcon.vue";
 import ErrorCard from "@/components/ErrorCard.vue";
 import ButtonGroup from "@/components/form/ButtonGroup.vue";
 import ValidationForm from "@/components/form/ValidationForm.vue";
@@ -27,8 +28,12 @@ import { route, RouteName } from "@/router";
 import RouteButton from "@/components/form/RouteButton.vue";
 import { ApiError } from "@/utils/Api";
 import NodeCoordinatesInput from "@/components/nodes/NodeCoordinatesInput.vue";
+import OutsideOfCommunityConfirmationForm from "@/components/nodes/OutsideOfCommunityConfirmationForm.vue";
 import CheckboxInput from "@/components/form/CheckboxInput.vue";
 import InfoCard from "@/components/InfoCard.vue";
+import { isPointInPolygon } from "geolib";
+import { parseToFloat } from "@/utils/Numbers";
+import { forConstraint } from "../../shared/validation/validator";
 
 const configStore = useConfigStore();
 const nodeStore = useNodeStore();
@@ -63,6 +68,9 @@ const nicknameModel = ref("" as Nickname);
 const emailModel = ref("" as EmailAddress);
 const monitoringModel = ref(false);
 
+const showOutsideOfCommunityForm = ref(false);
+const confirmedOutsideOfCommunity = ref(false);
+
 onMounted(() => {
     if (props.hostname) {
         hostnameModel.value = props.hostname;
@@ -75,6 +83,30 @@ onMounted(() => {
     }
 });
 
+function isOutsideCommunity(): boolean {
+    if (!forConstraint(CONSTRAINTS.node.coords, false)(coordsModel.value)) {
+        return false;
+    }
+    const [lat, lng] = coordsModel.value.split(" ").map(parseToFloat);
+
+    return !isPointInPolygon(
+        { lat, lng },
+        configStore.getConfig.otherCommunityInfo.localCommunityPolygon
+    );
+}
+
+async function onConfirmOutsideOfCommunity() {
+    showOutsideOfCommunityForm.value = false;
+    confirmedOutsideOfCommunity.value = true;
+
+    await onSubmit();
+}
+
+async function onCancelOutsideOfCommunity() {
+    showOutsideOfCommunityForm.value = false;
+    window.scrollTo(0, 0);
+}
+
 async function onSubmit() {
     generalError.value = false;
     conflictErrorMessage.value = undefined;
@@ -82,6 +114,18 @@ async function onSubmit() {
     // Make sure to re-render error message to trigger scrolling into view.
     await nextTick();
 
+    if (
+        configStore.getConfig.otherCommunityInfo.showInfo &&
+        isOutsideCommunity() &&
+        !confirmedOutsideOfCommunity.value
+    ) {
+        showOutsideOfCommunityForm.value = true;
+    } else {
+        await createNode();
+    }
+}
+
+async function createNode(): Promise<void> {
     try {
         const node = await nodeStore.create({
             hostname: hostnameModel.value,
@@ -115,7 +159,17 @@ async function onSubmit() {
 </script>
 
 <template>
-    <ValidationForm novalidate="" ref="form" @submit="onSubmit">
+    <OutsideOfCommunityConfirmationForm
+        v-if="showOutsideOfCommunityForm"
+        @confirm="onConfirmOutsideOfCommunity"
+        @cancel="onCancelOutsideOfCommunity"
+    />
+    <ValidationForm
+        v-if="!showOutsideOfCommunityForm"
+        novalidate=""
+        ref="form"
+        @submit="onSubmit"
+    >
         <h2>Neuen Knoten anmelden</h2>
 
         <div>
@@ -216,7 +270,10 @@ async function onSubmit() {
             <fieldset v-if="configStore.getConfig.monitoring.enabled">
                 <h3>Möchtest Du automatisiert Status-E-Mails bekommen?</h3>
 
-                <i class="monitoring-icon fa fa-heartbeat" aria-hidden="true" />
+                <FloatingIcon
+                    icon="heartbeat"
+                    :variant="ComponentVariant.PRIMARY"
+                />
 
                 <p class="help-block">
                     Du kannst Dich automatisiert benachrichtigen lassen, sobald
@@ -266,8 +323,6 @@ async function onSubmit() {
                 </InfoCard>
             </fieldset>
 
-            <h1>TODO: Check community bounds</h1>
-
             <ButtonGroup
                 :align="ComponentAlignment.RIGHT"
                 :button-size="ButtonSize.SMALL"
@@ -294,13 +349,4 @@ async function onSubmit() {
     </ValidationForm>
 </template>
 
-<style lang="scss" scoped>
-@import "../../scss/variables";
-
-.monitoring-icon {
-    float: left;
-    margin: 0 0.25em 0.125em 0;
-    font-size: 3em;
-    color: $variant-color-primary;
-}
-</style>
+<style lang="scss" scoped></style>
