@@ -30,6 +30,7 @@ const displayLabel = computed(() =>
         : undefined
 );
 
+const label = ref<HTMLInputElement>();
 const input = ref<HTMLInputElement>();
 const valid = ref(true);
 const validated = ref(false);
@@ -72,13 +73,6 @@ function onInput() {
     });
 }
 
-function reset() {
-    withInputElement((element) => {
-        element.value = "";
-        onInput();
-    });
-}
-
 function validate(): boolean {
     const element = input.value;
     if (!element) {
@@ -90,7 +84,20 @@ function validate(): boolean {
     return valid.value;
 }
 
+function reset() {
+    withInputElement((element) => {
+        element.value = "";
+        onInput();
+    });
+}
+
+function focus() {
+    label.value?.scrollIntoView();
+    input.value?.focus();
+}
+
 defineExpose({
+    focus,
     validate,
 });
 
@@ -101,7 +108,7 @@ onMounted(() => {
 
 <template>
     <div class="validation-form-input">
-        <label>
+        <label ref="label">
             {{ displayLabel }}
             <ExpandableHelpBox v-if="props.help" :text="props.help" />
 

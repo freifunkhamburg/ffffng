@@ -31,8 +31,20 @@ function onSubmit() {
     const valid = validate();
     if (valid) {
         emit("submit");
+    } else {
+        for (const component of validationComponents.value) {
+            if (
+                component.isMounted &&
+                component.exposed?.validate &&
+                component.exposed?.focus
+            ) {
+                if (!component.exposed.validate()) {
+                    component.exposed.focus();
+                    return;
+                }
+            }
+        }
     }
-    // TODO: Else scroll to first error and focus input.
 }
 </script>
 
