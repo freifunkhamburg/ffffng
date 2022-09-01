@@ -12,7 +12,7 @@
         },
         token: {
             type: "string",
-            regex: /^[0-9a-fA-F]{16}$/,
+            regex: /^[0-9a-f]{16}$/i,
             optional: false,
         },
         node: {
