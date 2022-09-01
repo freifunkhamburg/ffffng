@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, getCurrentInstance, onMounted, ref } from "vue";
+import { computed, getCurrentInstance, onMounted, ref, watch } from "vue";
 import { type Constraint, forConstraint } from "@/shared/validation/validator";
 import ExpandableHelpBox from "@/components/ExpandableHelpBox.vue";
 
@@ -39,6 +39,10 @@ const hasResetIcon = computed(
     () => !!(props.modelValue && props.resetIconTitle)
 );
 
+watch(props, () => {
+    onValueChange();
+});
+
 function registerValidationComponent() {
     const instance = getCurrentInstance();
     let parent = instance?.parent;
@@ -62,6 +66,12 @@ function withInputElement(callback: (element: HTMLInputElement) => void): void {
     }
 
     callback(element);
+}
+
+function onValueChange() {
+    if (validated.value) {
+        validate();
+    }
 }
 
 function onInput() {
