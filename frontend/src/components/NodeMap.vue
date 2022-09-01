@@ -91,6 +91,10 @@ function createMap(defaultLayers: L.Layer[], layers: { [p: string]: L.Layer }) {
 function updateMarker() {
     const coordinates = getCoordinates();
     if (!coordinates) {
+        if (marker) {
+            marker.remove();
+            marker = null;
+        }
         return;
     }
 

@@ -64,6 +64,8 @@ h2 {
 
 input {
     padding: $input-padding;
+    font-size: $input-font-size;
+
     border: none;
     border-radius: $input-border-radius;
 

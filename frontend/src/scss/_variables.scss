@@ -91,6 +91,7 @@ $validation-form-input-margin: 1em 0;
 
 // Inputs
 $input-padding: 0.25em 0.5em;
+$input-font-size: 1em;
 $input-background-color: $gray-lighter;
 $input-text-color: $gray-darkest;
 $input-placeholder-color: $gray-darkest;
@@ -98,6 +99,9 @@ $input-placeholder-opacity: 0.8;
 $input-border-radius: 0.5em;
 $input-outline: 0.1em solid $variant-color-info;
 $input-outline-offset: 0.125em;
+$input-reset-icon-color: $gray-darkest;
+$input-reset-icon-position-right: 1em;
+$input-with-reset-icon-padding-right: 1.25em;
 
 $checkbox-size: 1.25em;
 $checkbox-margin: 0 0.5em 0 0;

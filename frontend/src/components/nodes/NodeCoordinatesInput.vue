@@ -43,6 +43,7 @@ function onUpdateModelValue(value: string) {
                 :placeholder="`z. B. ${configStore.getConfig.coordsSelector.lat} ${configStore.getConfig.coordsSelector.lng}`"
                 :constraint="CONSTRAINTS.node.coords"
                 :validation-error="`Bitte gib die Koordinaten wie folgt an, Beispiel: ${configStore.getConfig.coordsSelector.lat} ${configStore.getConfig.coordsSelector.lng}`"
+                reset-icon-title="Koodinaten zurücksetzen"
             />
         </div>
 

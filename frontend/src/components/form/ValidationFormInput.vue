@@ -13,6 +13,7 @@ interface Props {
     placeholder: string;
     constraint: Constraint;
     validationError: string;
+    resetIconTitle?: string;
     help?: string;
 }
 
@@ -24,14 +25,18 @@ const emit = defineEmits<{
 const displayLabel = computed(() =>
     props.label
         ? props.constraint.optional
-            ? props.label
-            : `${props.label}*`
+            ? `${props.label}:`
+            : `${props.label}*:`
         : undefined
 );
 
 const input = ref<HTMLInputElement>();
 const valid = ref(true);
 const validated = ref(false);
+
+const hasResetIcon = computed(
+    () => !!(props.modelValue && props.resetIconTitle)
+);
 
 function registerValidationComponent() {
     const instance = getCurrentInstance();
@@ -48,16 +53,30 @@ function registerValidationComponent() {
     );
 }
 
-function onInput() {
-    if (validated.value) {
-        validate();
-    }
+function withInputElement(callback: (element: HTMLInputElement) => void): void {
     const element = input.value;
     if (!element) {
         console.warn("Could not get referenced input element.");
         return;
     }
-    emit("update:modelValue", element.value);
+
+    callback(element);
+}
+
+function onInput() {
+    if (validated.value) {
+        validate();
+    }
+    withInputElement((element) => {
+        emit("update:modelValue", element.value);
+    });
+}
+
+function reset() {
+    withInputElement((element) => {
+        element.value = "";
+        onInput();
+    });
 }
 
 function validate(): boolean {
@@ -82,27 +101,29 @@ onMounted(() => {
 
 <template>
     <div class="validation-form-input">
-        <label v-if="displayLabel">
-            {{ displayLabel }}:
+        <label>
+            {{ displayLabel }}
             <ExpandableHelpBox v-if="props.help" :text="props.help" />
-            <input
-                ref="input"
-                :name="props.name"
-                :value="props.modelValue"
-                @input="onInput"
-                :type="props.type || 'text'"
-                :placeholder="props.placeholder"
-            />
+
+            <span class="input-wrapper">
+                <input
+                    ref="input"
+                    :class="{ 'has-reset-icon': hasResetIcon }"
+                    :name="props.name"
+                    :value="props.modelValue"
+                    @input="onInput"
+                    :type="props.type || 'text'"
+                    :placeholder="props.placeholder"
+                />
+                <i
+                    v-if="hasResetIcon"
+                    class="fa fa-times reset-icon"
+                    aria-hidden="true"
+                    :title="props.resetIconTitle"
+                    @click.prevent="reset"
+                />
+            </span>
         </label>
-        <input
-            v-if="!displayLabel"
-            ref="input"
-            :name="props.name"
-            :value="props.modelValue"
-            @input="onInput"
-            :type="props.type || 'text'"
-            :placeholder="props.placeholder"
-        />
         <div class="validation-error" v-if="!valid">
             {{ props.validationError }}
         </div>
@@ -117,15 +138,35 @@ onMounted(() => {
 }
 
 label {
+    position: relative;
     display: block;
     font-weight: $label-font-weight;
     cursor: pointer;
 }
 
-input {
-    box-sizing: border-box;
-    width: 100%;
-    margin: 0.25em 0;
+.input-wrapper {
+    display: flex;
+    align-items: center;
+
+    input {
+        box-sizing: border-box;
+        width: 100%;
+        margin: 0.25em 0;
+
+        &.has-reset-icon {
+            padding-right: $input-with-reset-icon-padding-right;
+        }
+    }
+
+    .reset-icon {
+        cursor: pointer;
+        width: 0; // Allow input to really take up 100% width within flexbox.
+
+        margin-left: -$input-reset-icon-position-right;
+
+        font-size: $input-font-size;
+        color: $input-reset-icon-color;
+    }
 }
 
 .validation-error {
