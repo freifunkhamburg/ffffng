@@ -14,12 +14,13 @@ import {
     MailData,
     MailId,
     MailSortField,
+    MailSortFieldEnum,
     MailType,
-    parseJSON,
     UnixTimestampSeconds,
 } from "../types";
 import ErrorTypes from "../utils/errorTypes";
 import { send } from "../mail";
+import { parseJSON } from "../shared/utils/json";
 
 type EmaiQueueRow = {
     id: MailId;
@@ -81,6 +82,8 @@ async function findPendingMailsBefore(
             recipient: row.recipient,
             data,
             failures: row.failures,
+            created_at: row.created_at,
+            modified_at: row.modified_at,
         };
     });
 }
@@ -156,14 +159,14 @@ export async function getPendingMails(
 
     const total = row?.total || 0;
 
-    const filter = Resources.filterClause(
+    const filter = Resources.filterClause<MailSortField>(
         restParams,
-        MailSortField.ID,
+        MailSortFieldEnum.ID,
         isMailSortField,
         ["id", "failures", "sender", "recipient", "email"]
     );
 
-    const mails = await db.all(
+    const mails = await db.all<Mail>(
         "SELECT * FROM email_queue WHERE " + filter.query,
         filter.params
     );

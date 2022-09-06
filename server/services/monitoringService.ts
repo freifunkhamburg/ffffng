@@ -18,7 +18,6 @@ import { forConstraint } from "../shared/validation/validator";
 import {
     Domain,
     DurationSeconds,
-    filterUndefinedFromJSON,
     Hostname,
     isBoolean,
     isDomain,
@@ -33,15 +32,14 @@ import {
     JSONValue,
     MAC,
     MailType,
-    mapIdFromMAC,
     MonitoringSortField,
+    MonitoringSortFieldEnum,
     MonitoringState,
     MonitoringToken,
     NodeMonitoringStateResponse,
     NodeStateData,
     NodeStateId,
     OnlineState,
-    parseJSON,
     Site,
     StoredNode,
     toCreateOrUpdateNode,
@@ -56,6 +54,8 @@ import {
     subtract,
     weeks,
 } from "../utils/time";
+import { filterUndefinedFromJSON, parseJSON } from "../shared/utils/json";
+import { mapIdFromMAC } from "../shared/utils/node";
 
 type NodeStateRow = {
     id: NodeStateId;
@@ -743,9 +743,9 @@ export async function getAll(
 
     const total = row?.total || 0;
 
-    const filter = Resources.filterClause(
+    const filter = Resources.filterClause<MonitoringSortField>(
         restParams,
-        MonitoringSortField.ID,
+        MonitoringSortFieldEnum.ID,
         isMonitoringSortField,
         filterFields
     );

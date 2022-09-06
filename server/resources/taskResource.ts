@@ -2,27 +2,20 @@ import CONSTRAINTS from "../shared/validation/constraints";
 import ErrorTypes from "../utils/errorTypes";
 import * as Resources from "../utils/resources";
 import { handleJSONWithData, RequestData } from "../utils/resources";
-import { getTasks, Task, TaskState } from "../jobs/scheduler";
+import { getTasks, Task } from "../jobs/scheduler";
 import { normalizeString } from "../shared/utils/strings";
 import { forConstraint } from "../shared/validation/validator";
 import { Request, Response } from "express";
-import { isString, isTaskSortField } from "../types";
+import {
+    isString,
+    isTaskSortField,
+    TaskResponse,
+    TaskSortField,
+    TaskState,
+    UnixTimestampSeconds,
+} from "../types";
 
 const isValidId = forConstraint(CONSTRAINTS.id, false);
-
-type TaskResponse = {
-    id: number;
-    name: string;
-    description: string;
-    schedule: string;
-    runningSince: number | null;
-    lastRunStarted: number | null;
-    lastRunDuration: number | null;
-    state: string;
-    result: string | null;
-    message: string | null;
-    enabled: boolean;
-};
 
 function toTaskResponse(task: Task): TaskResponse {
     return {
@@ -30,8 +23,12 @@ function toTaskResponse(task: Task): TaskResponse {
         name: task.name,
         description: task.description,
         schedule: task.schedule,
-        runningSince: task.runningSince && task.runningSince.unix(),
-        lastRunStarted: task.lastRunStarted && task.lastRunStarted.unix(),
+        runningSince:
+            task.runningSince &&
+            (task.runningSince.unix() as UnixTimestampSeconds),
+        lastRunStarted:
+            task.lastRunStarted &&
+            (task.lastRunStarted.unix() as UnixTimestampSeconds),
         lastRunDuration: task.lastRunDuration || null,
         state: task.state,
         result:
@@ -89,7 +86,7 @@ async function doGetAll(
 ): Promise<{ total: number; pageTasks: Task[] }> {
     const restParams = await Resources.getValidRestParams("list", null, req);
 
-    const tasks = Resources.sort(
+    const tasks = Resources.sort<Task, TaskSortField>(
         Object.values(getTasks()),
         isTaskSortField,
         restParams

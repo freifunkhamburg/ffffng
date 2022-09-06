@@ -19,7 +19,6 @@ import {
     CreateOrUpdateNode,
     EmailAddress,
     FastdKey,
-    filterUndefinedFromJSON,
     Hostname,
     isFastdKey,
     isHostname,
@@ -36,13 +35,14 @@ import {
     NodeStatistics,
     StoredNode,
     Token,
-    toUnixTimestampSeconds,
     TypeGuard,
-    unhandledEnumField,
     UnixTimestampMilliseconds,
     UnixTimestampSeconds,
 } from "../types";
 import util from "util";
+import { filterUndefinedFromJSON } from "../shared/utils/json";
+import { unhandledEnumField } from "../shared/utils/enums";
+import { toUnixTimestampSeconds } from "../shared/utils/time";
 
 const pglob = util.promisify(glob);
 

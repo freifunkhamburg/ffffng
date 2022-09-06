@@ -9,11 +9,7 @@ import FixNodeFilenamesJob from "./FixNodeFilenamesJob";
 import NodeInformationRetrievalJob from "./NodeInformationRetrievalJob";
 import MonitoringMailsSendingJob from "./MonitoringMailsSendingJob";
 import OfflineNodesDeletionJob from "./OfflineNodesDeletionJob";
-
-export enum JobResultState {
-    OKAY = "okay",
-    WARNING = "warning",
-}
+import { DurationSeconds, JobResultState, TaskState } from "../shared/types";
 
 export type JobResult = {
     state: JobResultState;
@@ -41,12 +37,6 @@ export interface Job {
     run(): Promise<JobResult>;
 }
 
-export enum TaskState {
-    IDLE = "idle",
-    RUNNING = "running",
-    FAILED = "failed",
-}
-
 export class Task {
     constructor(
         public id: number,
@@ -56,7 +46,7 @@ export class Task {
         public job: Job,
         public runningSince: moment.Moment | null,
         public lastRunStarted: moment.Moment | null,
-        public lastRunDuration: number | null,
+        public lastRunDuration: DurationSeconds | null,
         public state: TaskState,
         public result: JobResult | null,
         public enabled: boolean
@@ -74,7 +64,9 @@ export class Task {
 
         const done = (state: TaskState, result: JobResult | null): void => {
             const now = moment();
-            const duration = now.diff(this.runningSince || now);
+            const duration = now.diff(
+                this.runningSince || now
+            ) as DurationSeconds;
             Logger.tag("jobs").profile("[%sms]\t%s", duration, this.name);
 
             this.runningSince = null;

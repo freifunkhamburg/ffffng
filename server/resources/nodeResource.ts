@@ -10,7 +10,6 @@ import { Request, Response } from "express";
 import {
     CreateOrUpdateNode,
     DomainSpecificNodeResponse,
-    filterUndefinedFromJSON,
     isCreateOrUpdateNode,
     isNodeSortField,
     isString,
@@ -27,6 +26,7 @@ import {
     toNodeResponse,
     toNodeTokenResponse,
 } from "../types";
+import { filterUndefinedFromJSON } from "../shared/utils/json";
 
 const nodeFields = [
     "hostname",
