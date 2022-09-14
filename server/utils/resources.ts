@@ -11,10 +11,7 @@ import {
 } from "../shared/validation/validator";
 import { Request, Response } from "express";
 import {
-    EnumTypeGuard,
-    ValueOf,
     type GenericSortField,
-    getFieldIfExists,
     isJSONObject,
     isNumber,
     isString,
@@ -24,6 +21,7 @@ import {
     SortDirection,
     TypeGuard,
 } from "../types";
+import { getFieldIfExists } from "../shared/utils/objects";
 
 export type RequestData = JSONObject;
 export type RequestHandler = (request: Request, response: Response) => void;
@@ -77,12 +75,12 @@ function respond(
     }
 }
 
-function orderByClause<S>(
+function orderByClause<SortField>(
     restParams: RestParams,
-    defaultSortField: ValueOf<S>,
-    isSortField: EnumTypeGuard<S>
+    defaultSortField: SortField,
+    isSortField: TypeGuard<SortField>
 ): OrderByClause {
-    let sortField: ValueOf<S> | undefined = isSortField(restParams._sortField)
+    let sortField: SortField | undefined = isSortField(restParams._sortField)
         ? restParams._sortField
         : undefined;
     if (!sortField) {
@@ -345,13 +343,17 @@ export function getPageEntities<Entity>(
 
 export { filterCondition as whereCondition };
 
-export function filterClause<S>(
+export function filterClause<SortField>(
     restParams: RestParams,
-    defaultSortField: ValueOf<S>,
-    isSortField: EnumTypeGuard<S>,
+    defaultSortField: SortField,
+    isSortField: TypeGuard<SortField>,
     filterFields: string[]
 ): FilterClause {
-    const orderBy = orderByClause<S>(restParams, defaultSortField, isSortField);
+    const orderBy = orderByClause<SortField>(
+        restParams,
+        defaultSortField,
+        isSortField
+    );
     const limitOffset = limitOffsetClause(restParams);
 
     const filter = filterCondition(restParams, filterFields);

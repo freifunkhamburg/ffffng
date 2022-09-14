@@ -20,9 +20,9 @@ import {
     isSortDirection,
     isString,
     type JSONValue,
-    parseJSON,
     type TypeGuard,
 } from "@/types";
+import { parseJSON } from "@/shared/utils/json";
 
 export interface Route {
     name: RouteName;
