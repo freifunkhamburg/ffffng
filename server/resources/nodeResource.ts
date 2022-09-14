@@ -6,7 +6,7 @@ import { normalizeMac, normalizeString } from "../shared/utils/strings";
 import { forConstraint, forConstraints } from "../shared/validation/validator";
 import * as Resources from "../utils/resources";
 import { handleJSONWithData } from "../utils/resources";
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import {
     CreateOrUpdateNode,
     DomainSpecificNodeResponse,

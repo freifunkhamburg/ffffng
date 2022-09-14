@@ -4,7 +4,7 @@ import { db } from "../db/database";
 import Logger from "../logger";
 import * as MailTemplateService from "./mailTemplateService";
 import * as Resources from "../utils/resources";
-import { RestParams } from "../utils/resources";
+import type { RestParams } from "../utils/resources";
 import {
     EmailAddress,
     isJSONObject,

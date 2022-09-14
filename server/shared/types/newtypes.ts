@@ -140,3 +140,15 @@ export type Domain = string & { readonly __tag: unique symbol };
  * @param arg - Value to check.
  */
 export const isDomain = toIsNewtype(isString, "" as Domain);
+
+/**
+ * A search term entered by the user in the frontend.
+ */
+export type SearchTerm = string & { readonly __tag: unique symbol };
+
+/**
+ * Type guard for {@link Domain}.
+ *
+ * @param arg - Value to check.
+ */
+export const isSearchTerm = isString;

@@ -1,5 +1,5 @@
-import { LogLevel, TaggedLogger } from "../types";
-import { ActivatableLogger } from "../logger";
+import type { LogLevel, TaggedLogger } from "../types";
+import type { ActivatableLogger } from "../logger";
 
 export type MockLogMessages = unknown[][];
 type TaggedLogMessages = {

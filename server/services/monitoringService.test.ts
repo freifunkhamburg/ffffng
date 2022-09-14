@@ -1,7 +1,7 @@
 import { ParsedNode, parseNode, parseNodesJson } from "./monitoringService";
 import { Domain, MAC, OnlineState, Site, UnixTimestampSeconds } from "../types";
 import Logger from "../logger";
-import { MockLogger } from "../__mocks__/logger";
+import type { MockLogger } from "../__mocks__/logger";
 import { now, parseTimestamp } from "../utils/time";
 
 const mockedLogger = Logger as MockLogger;

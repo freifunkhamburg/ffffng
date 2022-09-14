@@ -7,8 +7,8 @@ import { htmlToText } from "nodemailer-html-to-text";
 import { config } from "../config";
 import Logger from "../logger";
 import { editNodeUrl } from "../utils/urlBuilder";
-import { Transporter } from "nodemailer";
-import { MailData, Mail } from "../types";
+import type { Transporter } from "nodemailer";
+import type { MailData, Mail } from "../types";
 
 const templateBasePath = __dirname + "/../mailTemplates";
 const snippetsBasePath = templateBasePath + "/snippets";
