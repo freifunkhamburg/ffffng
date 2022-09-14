@@ -5,7 +5,7 @@ import { handleJSONWithData, RequestData } from "../utils/resources";
 import { getTasks, Task } from "../jobs/scheduler";
 import { normalizeString } from "../shared/utils/strings";
 import { forConstraint } from "../shared/validation/validator";
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import {
     isString,
     isTaskSortField,

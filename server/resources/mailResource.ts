@@ -5,7 +5,7 @@ import * as Resources from "../utils/resources";
 import { handleJSONWithData, RequestData } from "../utils/resources";
 import { normalizeString, parseInteger } from "../shared/utils/strings";
 import { forConstraint } from "../shared/validation/validator";
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { isString, Mail, MailId } from "../types";
 
 const isValidId = forConstraint(CONSTRAINTS.id, false);

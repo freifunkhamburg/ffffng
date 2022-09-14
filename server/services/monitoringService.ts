@@ -10,7 +10,7 @@ import Logger from "../logger";
 import * as MailService from "../services/mailService";
 import * as NodeService from "../services/nodeService";
 import * as Resources from "../utils/resources";
-import { RestParams } from "../utils/resources";
+import type { RestParams } from "../utils/resources";
 import { normalizeMac, parseInteger } from "../shared/utils/strings";
 import { monitoringDisableUrl } from "../utils/urlBuilder";
 import CONSTRAINTS from "../shared/validation/constraints";

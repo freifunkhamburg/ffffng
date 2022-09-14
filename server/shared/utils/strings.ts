@@ -1,7 +1,7 @@
 /**
  * Utility functions all around strings.
  */
-import { isInteger, MAC } from "../types";
+import { isInteger, type MAC } from "../types";
 
 /**
  * Trims the given `string` and replaces multiple whitespaces by one space each.

@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { MonitoringToken, Url } from "../types";
+import type { MonitoringToken, Url } from "../types";
 
 function formUrl(route: string, queryParams?: { [key: string]: string }): Url {
     let url = config.server.baseUrl as string;

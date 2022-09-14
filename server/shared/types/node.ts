@@ -3,25 +3,27 @@
  */
 import { isObject } from "./objects";
 import { isOptional } from "./helpers";
-import {
+import type {
     Coordinates,
     Domain,
     FastdKey,
+    MAC,
+    Nickname,
+    Site,
+} from "./newtypes";
+import {
     isCoordinates,
     isDomain,
     isFastdKey,
     isMAC,
     isNickname,
     isSite,
-    MAC,
-    Nickname,
-    Site,
     toIsNewtype,
 } from "./newtypes";
 import { isBoolean, isString } from "./primitives";
-import { SortFieldFor, toIsSortField } from "./sortfields";
-import { EmailAddress, isEmailAddress } from "./email";
-import { isUnixTimestampSeconds, UnixTimestampSeconds } from "./time";
+import { type SortFieldFor, toIsSortField } from "./sortfields";
+import { type EmailAddress, isEmailAddress } from "./email";
+import { isUnixTimestampSeconds, type UnixTimestampSeconds } from "./time";
 import {
     isMonitoringState,
     isOnlineState,

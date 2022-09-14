@@ -6,7 +6,7 @@ import { config } from "../config";
 import Logger from "../logger";
 import { Database, open, Statement } from "sqlite";
 import * as sqlite3 from "sqlite3";
-import { RunResult, SqlType, TypedDatabase } from "../types";
+import type { RunResult, SqlType, TypedDatabase } from "../types";
 
 const pglob = util.promisify(glob);
 const pReadFile = util.promisify(fs.readFile);

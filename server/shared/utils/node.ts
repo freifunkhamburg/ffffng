@@ -1,7 +1,7 @@
 /**
  * Utility functions for node related data.
  */
-import { MAC, MapId } from "../types";
+import type { MAC, MapId } from "../types";
 
 /**
  * Converts the MAC address of a Freifunk node to an id representing it on the community's node map.

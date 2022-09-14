@@ -115,6 +115,3 @@ const CONSTRAINTS = {
 };
 
 export default CONSTRAINTS;
-
-// TODO: Remove after refactoring.
-module.exports = CONSTRAINTS;

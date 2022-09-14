@@ -1,7 +1,7 @@
 /**
  * Utility functions for "wibbly wobbly timey wimey" stuff.
  */
-import { UnixTimestampMilliseconds, UnixTimestampSeconds } from "../types";
+import type { UnixTimestampMilliseconds, UnixTimestampSeconds } from "../types";
 
 /**
  * Converts an {@link UnixTimestampMilliseconds} to an {@link UnixTimestampSeconds} rounding down.

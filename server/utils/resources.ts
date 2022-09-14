@@ -9,7 +9,7 @@ import {
     isConstraints,
     NestedConstraints,
 } from "../shared/validation/validator";
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import {
     type GenericSortField,
     isJSONObject,

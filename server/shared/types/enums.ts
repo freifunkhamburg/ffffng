@@ -1,7 +1,7 @@
 /**
  * Contains type guards and helpers for enums.
  */
-import { TypeGuard, ValueOf } from "./helpers";
+import type { TypeGuard, ValueOf } from "./helpers";
 
 /**
  * Shorthand type alias for enum {@link TypeGuard}s.

@@ -80,4 +80,4 @@ export class MockDatabase implements TypedDatabase {
 
 export const db: MockDatabase = new MockDatabase();
 
-export { TypedDatabase, Statement };
+export { Statement };

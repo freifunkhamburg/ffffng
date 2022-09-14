@@ -5,7 +5,7 @@ import * as Resources from "../utils/resources";
 import { handleJSONWithData } from "../utils/resources";
 import { normalizeString } from "../shared/utils/strings";
 import { forConstraint } from "../shared/validation/validator";
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import {
     isMonitoringToken,
     JSONObject,

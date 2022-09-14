@@ -3,7 +3,7 @@ import { promises as fs } from "graceful-fs";
 import ErrorTypes from "../utils/errorTypes";
 import Logger from "../logger";
 import * as Resources from "../utils/resources";
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 const indexHtml = __dirname + "/../../client/index.html";
 

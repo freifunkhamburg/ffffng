@@ -2,21 +2,26 @@
  * Contains types and type guards for monitoring data.
  */
 import {
-    Domain,
+    type Domain,
     isDomain,
     isMAC,
     isSite,
-    MAC,
-    Site,
+    type MAC,
+    type Site,
     toIsNewtype,
 } from "./newtypes";
 import { isBoolean, isNumber, isString } from "./primitives";
 import { toIsEnum } from "./enums";
-import { Hostname, isHostname, isMapId, MapId } from "./node";
-import { EmailAddress, isEmailAddress, isMailType, MailType } from "./email";
-import { isUnixTimestampSeconds, UnixTimestampSeconds } from "./time";
+import { type Hostname, isHostname, isMapId, type MapId } from "./node";
+import {
+    type EmailAddress,
+    isEmailAddress,
+    isMailType,
+    MailType,
+} from "./email";
+import { isUnixTimestampSeconds, type UnixTimestampSeconds } from "./time";
 import { isOptional } from "./helpers";
-import { SortFieldFor, toIsSortField } from "./sortfields";
+import { type SortFieldFor, toIsSortField } from "./sortfields";
 
 /**
  * Token for activating monitoring of a Freifunk node. This is being sent to verify the email address to use.

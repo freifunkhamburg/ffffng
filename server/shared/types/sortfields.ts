@@ -1,9 +1,9 @@
 /**
  * Contains helper types and type guards for sort fields.
  */
-import { Enum, toIsEnum } from "./enums";
+import { type Enum, toIsEnum } from "./enums";
 import { isString } from "./primitives";
-import { TypeGuard } from "./helpers";
+import type { TypeGuard } from "./helpers";
 
 /**
  * Generic untyped sort field.

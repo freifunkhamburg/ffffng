@@ -3,7 +3,7 @@
  *
  * @module arrays
  */
-import { TypeGuard } from "./helpers";
+import type { TypeGuard } from "./helpers";
 
 /**
  * Type guard for an array with elements of type `<Element>`.

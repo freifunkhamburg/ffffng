@@ -5,12 +5,12 @@ import { toIsEnum } from "./enums";
 import { isNullable } from "./helpers";
 import { isPlainObject } from "./objects";
 import { isBoolean, isNumber, isString } from "./primitives";
-import { SortFieldFor, toIsSortField } from "./sortfields";
+import { type SortFieldFor, toIsSortField } from "./sortfields";
 import {
-    DurationSeconds,
+    type DurationSeconds,
     isDurationSeconds,
     isUnixTimestampSeconds,
-    UnixTimestampSeconds,
+    type UnixTimestampSeconds,
 } from "./time";
 
 // FIXME: Naming Task vs. Job

@@ -1,7 +1,7 @@
 /**
  * Utility functions for JSON.
  */
-import { isJSONValue, JSONObject, JSONValue } from "../types";
+import { isJSONValue, type JSONObject, type JSONValue } from "../types";
 
 /**
  * Parses the given `string` and converts it into a {@link JSONValue}.

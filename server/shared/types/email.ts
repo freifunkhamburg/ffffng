@@ -3,10 +3,10 @@
  */
 import { toIsNewtype } from "./newtypes";
 import { isNumber, isString } from "./primitives";
-import { JSONObject } from "./json";
+import type { JSONObject } from "./json";
 import { toIsEnum } from "./enums";
-import { SortFieldFor, toIsSortField } from "./sortfields";
-import { UnixTimestampSeconds } from "./time";
+import { type SortFieldFor, toIsSortField } from "./sortfields";
+import type { UnixTimestampSeconds } from "./time";
 
 /**
  * An email address.

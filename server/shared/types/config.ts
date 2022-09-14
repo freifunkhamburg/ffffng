@@ -9,8 +9,15 @@ import { isBoolean, isNumber, isString } from "./primitives";
 import { isArray } from "./arrays";
 import { isOptional } from "./helpers";
 import { isJSONObject } from "./json";
-import { Domain, isDomain, isSite, isUrl, Site, Url } from "./newtypes";
-import { EmailAddress, isEmailAddress } from "./email";
+import {
+    type Domain,
+    isDomain,
+    isSite,
+    isUrl,
+    type Site,
+    type Url,
+} from "./newtypes";
+import { type EmailAddress, isEmailAddress } from "./email";
 
 /**
  * Configuration for a single coordinate.
