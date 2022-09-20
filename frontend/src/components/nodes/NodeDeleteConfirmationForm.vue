@@ -8,7 +8,7 @@ import type { Hostname, StoredNode } from "@/types";
 import { ButtonSize, ComponentAlignment, ComponentVariant } from "@/types";
 import router, { route, RouteName } from "@/router";
 import { computed, nextTick, ref } from "vue";
-import { ApiError } from "@/utils/Api";
+import { ApiError } from "@/utils/api";
 import ErrorCard from "@/components/ErrorCard.vue";
 import { useConfigStore } from "@/stores/config";
 

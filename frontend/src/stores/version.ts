@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { isObject, isVersion, type Version } from "@/types";
-import { api } from "@/utils/Api";
+import { isObject, isVersion, type Path, type Version } from "@/types";
+import { api } from "@/utils/api";
 
 interface VersionResponse {
     version: Version;
@@ -30,7 +30,7 @@ export const useVersionStore = defineStore({
     actions: {
         async refresh(): Promise<void> {
             const response = await api.get<VersionResponse>(
-                "version",
+                "version" as Path,
                 isVersionResponse
             );
             this.version = response.version;

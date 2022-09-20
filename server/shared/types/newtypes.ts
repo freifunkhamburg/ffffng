@@ -69,6 +69,18 @@ export type Url = string & { readonly __tag: unique symbol };
 export const isUrl = toIsNewtype(isString, "" as Url);
 
 /**
+ * Typesafe string representation of paths.
+ */
+export type Path = string & { readonly __tag: unique symbol };
+
+/**
+ * Type guard for {@link Path}.
+ *
+ * @param arg - Value to check.
+ */
+export const isPath = toIsNewtype(isString, "" as Url);
+
+/**
  * Fastd VPN key of a Freifunk node. This is the key used by the node to open a VPN tunnel to Freifunk gateways.
  */
 export type FastdKey = string & { readonly __tag: unique symbol };

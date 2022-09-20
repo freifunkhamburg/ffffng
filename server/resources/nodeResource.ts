@@ -27,6 +27,7 @@ import {
     toNodeTokenResponse,
 } from "../types";
 import { filterUndefinedFromJSON } from "../shared/utils/json";
+import { HttpHeader } from "../shared/utils/http";
 
 const nodeFields = [
     "hostname",
@@ -165,7 +166,7 @@ export function getAll(req: Request, res: Response): void {
                 total: number;
                 pageNodes: DomainSpecificNodeResponse[];
             }) => {
-                res.set("X-Total-Count", result.total.toString(10));
+                res.set(HttpHeader.X_TOTAL_COUNT, result.total.toString(10));
                 return Resources.success(
                     res,
                     result.pageNodes.map(filterUndefinedFromJSON)

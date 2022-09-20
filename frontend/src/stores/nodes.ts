@@ -4,9 +4,10 @@ import {
     isDomainSpecificNodeResponse,
     type NodesFilter,
     NodeSortFieldEnum,
+    type Path,
     SortDirection,
 } from "@/types";
-import { internalApi } from "@/utils/Api";
+import { internalApi } from "@/utils/api";
 
 interface NodesStoreState {
     nodes: DomainSpecificNodeResponse[];
@@ -65,7 +66,7 @@ export const useNodesStore = defineStore({
                 DomainSpecificNodeResponse,
                 NodeSortFieldEnum
             >(
-                "nodes",
+                "nodes" as Path,
                 isDomainSpecificNodeResponse,
                 page,
                 nodesPerPage,

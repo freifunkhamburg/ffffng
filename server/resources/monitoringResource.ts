@@ -14,6 +14,7 @@ import {
     NodeMonitoringStateResponse,
     toMonitoringResponse,
 } from "../types";
+import { HttpHeader } from "../shared/utils/http";
 
 const isValidToken = forConstraint(CONSTRAINTS.token, false);
 
@@ -33,7 +34,7 @@ async function doGetAll(
 export function getAll(req: Request, res: Response): void {
     doGetAll(req)
         .then(({ total, result }) => {
-            res.set("X-Total-Count", total.toString(10));
+            res.set(HttpHeader.X_TOTAL_COUNT, total.toString(10));
             Resources.success(res, result);
         })
         .catch((err) => Resources.error(res, err));

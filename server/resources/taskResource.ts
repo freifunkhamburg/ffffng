@@ -14,6 +14,7 @@ import {
     TaskState,
     UnixTimestampSeconds,
 } from "../types";
+import { HttpHeader } from "../shared/utils/http";
 
 const isValidId = forConstraint(CONSTRAINTS.id, false);
 
@@ -109,7 +110,7 @@ async function doGetAll(
 export function getAll(req: Request, res: Response): void {
     doGetAll(req)
         .then(({ total, pageTasks }) => {
-            res.set("X-Total-Count", total.toString(10));
+            res.set(HttpHeader.X_TOTAL_COUNT, total.toString(10));
             Resources.success(res, pageTasks.map(toTaskResponse));
         })
         .catch((err) => Resources.error(res, err));

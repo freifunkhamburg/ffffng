@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { isStatistics, type Statistics } from "@/types";
-import { internalApi } from "@/utils/Api";
+import { isStatistics, type Path, type Statistics } from "@/types";
+import { internalApi } from "@/utils/api";
 
 interface StatisticsStoreState {
     statistics: Statistics | null;
@@ -21,7 +21,7 @@ export const useStatisticsStore = defineStore({
     actions: {
         async refresh(): Promise<void> {
             this.statistics = await internalApi.get<Statistics>(
-                "statistics",
+                "statistics" as Path,
                 isStatistics
             );
         },

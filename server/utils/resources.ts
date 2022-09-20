@@ -22,6 +22,7 @@ import {
     TypeGuard,
 } from "../types";
 import { getFieldIfExists } from "../shared/utils/objects";
+import { HttpHeader, HttpStatusCode, MimeType } from "../shared/utils/http";
 
 export type RequestData = JSONObject;
 export type RequestHandler = (request: Request, response: Response) => void;
@@ -46,30 +47,34 @@ export type FilterClause = { query: string; params: unknown[] };
 
 function respond(
     res: Response,
-    httpCode: number,
+    httpCode: HttpStatusCode,
     data: string,
-    type: "html"
+    type: MimeType.TEXT_HTML
 ): void;
 function respond(
     res: Response,
-    httpCode: number,
+    httpCode: HttpStatusCode,
     data: JSONValue,
-    type: "json"
+    type: MimeType.APPLICATION_JSON
 ): void;
 function respond(
     res: Response,
-    httpCode: number,
+    httpCode: HttpStatusCode,
     data: JSONValue,
-    type: "html" | "json"
+    type: MimeType.APPLICATION_JSON | MimeType.TEXT_HTML
 ): void {
     switch (type) {
-        case "html":
-            res.writeHead(httpCode, { "Content-Type": "text/html" });
+        case MimeType.TEXT_HTML:
+            res.writeHead(httpCode, {
+                [HttpHeader.CONTENT_TYPE]: MimeType.TEXT_HTML,
+            });
             res.end(data);
             break;
 
         default:
-            res.writeHead(httpCode, { "Content-Type": "application/json" });
+            res.writeHead(httpCode, {
+                [HttpHeader.CONTENT_TYPE]: MimeType.APPLICATION_JSON,
+            });
             res.end(JSON.stringify(data));
             break;
     }
@@ -365,18 +370,18 @@ export function filterClause<SortField>(
 }
 
 export function success(res: Response, data: JSONValue) {
-    respond(res, 200, data, "json");
+    respond(res, HttpStatusCode.OK, data, MimeType.APPLICATION_JSON);
 }
 
 export function successHtml(res: Response, html: string) {
-    respond(res, 200, html, "html");
+    respond(res, HttpStatusCode.OK, html, MimeType.APPLICATION_JSON);
 }
 
 export function error(
     res: Response,
-    err: { data: JSONValue; type: { code: number } }
+    err: { data: JSONValue; type: { code: HttpStatusCode } }
 ) {
-    respond(res, err.type.code, err.data, "json");
+    respond(res, err.type.code, err.data, MimeType.APPLICATION_JSON);
 }
 
 export function handleJSON<Response>(

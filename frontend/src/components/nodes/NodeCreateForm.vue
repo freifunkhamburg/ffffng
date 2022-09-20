@@ -26,7 +26,7 @@ import ValidationForm from "@/components/form/ValidationForm.vue";
 import ValidationFormInput from "@/components/form/ValidationFormInput.vue";
 import { route, RouteName } from "@/router";
 import RouteButton from "@/components/form/RouteButton.vue";
-import { ApiError } from "@/utils/Api";
+import { ApiError } from "@/utils/api";
 import NodeCoordinatesInput from "@/components/nodes/NodeCoordinatesInput.vue";
 import OutsideOfCommunityConfirmationForm from "@/components/nodes/OutsideOfCommunityConfirmationForm.vue";
 import CheckboxInput from "@/components/form/CheckboxInput.vue";

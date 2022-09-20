@@ -7,6 +7,7 @@ import { normalizeString, parseInteger } from "../shared/utils/strings";
 import { forConstraint } from "../shared/validation/validator";
 import type { Request, Response } from "express";
 import { isString, Mail, MailId } from "../types";
+import { HttpHeader } from "../shared/utils/http";
 
 const isValidId = forConstraint(CONSTRAINTS.id, false);
 
@@ -39,7 +40,7 @@ async function doGetAll(
 export function getAll(req: Request, res: Response): void {
     doGetAll(req)
         .then(({ total, mails }) => {
-            res.set("X-Total-Count", total.toString(10));
+            res.set(HttpHeader.X_TOTAL_COUNT, total.toString(10));
             return Resources.success(res, mails);
         })
         .catch((err) => Resources.error(res, err));
