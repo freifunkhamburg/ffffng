@@ -11,6 +11,7 @@ import { config } from "./config";
 import type { CleartextPassword, PasswordHash, Username } from "./types";
 import { isString } from "./types";
 import Logger from "./logger";
+import { HttpHeader, HttpStatusCode, MimeType } from "./shared/utils/http";
 
 export const app: Express = express();
 
@@ -111,7 +112,7 @@ export function init(): void {
     router.use(compress());
 
     async function serveTemplate(
-        mimeType: string,
+        mimeType: MimeType,
         req: Request,
         res: Response
     ): Promise<void> {
@@ -120,13 +121,15 @@ export function init(): void {
             "utf8"
         );
 
-        res.writeHead(200, { "Content-Type": mimeType });
+        res.writeHead(HttpStatusCode.OK, {
+            [HttpHeader.CONTENT_TYPE]: mimeType,
+        });
         res.end(_.template(body)({ config: config.client }));
     }
 
     usePromise(async (req: Request, res: Response): Promise<void> => {
         if (jsTemplateFiles.indexOf(req.path) >= 0) {
-            await serveTemplate("application/javascript", req, res);
+            await serveTemplate(MimeType.APPLICATION_JSON, req, res);
         }
     });
 
