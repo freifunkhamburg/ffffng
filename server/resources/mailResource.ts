@@ -3,11 +3,12 @@ import ErrorTypes from "../utils/errorTypes";
 import * as MailService from "../services/mailService";
 import * as Resources from "../utils/resources";
 import { handleJSONWithData, RequestData } from "../utils/resources";
-import { normalizeString, parseInteger } from "../shared/utils/strings";
+import { normalizeString } from "../shared/utils/strings";
 import { forConstraint } from "../shared/validation/validator";
 import type { Request, Response } from "express";
 import { isString, Mail, MailId } from "../types";
 import { HttpHeader } from "../shared/utils/http";
+import { parseToInteger } from "../shared/utils/numbers";
 
 const isValidId = forConstraint(CONSTRAINTS.id, false);
 
@@ -22,7 +23,7 @@ async function withValidMailId(data: RequestData): Promise<MailId> {
         throw { data: "Invalid mail id.", type: ErrorTypes.badRequest };
     }
 
-    return parseInteger(id) as MailId;
+    return parseToInteger(id) as MailId;
 }
 
 export const get = handleJSONWithData(async (data) => {

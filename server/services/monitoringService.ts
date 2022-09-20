@@ -11,7 +11,8 @@ import * as MailService from "../services/mailService";
 import * as NodeService from "../services/nodeService";
 import * as Resources from "../utils/resources";
 import type { RestParams } from "../utils/resources";
-import { normalizeMac, parseInteger } from "../shared/utils/strings";
+import { normalizeMac } from "../shared/utils/strings";
+import { parseToInteger } from "../shared/utils/numbers";
 import { monitoringDisableUrl } from "../utils/urlBuilder";
 import CONSTRAINTS from "../shared/validation/constraints";
 import { forConstraint } from "../shared/validation/validator";
@@ -525,7 +526,7 @@ async function sendOfflineMails(
     startTime: UnixTimestampSeconds,
     mailType: MailType
 ): Promise<void> {
-    const mailNumber = parseInteger(mailType.split("-")[2]);
+    const mailNumber = parseToInteger(mailType.split("-")[2]);
     await sendMonitoringMailsBatched(
         "offline " + mailNumber,
         mailType,
