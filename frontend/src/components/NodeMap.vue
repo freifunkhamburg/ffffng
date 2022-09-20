@@ -4,7 +4,7 @@ import { onMounted, ref, watch } from "vue";
 import { useConfigStore } from "@/stores/config";
 import type { Coordinates } from "@/types";
 import * as L from "leaflet";
-import { parseToFloat } from "@/utils/Numbers";
+import { parseToFloat } from "@/shared/utils/numbers";
 import type { LatLngTuple } from "leaflet";
 import { forConstraint } from "@/shared/validation/validator";
 import CONSTRAINTS from "@/shared/validation/constraints";

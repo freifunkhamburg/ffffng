@@ -32,7 +32,7 @@ import OutsideOfCommunityConfirmationForm from "@/components/nodes/OutsideOfComm
 import CheckboxInput from "@/components/form/CheckboxInput.vue";
 import InfoCard from "@/components/InfoCard.vue";
 import { isPointInPolygon } from "geolib";
-import { parseToFloat } from "@/utils/Numbers";
+import { parseToFloat } from "@/shared/utils/numbers";
 import { forConstraint } from "../../shared/validation/validator";
 
 const configStore = useConfigStore();

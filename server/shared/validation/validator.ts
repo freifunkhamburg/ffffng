@@ -1,4 +1,4 @@
-import { parseInteger } from "../utils/strings";
+import { parseToInteger } from "../utils/numbers";
 import {
     isBoolean,
     isNumber,
@@ -67,7 +67,7 @@ function isValidBoolean(value: unknown): boolean {
 
 function isValidNumber(constraint: Constraint, value: unknown): boolean {
     if (isString(value)) {
-        value = parseInteger(value);
+        value = parseToInteger(value);
     }
 
     if (!isNumber(value)) {

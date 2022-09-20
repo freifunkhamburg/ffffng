@@ -24,6 +24,15 @@ export function isInteger(arg: unknown): arg is number {
     return isNumber(arg) && Number.isInteger(arg);
 }
 
+/**
+ * Type guard checking the given value is a floating point `number`.
+ *
+ * @param arg - Value to check.
+ */
+export function isFloat(arg: unknown): arg is number {
+    return isNumber(arg) && Number.isFinite(arg);
+}
+
 // =====================================================================================================================
 // Strings
 // =====================================================================================================================
