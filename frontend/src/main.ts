@@ -2,13 +2,12 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 
 import App from "./App.vue";
-import router from "./router";
+import router, { initTitleSync } from "./router";
 import { useConfigStore } from "@/stores/config";
 import { useVersionStore } from "@/stores/version";
 
 async function main() {
     const app = createApp(App);
-
     app.use(createPinia());
     app.use(router);
 
@@ -17,6 +16,8 @@ async function main() {
 
     await configLoaded;
     await versionLoaded;
+
+    initTitleSync();
 
     app.mount("#app");
 }
