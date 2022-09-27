@@ -3,7 +3,9 @@ import {
     createWebHistory,
     type LocationQueryRaw,
     type RouteLocationNormalized,
+    type RouteLocationRaw,
     type RouteRecordRaw,
+    type RouteRecordRedirectOption,
 } from "vue-router";
 import AdminDashboardView from "@/views/AdminDashboardView.vue";
 import AdminNodesView from "@/views/AdminNodesView.vue";
@@ -47,7 +49,10 @@ export interface Route {
 export enum RouteName {
     HOME = "home",
     NODE_CREATE = "node-create",
+    NODE_UPDATE = "node-update",
     NODE_DELETE = "node-delete",
+    // MONITORING_CONFIRM = "monitoring-confirm",
+    // MONITORING_DISABLE = "monitoring-disable",
     ADMIN = "admin",
     ADMIN_NODES = "admin-nodes",
 }
@@ -154,6 +159,14 @@ const routes: RouteWithTitle[] = [
             mac: getQueryField(route, "mac", isMAC),
         }),
     },
+    // {
+    //     path: "/node/update",
+    //     name: RouteName.NODE_UPDATE,
+    //     meta: {
+    //         title: "Knotendaten ändern",
+    //     },
+    //     component: NodeUpdateView,
+    // },
     {
         path: "/node/delete",
         name: RouteName.NODE_DELETE,
@@ -162,6 +175,22 @@ const routes: RouteWithTitle[] = [
         },
         component: NodeDeleteView,
     },
+    // {
+    //     path: "/monitoring/confirm",
+    //     name: RouteName.MONITORING_CONFIRM,
+    //     meta: {
+    //         title: "Versand von Status-E-Mails bestätigen",
+    //     },
+    //     component: MonitoringConfirmView,
+    // },
+    // {
+    //     path: "/monitoring/disable",
+    //     name: RouteName.MONITORING_DISABLE,
+    //     meta: {
+    //         title: "Versand von Status-E-Mails deaktivieren",
+    //     },
+    //     component: MonitoringDisableView,
+    // },
     {
         path: "/admin",
         name: RouteName.ADMIN,
@@ -186,10 +215,58 @@ const routes: RouteWithTitle[] = [
     },
 ];
 
+// TODO: Redirect legacy admin URLs.
+
+/**
+ * Redirects for routes from the old frontend.
+ */
+const legacyRedirects: { path: string; redirect: RouteRecordRedirectOption }[] =
+    [
+        {
+            path: "/new",
+            redirect: {
+                name: RouteName.NODE_CREATE,
+            },
+        },
+        {
+            path: "/update",
+            redirect: {
+                name: RouteName.NODE_UPDATE,
+            },
+        },
+        {
+            path: "/delete",
+            redirect: {
+                name: RouteName.NODE_DELETE,
+            },
+        },
+    ];
+
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
-    routes,
+    routes: [...legacyRedirects, ...routes],
 });
+
+router.beforeResolve(redirectLegacyUrls);
+
+/**
+ * Navigation guard to make sure URLs of the old frontend of the form `/#/<path>?<query>` still work.
+ * Those will be redirected to `/<path>?<query>`.
+ *
+ * @param to - The route that is being navigated to.
+ * @returns New path to navigate to if a legacy URL is detected or `true` otherwise.
+ */
+function redirectLegacyUrls(
+    to: RouteLocationNormalized
+): RouteLocationRaw | boolean {
+    if (to.fullPath.startsWith("/#/")) {
+        // URL for the old frontend. Do a proper redirect.
+        return to.fullPath.slice(2);
+    }
+
+    // Nothing to do.
+    return true;
+}
 
 /**
  * Update the HTML documents title for the given route.
