@@ -1,3 +1,4 @@
+// TODO: This is deprecated. Remove some time after re-launch. Used only for legacy clients that have not yet reloaded.
 'use strict';
 
 angular.module('ffffng').constant('config', <%= JSON.stringify(config) %>);

@@ -6,7 +6,6 @@ stdenv.mkDerivation rec {
   version = "dev";
 
   buildInputs = [
-    compass
     git
     nasm
     nodejs-16_x

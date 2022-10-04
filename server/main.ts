@@ -3,7 +3,6 @@ import { config } from "./config";
 import Logger from "./logger";
 import * as db from "./db/database";
 import * as scheduler from "./jobs/scheduler";
-import * as router from "./router";
 import * as app from "./app";
 import * as mail from "./mail";
 
@@ -17,7 +16,6 @@ async function main() {
     await db.init();
     mail.init();
     scheduler.init();
-    router.init();
 
     app.app.listen(config.server.port, "::");
 }

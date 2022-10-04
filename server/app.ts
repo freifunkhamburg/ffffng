@@ -7,11 +7,13 @@ import compress from "compression";
 import express, { Express, NextFunction, Request, Response } from "express";
 import { promises as fs } from "graceful-fs";
 
+import * as apiRouter from "./router";
 import { config } from "./config";
 import type { CleartextPassword, PasswordHash, Username } from "./types";
 import { isString } from "./types";
 import Logger from "./logger";
 import { HttpHeader, HttpStatusCode, MimeType } from "./shared/utils/http";
+import history from "connect-history-api-fallback";
 
 export const app: Express = express();
 
@@ -95,8 +97,9 @@ export function init(): void {
     router.use(bodyParser.json());
     router.use(bodyParser.urlencoded({ extended: true }));
 
-    const adminDir = __dirname + "/../admin";
     const clientDir = __dirname + "/../client";
+
+    // TODO: This is deprecated. Remove some time after re-launch. Used only for legacy clients that have not yet reloaded.
     const templateDir = __dirname + "/templates";
 
     const jsTemplateFiles = ["/config.js"];
@@ -133,8 +136,21 @@ export function init(): void {
         }
     });
 
-    router.use("/internal/admin", express.static(adminDir + "/"));
     router.use("/", express.static(clientDir + "/"));
 
+    app.use(config.server.rootPath, router);
+
+    apiRouter.init();
+
+    // Handle URLs not found before to be compatible with history mode.
+    const historyLogger = Logger.tag("history-api-fallback");
+    app.use(
+        history({
+            index: "/index.html",
+            logger: historyLogger.debug.bind(historyLogger),
+        })
+    );
+
+    // Re-serve static content after rewrite by history mode fallback.
     app.use(config.server.rootPath, router);
 }

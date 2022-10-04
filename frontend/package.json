@@ -7,10 +7,13 @@
     "name": "Andreas Baldeau",
     "email": "andreas@baldeau.net"
   },
+  "private": true,
   "scripts": {
     "check": "yarn run typecheck && yarn run lint",
     "dev": "vite",
+    "dist": "yarn run clean && yarn run build && cp LICENSE package.json dist/",
     "build": "vue-tsc --noEmit && vite build",
+    "clean": "rm -rf dist/",
     "preview": "vite preview --port 5050",
     "test": "yarn run test:unit",
     "test:unit": "vitest --environment jsdom",

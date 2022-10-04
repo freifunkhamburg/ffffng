@@ -346,8 +346,7 @@ fastd-Key und die MAC-Adresse angeben.
 ### Abhängigkeiten
 
 * node.js + yarn
-* compass (Installation z. B. via Ruby's `gem`)
-* ggf. bower (Installation z. B. via `yarn install bower`)
+* sass
 
 
 ### Build

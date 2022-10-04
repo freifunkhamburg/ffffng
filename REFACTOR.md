@@ -6,9 +6,7 @@
 
 ## Short term
 
-* Split into seperate packages for server and frontend.
 * Make admin panel part of new frontend package.
-* Get rid of grunt.
 * Use generated type guards.
 
 ## Mid term
@@ -22,5 +20,4 @@
 
 * Rewrite the admin interface (used lib is unmaintained).
 * Rewrite the client in typescript (+ vue?).
-* Replace the grunt build system.
 * Decentralize node data.
