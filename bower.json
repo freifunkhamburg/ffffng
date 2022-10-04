@@ -1,7 +1,7 @@
 {
   "name": "ffffng",
   "version": "DEVELOPMENT",
-  "license": "MIT",
+  "license": "AGPL",
   "dependencies": {
     "angular": "1.8.3",
     "angular-bootstrap": "2.5.0",

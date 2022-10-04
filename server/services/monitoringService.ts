@@ -77,14 +77,13 @@ type NodeStateRow = {
 const MONITORING_STATE_MACS_CHUNK_SIZE = 100;
 const NEVER_ONLINE_NODES_DELETION_CHUNK_SIZE = 20;
 const MONITORING_MAILS_DB_BATCH_SIZE = 50;
-/**
- * Defines the intervals emails are sent if a node is offline
- */
+
 const MONITORING_OFFLINE_MAILS_SCHEDULE: Record<number, DurationSeconds> = {
     1: hours(3),
     2: days(1),
     3: weeks(1),
 };
+
 const DELETE_OFFLINE_NODES_AFTER_DURATION: DurationSeconds = days(100);
 
 export type ParsedNode = {
