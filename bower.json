@@ -1,7 +1,7 @@
 {
   "name": "ffffng",
   "version": "DEVELOPMENT",
-  "license": "AGPL",
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "angular": "1.8.3",
     "angular-bootstrap": "2.5.0",

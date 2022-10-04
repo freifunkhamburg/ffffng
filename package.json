@@ -2,7 +2,7 @@
     "name": "ffffng",
     "version": "0.18.2-SNAPSHOT",
     "description": "Node management form for Freifunk",
-    "license": "AGPL",
+    "license": "AGPL-3.0-only",
     "author": {
         "name": "Andreas Baldeau",
         "email": "andreas@baldeau.net"
