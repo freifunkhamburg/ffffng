@@ -2,7 +2,7 @@
   "name": "ffffng-frontend",
   "version": "0.0.0-SNAPSHOT",
   "description": "New frontend for ffffng",
-  "license": "AGPL",
+  "license": "AGPL-3.0-only",
   "author": {
     "name": "Andreas Baldeau",
     "email": "andreas@baldeau.net"
